@@ -7,6 +7,11 @@ export function formatDay(date: string) {
   return noon(date).toLocaleDateString("es-ES", { day: "numeric", month: "long" })
 }
 
+/** "marzo de 2024" */
+export function formatMonth(date: string) {
+  return noon(date).toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+}
+
 /** "en 3 días", "mañana", "hoy" */
 export function formatInDays(days: number) {
   if (days <= 0) return "hoy"
