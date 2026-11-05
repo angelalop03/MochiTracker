@@ -1,0 +1,13 @@
+node_modules
+dist
+.vercel
+*.local
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage
+# Datos personales: exportaciones reales de Clue, nunca al repo
+*.cluedata
+clue-export*
