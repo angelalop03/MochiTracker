@@ -1,10 +1,96 @@
+<div align="center">
+
+<img src="docs/screenshots/verano.jpg" alt="Mochi en su isla flotante en verano, con pamela" width="420" />
+
 # Isla Mochi
 
-Guía personal del ciclo menstrual: cómo te puedes sentir, física y emocionalmente, en cada momento, y qué te puede ayudar. **No es un tracker**: el seguimiento se queda en Clue o en la app que uses. Isla Mochi solo necesita saber en qué fase estás.
+**Tu ciclo, como las estaciones de una pequeña isla.**
 
-Cada fase es una estación en una pequeña isla 3D, y Mochi, un personaje hecho solo con código, refleja la energía de esa fase. Los consejos van en cuatro bloques: emociones, cuerpo, comida y movimiento.
+Una guía personal de cómo te puedes sentir, física y emocionalmente, en cada momento del ciclo, y qué te puede ayudar.
+
+</div>
+
+Isla Mochi **no es un tracker**: para seguir tu regla ya tienes Clue o tu app de siempre. Aquí vienes a entenderte mejor. La app solo necesita saber en qué fase estás, y a partir de ahí Mochi te cuenta qué puedes notar hoy y qué te puede sentar bien.
 
 > El nombre es provisional. El contenido es informativo y no sustituye a un profesional sanitario. No sirve como método anticonceptivo.
+
+## Capturas
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/landing.jpg" alt="Portada con la isla en primavera" /></td>
+    <td width="33%"><img src="docs/screenshots/hoy.jpg" alt="Pantalla Hoy en fase lútea" /></td>
+    <td width="33%"><img src="docs/screenshots/guia.jpg" alt="Guía del ciclo" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Portada</sub></td>
+    <td align="center"><sub>Hoy: tu fase y cómo te puedes sentir</sub></td>
+    <td align="center"><sub>Guía de las 4 fases</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/consejos.jpg" alt="Consejo personalizado Para ti" /></td>
+    <td><img src="docs/screenshots/clue.jpg" alt="Guía para importar desde Clue" /></td>
+    <td><img src="docs/screenshots/ajustes.jpg" alt="Ajustes de avisos" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Consejos «Para ti»</sub></td>
+    <td align="center"><sub>Importar desde Clue</sub></td>
+    <td align="center"><sub>Avisos y cuenta</sub></td>
+  </tr>
+</table>
+
+<img src="docs/screenshots/escritorio.jpg" alt="Pantalla Hoy en escritorio" width="100%" />
+
+## Las cuatro estaciones
+
+Cada fase es una estación de la isla, y Mochi cambia con ella: más tranquilo y arropado en invierno y otoño, más activo en primavera y verano.
+
+<table>
+  <tr>
+    <td width="25%"><img src="docs/screenshots/invierno.jpg" alt="La isla en invierno" /></td>
+    <td width="25%"><img src="docs/screenshots/primavera.jpg" alt="La isla en primavera" /></td>
+    <td width="25%"><img src="docs/screenshots/verano.jpg" alt="La isla en verano" /></td>
+    <td width="25%"><img src="docs/screenshots/otono.jpg" alt="La isla en otoño" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Invierno</b><br />Menstrual</sub></td>
+    <td align="center"><sub><b>Primavera</b><br />Folicular</sub></td>
+    <td align="center"><sub><b>Verano</b><br />Ovulatoria</sub></td>
+    <td align="center"><sub><b>Otoño</b><br />Lútea</sub></td>
+  </tr>
+</table>
+
+## Cómo funciona
+
+1. **Le dices dónde estás.** Indicas tu última regla y tus duraciones medias, o importas tu historial de Clue. El archivo se procesa en tu dispositivo y solo se guardan fechas de regla y síntomas.
+2. **Mochi calcula tu fase.** Estima en qué día y fase estás, y avisa si tus ciclos son irregulares o si hay retraso.
+3. **Lees cómo te puedes sentir.** Cuatro bloques con información y consejos: emociones, cuerpo, comida y movimiento. En la Guía tienes las 4 fases para leerlas con calma.
+4. **Si quieres, afinas los consejos.** Puedes contar cómo estás, y es opcional. Si algo se repite, aparece un consejo «Para ti». Si un síntoma vuelve en la misma fase de varios ciclos, Mochi te lo avisa.
+5. **Recibes avisos, si los activas.** Por email o notificación, cada día o solo al cambiar de estación. Los títulos no mencionan tu ciclo, por si se ven en la pantalla de bloqueo.
+
+Mochi es 3D y está hecho solo con código, sin modelos ni texturas. Respira, parpadea, te sigue con la mirada y da un brinco si lo tocas.
+
+## Consejos con IA
+
+> **En desarrollo.** Esta parte aún no está publicada. Hoy los consejos «Para ti» salen de reglas fijas, y la app funciona por completo sin IA.
+
+La idea es una IA gratuita que se ejecuta **dentro de tu navegador** con [WebLLM](https://webllm.mlc.ai) y WebGPU:
+
+- **Privada:** lo que registras no se envía a ningún servicio de IA. Internet solo se usa para descargar el modelo una vez.
+- **Opcional:** se activa con un botón, avisando antes del tamaño de la descarga.
+- **Con red de seguridad:** si el dispositivo no puede ejecutarla o la respuesta no es válida, se usan las reglas sin que se note.
+- **Vigilada:** los modelos pequeños se equivocan, así que todo lo que escriben se valida antes de mostrarlo. Nunca decide nada sobre señales de alarma: eso lo hacen reglas fijas.
+
+Las primeras pruebas con el modelo real mostraron que el más pequeño no escribe con calidad suficiente para un tema de salud, así que se están comparando otros modelos antes de publicarla.
+
+## Privacidad
+
+Son datos de salud, una categoría especial del RGPD:
+
+- Consentimiento explícito al registrarse, y solo se guarda lo necesario.
+- Cada usuaria solo puede acceder a sus propias filas, con Row Level Security y tests que lo comprueban.
+- Puedes exportar tus datos y borrar tu cuenta desde Ajustes.
+- Las fuentes van alojadas en la propia app: no se envía tu IP a Google.
 
 ## Estado
 
@@ -13,7 +99,7 @@ Cada fase es una estación en una pequeña isla 3D, y Mochi, un personaje hecho 
 | 1 | Base, Supabase, auth, bienvenida manual, lógica del ciclo, pantalla Hoy y escena 3D | Hecha |
 | 2 | Importar desde Clue, registro diario, Mi ciclo y personalización por reglas | Hecha |
 | 3 | PWA, push, emails y cron. Exportar y borrar cuenta | Hecha, sin probar con servicios reales |
-| 4 | Consejos con IA en el navegador (WebLLM) | Pendiente |
+| 4 | Consejos con IA en el navegador (WebLLM) | En desarrollo |
 
 ## Stack
 
