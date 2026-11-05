@@ -9,7 +9,6 @@ import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
 import { todayInTimeZone } from "../lib/cycle"
 import { deviceTimeZone } from "../lib/format"
-import { CLUE_PARSER_READY } from "../lib/clue/parser"
 import { addPeriod, updateProfile } from "../services/data"
 
 export default function Onboarding() {
@@ -98,11 +97,9 @@ export default function Onboarding() {
         que viene puesto y lo iré ajustando.
       </DialogBox>
 
-      {CLUE_PARSER_READY && (
-        <p>
-          ¿Usas Clue? <Link to="/importar">Importa tus datos</Link> y te ahorras este paso.
-        </p>
-      )}
+      <p>
+        ¿Usas Clue? <Link to="/importar">Importa tus datos</Link> y te ahorras este paso.
+      </p>
 
       <form className="form" onSubmit={handleSubmit}>
         <label className="field">

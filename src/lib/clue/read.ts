@@ -4,11 +4,8 @@
 import { ClueImportError } from "./types"
 
 const MAX_BYTES = 50 * 1024 * 1024
-
-export interface ExportEntry {
-  name: string
-  data: unknown
-}
+/** El único archivo del ZIP que se abre. Los demás (user.json, devices.json…) no se descifran */
+const MEASUREMENTS = "measurements.json"
 
 function parseJson(text: string): unknown {
   try {
@@ -24,7 +21,7 @@ function isEmpty(data: unknown) {
   return typeof data === "object" && Object.keys(data).length === 0
 }
 
-async function readZip(file: Blob, password: string | undefined): Promise<ExportEntry[]> {
+async function readZip(file: Blob, password: string | undefined): Promise<unknown> {
   const { BlobReader, TextWriter, ZipReader } = await import("@zip.js/zip.js")
   const reader = new ZipReader(new BlobReader(file), { password: password || undefined, useWebWorkers: false })
 
@@ -36,41 +33,37 @@ async function readZip(file: Blob, password: string | undefined): Promise<Export
       throw new ClueImportError("not_clue")
     }
 
-    const files = entries.filter((e) => !e.directory && e.filename.toLowerCase().endsWith(".json"))
-    if (files.length === 0) throw new ClueImportError("not_clue")
+    const entry = entries.find((e) => e.filename.toLowerCase().split("/").pop() === MEASUREMENTS)
+    if (!entry || entry.directory) throw new ClueImportError("not_clue")
+    if (entry.encrypted && !password) throw new ClueImportError("password_needed")
 
-    const result: ExportEntry[] = []
-    for (const entry of files) {
-      if (entry.directory) continue
-      if (entry.encrypted && !password) throw new ClueImportError("password_needed")
-      let text: string
-      try {
-        text = await entry.getData(new TextWriter())
-      } catch {
-        throw new ClueImportError(entry.encrypted ? "wrong_password" : "not_clue")
-      }
-      try {
-        result.push({ name: entry.filename, data: JSON.parse(text) })
-      } catch {
-        // Con el cifrado antiguo de ZIP, una contraseña mala puede dar texto sin sentido
-        throw new ClueImportError(entry.encrypted ? "wrong_password" : "not_clue")
-      }
+    // Con el cifrado de los ZIP de Clue, una contraseña mala puede fallar o dar texto sin sentido
+    const bad = new ClueImportError(entry.encrypted ? "wrong_password" : "not_clue")
+    let text: string
+    try {
+      text = await entry.getData(new TextWriter())
+    } catch {
+      throw bad
     }
-    return result
+    try {
+      return JSON.parse(text)
+    } catch {
+      throw bad
+    }
   } finally {
     await reader.close()
   }
 }
 
-/** Devuelve los JSON del archivo. Lanza ClueImportError con un motivo claro si no se puede */
-export async function readExportFile(file: File, password?: string): Promise<ExportEntry[]> {
+/** Devuelve el contenido de measurements.json. Lanza ClueImportError con un motivo claro si no se puede */
+export async function readExportFile(file: File, password?: string): Promise<unknown> {
   if (file.size === 0) throw new ClueImportError("empty")
   if (file.size > MAX_BYTES) throw new ClueImportError("too_big")
 
-  const entries = file.name.toLowerCase().endsWith(".json")
-    ? [{ name: file.name, data: parseJson(await file.text()) }]
+  const data = file.name.toLowerCase().endsWith(".json")
+    ? parseJson(await file.text())
     : await readZip(file, password)
 
-  if (entries.every((e) => isEmpty(e.data))) throw new ClueImportError("empty")
-  return entries
+  if (isEmpty(data)) throw new ClueImportError("empty")
+  return data
 }

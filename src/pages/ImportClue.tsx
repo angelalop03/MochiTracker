@@ -4,7 +4,7 @@ import DialogBox from "../components/DialogBox"
 import Loading from "../components/Loading"
 import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
-import { CLUE_PARSER_READY, parseClueExport } from "../lib/clue/parser"
+import { parseClueExport, withoutKnownPeriods } from "../lib/clue/parser"
 import { readExportFile } from "../lib/clue/read"
 import {
   CLUE_ERROR_MESSAGES,
@@ -87,13 +87,12 @@ const STEPS: { art: ReactNode; text: ReactNode }[] = [
 
 type Step =
   | { name: "pick" }
-  | { name: "opened" }
-  | { name: "review"; result: ImportResult; summary: ImportSummary }
+  | { name: "review"; result: ImportResult; summary: ImportSummary; skipped: number }
   | { name: "done" }
 
 export default function ImportClue() {
   const session = useSession()
-  const { profile, loading, reload } = useCycleData()
+  const { profile, periods, loading, reload } = useCycleData()
   const [file, setFile] = useState<File | null>(null)
   const [password, setPassword] = useState("")
   const [step, setStep] = useState<Step>({ name: "pick" })
@@ -112,13 +111,14 @@ export default function ImportClue() {
     setBusy(true)
     setError("")
     try {
-      const entries = await readExportFile(file, password)
-      if (!CLUE_PARSER_READY) {
-        setStep({ name: "opened" })
-        return
-      }
-      const result = parseClueExport(entries)
-      setStep({ name: "review", result, summary: summarizeImport(result) })
+      const parsed = parseClueExport(await readExportFile(file, password))
+      const result = withoutKnownPeriods(parsed, periods)
+      setStep({
+        name: "review",
+        result,
+        summary: summarizeImport(parsed),
+        skipped: parsed.periods.length - result.periods.length,
+      })
     } catch (err) {
       if (err instanceof ClueImportError) setError(CLUE_ERROR_MESSAGES[err.code])
       else {
@@ -211,21 +211,16 @@ export default function ImportClue() {
         </>
       )}
 
-      {step.name === "opened" && (
-        <>
-          <DialogBox speaker="Mochi">
-            He podido abrir tu archivo, pero todavía no sé leer los datos de Clue. No se ha guardado nada.
-          </DialogBox>
-          <button type="button" className="button button-quiet" onClick={() => setStep({ name: "pick" })}>
-            Volver
-          </button>
-        </>
-      )}
-
       {step.name === "review" && (
         <>
           <DialogBox speaker="Mochi">{step.summary.text}</DialogBox>
           <p>¿Guardamos estos datos en tu cuenta? Lo que ya tenías registrado no se modifica.</p>
+          {step.skipped > 0 && (
+            <p className="form-hint">
+              {step.skipped === 1 ? "1 regla ya estaba registrada" : `${step.skipped} reglas ya estaban registradas`} y no
+              se duplicará.
+            </p>
+          )}
           {error && (
             <p className="form-error" role="alert">
               {error}

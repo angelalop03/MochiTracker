@@ -9,7 +9,7 @@ Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en un
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Base, Supabase, auth, bienvenida manual, lógica del ciclo, pantalla Hoy y escena 3D | Hecha |
-| 2 | Registro diario, Mi ciclo, personalización por reglas y guía de Clue | Hecha, salvo el parser de Clue |
+| 2 | Importar desde Clue, registro diario, Mi ciclo y personalización por reglas | Hecha |
 | 3 | PWA, push, emails y cron. Exportar y borrar cuenta | Pendiente |
 | 4 | Consejos con IA en el navegador (WebLLM) | Pendiente |
 
@@ -104,7 +104,9 @@ Vive en `src/lib/personalize.ts`, sin IA ni red, y los textos en `src/content/pe
 
 ## Importar desde Clue
 
-Todo ocurre en el navegador: `src/lib/clue/read.ts` abre el ZIP con contraseña o el JSON y da errores claros. **Falta el parser** (`src/lib/clue/parser.ts`): el formato de Clue no está documentado y se adaptará a un ejemplo real. Hasta entonces, `CLUE_PARSER_READY` es `false`: el archivo se abre, se avisa y no se guarda nada.
+Todo ocurre en el navegador. `src/lib/clue/read.ts` abre el ZIP con contraseña o el JSON y solo descifra `measurements.json`. `src/lib/clue/parser.ts` extrae las fechas de regla y una lista cerrada de síntomas (`SYMPTOM_MAP`): el resto, como vida sexual, medicación o peso, se descarta sin guardarse.
+
+El formato de Clue no está documentado: el parser sale de una exportación real de noviembre de 2026, así que puede necesitar ajustes si Clue lo cambia. Los días de regla separados por hasta 2 días vacíos cuentan como la misma regla, y lo importado nunca sustituye a lo que ya estaba registrado.
 
 ## Estructura
 
