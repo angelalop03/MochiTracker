@@ -17,6 +17,7 @@ const PIXEL_SIZE = { mobile: 2.5, desktop: 3.5 }
 
 // Vista casi isométrica: el mundo se inclina y Mochi se gira para seguir mirando de frente
 const WORLD_TILT: [number, number, number] = [0.38, -0.55, 0]
+const FACING_CAMERA = new THREE.Quaternion().setFromEuler(new THREE.Euler(...WORLD_TILT)).invert()
 
 // Con frameloop="demand" solo se dibuja cuando se pide: 30 fps bastan para el estilo retro
 // y gastan menos batería. Fuera de pantalla no se dibuja nada.
@@ -118,7 +119,7 @@ function World({ phase }: { phase: Phase }) {
     <>
       <group ref={holder} rotation={WORLD_TILT}>
         <Island phase={phase} />
-        <group position={[-0.2, 1.58, 0.9]} rotation={[-0.1, 0.5, 0]} scale={1.15}>
+        <group position={[-0.2, 2.02, 1.1]} quaternion={FACING_CAMERA} scale={1.6}>
           <Mochi phase={phase} onPoke={handlePoke} />
         </group>
       </group>
@@ -146,8 +147,10 @@ export default function Scene({ phase, mode = "embedded" }: SceneProps) {
         flat
         frameloop="demand"
         dpr={1 / (mobile ? PIXEL_SIZE.mobile : PIXEL_SIZE.desktop)}
-        eventSource={document.getElementById("root")!}
-        eventPrefix="client"
+        // Las coordenadas "client" solo valen para un canvas a pantalla completa
+        {...(mode === "scroll"
+          ? { eventSource: document.getElementById("root")!, eventPrefix: "client" as const }
+          : {})}
         camera={{ position: [0, 0, CAMERA_Z], fov: FOV }}
         gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
       >

@@ -12,6 +12,17 @@ const euler = new THREE.Euler()
 const scale = new THREE.Vector3()
 const color = new THREE.Color()
 const white = new THREE.MeshLambertMaterial({ color: "#ffffff", flatShading: true })
+const flat = new Map<string, THREE.MeshBasicMaterial>()
+
+/** Sin luces: el color que se ve es exactamente el indicado */
+function unlit(c: string) {
+  let material = flat.get(c)
+  if (!material) {
+    material = new THREE.MeshBasicMaterial({ color: c })
+    flat.set(c, material)
+  }
+  return material
+}
 
 const mod = (n: number, m: number) => ((n % m) + m) % m
 
@@ -84,7 +95,8 @@ const CLOUDS = (() => {
 // Nubes de bloques con parallax: se mueven más despacio que el scroll
 function Clouds({ phase, parallax }: Omit<FloatersProps, "count">) {
   const groups = useRef<(THREE.Group | null)[]>([])
-  const material = lambert(SEASONS[phase].cloud)
+  const season = SEASONS[phase]
+  const material = parallax ? unlit(season.cloudMuted) : lambert(season.cloud)
 
   useFrame(({ clock, size }) => {
     const t = clock.elapsedTime

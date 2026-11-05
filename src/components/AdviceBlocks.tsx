@@ -12,15 +12,12 @@ export default function AdviceBlocks({ phase, seed }: { phase: Phase; seed: numb
       <h2 id="advice-title" className="section-title">
         Para esta fase
       </h2>
-      <div className="advice-tabs" role="tablist" aria-label="Tipo de consejo">
+      <div className="advice-tabs" role="group" aria-label="Tipo de consejo">
         {BLOCKS.map((block) => (
           <button
             key={block.id}
-            id={`tab-${block.id}`}
             type="button"
-            role="tab"
-            aria-selected={open === block.id}
-            aria-controls="advice-panel"
+            aria-pressed={open === block.id}
             className="advice-tab"
             onClick={() => setOpen(block.id)}
           >
@@ -28,7 +25,7 @@ export default function AdviceBlocks({ phase, seed }: { phase: Phase; seed: numb
           </button>
         ))}
       </div>
-      <div id="advice-panel" role="tabpanel" aria-labelledby={`tab-${open}`} className="paper-box">
+      <div className="paper-box" aria-live="polite">
         <p>{pickVariant(content.blocks[open], seed)}</p>
       </div>
     </section>

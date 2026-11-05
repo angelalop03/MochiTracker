@@ -11,3 +11,6 @@ coverage
 # Datos personales: exportaciones reales de Clue, nunca al repo
 *.cluedata
 clue-export*
+
+# Configuración local de herramientas
+.claude

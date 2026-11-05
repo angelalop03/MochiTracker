@@ -16,18 +16,9 @@ const invisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, d
 function Outfit({ phase }: { phase: Phase }) {
   switch (phase) {
     case "menstrual":
-      // Manta que envuelve el cuerpo hasta el cuello
+      // Manta que le arropa por debajo de la cara
       return (
-        <group>
-          <mesh geometry={ball} material={lambert("#FFB84D")} position={[0, -0.28, 0]} scale={[1.2, 0.72, 1.14]} />
-          <mesh
-            geometry={box}
-            material={lambert("#F28C5A")}
-            position={[0, 0.13, 0.82]}
-            rotation={[0.4, 0, 0]}
-            scale={[1.3, 0.14, 0.34]}
-          />
-        </group>
+        <mesh geometry={ball} material={lambert("#FFB84D")} position={[0, -0.74, 0]} scale={[1.18, 0.42, 1.12]} />
       )
     case "folicular":
       // Brote en la cabeza
@@ -174,8 +165,8 @@ export default function Mochi({ phase, onPoke }: Props) {
 
       <group ref={face}>
         <group ref={eyes} position={[0, 0.1, 0.97]}>
-          <mesh geometry={box} material={lambert(INK)} position={[-0.34, 0, 0]} scale={[0.17, 0.26, 0.08]} />
-          <mesh geometry={box} material={lambert(INK)} position={[0.34, 0, 0]} scale={[0.17, 0.26, 0.08]} />
+          <mesh geometry={box} material={lambert(INK)} position={[-0.36, 0, 0]} scale={[0.22, 0.34, 0.08]} />
+          <mesh geometry={box} material={lambert(INK)} position={[0.36, 0, 0]} scale={[0.22, 0.34, 0.08]} />
         </group>
         <mesh
           geometry={box}
