@@ -1,6 +1,8 @@
 # Isla Mochi
 
-Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en una pequeña isla 3D, y Mochi, un personaje hecho solo con código, refleja la energía de esa fase. Muestra en qué fase estás hoy, qué día de ciclo es y consejos en cuatro bloques: emociones, cuerpo, comida y movimiento. Lo que registras cada día personaliza esos consejos.
+Guía personal del ciclo menstrual: cómo te puedes sentir, física y emocionalmente, en cada momento, y qué te puede ayudar. **No es un tracker**: el seguimiento se queda en Clue o en la app que uses. Isla Mochi solo necesita saber en qué fase estás.
+
+Cada fase es una estación en una pequeña isla 3D, y Mochi, un personaje hecho solo con código, refleja la energía de esa fase. Los consejos van en cuatro bloques: emociones, cuerpo, comida y movimiento.
 
 > El nombre es provisional. El contenido es informativo y no sustituye a un profesional sanitario. No sirve como método anticonceptivo.
 
@@ -10,7 +12,7 @@ Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en un
 |---|---|---|
 | 1 | Base, Supabase, auth, bienvenida manual, lógica del ciclo, pantalla Hoy y escena 3D | Hecha |
 | 2 | Importar desde Clue, registro diario, Mi ciclo y personalización por reglas | Hecha |
-| 3 | PWA, push, emails y cron. Exportar y borrar cuenta | Pendiente |
+| 3 | PWA, push, emails y cron. Exportar y borrar cuenta | Hecha, sin probar con servicios reales |
 | 4 | Consejos con IA en el navegador (WebLLM) | Pendiente |
 
 ## Stack
@@ -23,7 +25,9 @@ Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en un
 | Supabase | Auth (magic link y código) y Postgres con Row Level Security |
 | zip.js | Abrir en el navegador el ZIP con contraseña de Clue |
 | Vitest + PGlite | Tests de la lógica y de las políticas RLS |
-| Vercel | Hosting |
+| Resend | Emails de los avisos |
+| web-push + service worker | Notificaciones y PWA instalable |
+| Vercel | Hosting, funciones de `api/` y cron diario |
 
 ## Empezar en local
 
@@ -68,6 +72,15 @@ Copy-Item .env.example .env.local
 |---|---|---|
 | `VITE_SUPABASE_URL` | `.env.local` y Vercel | URL del proyecto |
 | `VITE_SUPABASE_ANON_KEY` | `.env.local` y Vercel | Clave pública. Lo que protege los datos es RLS |
+| `VITE_VAPID_PUBLIC_KEY` | `.env.local` y Vercel | Clave pública de notificaciones |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Solo Vercel** | Se salta RLS. Para el cron y borrar cuentas |
+| `VAPID_PRIVATE_KEY` | **Solo Vercel** | Clave privada de notificaciones |
+| `VAPID_SUBJECT` | **Solo Vercel** | Contacto, por ejemplo `mailto:hola@tudominio.es` |
+| `RESEND_API_KEY` | **Solo Vercel** | Clave de Resend |
+| `RESEND_FROM` | **Solo Vercel** | Remitente con dominio verificado |
+| `APP_URL` | **Solo Vercel** | URL pública, sin barra final |
+| `CRON_SECRET` | **Solo Vercel** | Protege el cron. Vercel lo envía solo |
+| `UNSUBSCRIBE_SECRET` | **Solo Vercel** | Firma los enlaces de baja |
 
 Todo lo que lleva el prefijo `VITE_` llega al navegador: nunca pongas ahí una clave secreta.
 
@@ -108,10 +121,33 @@ Todo ocurre en el navegador. `src/lib/clue/read.ts` abre el ZIP con contraseña 
 
 El formato de Clue no está documentado: el parser sale de una exportación real de noviembre de 2026, así que puede necesitar ajustes si Clue lo cambia. Los días de regla separados por hasta 2 días vacíos cuentan como la misma regla, y lo importado nunca sustituye a lo que ya estaba registrado.
 
+## Avisos
+
+`vercel.json` llama una vez al día, sobre las 7:00 UTC, a `api/cron/daily.ts`, protegido con `CRON_SECRET`. Para cada usuaria calcula la fase en su zona horaria y envía email, push o ambos, sin IA: contenido base más las reglas de personalización.
+
+- **Discreción:** el asunto y el push se ven en la pantalla de bloqueo, así que usan la metáfora de la isla y nunca mencionan el ciclo. Hay un test que lo comprueba. Las notas personales ni se leen.
+- **Sin duplicados:** cada envío se reserva antes en `notification_log`. Si el cron se repite, no se envía dos veces. Si un envío falla, se libera para reintentarlo.
+- **Límite de Resend:** como mucho 80 emails al día, con prioridad para los cambios de estación. El resto del cupo gratuito queda para los accesos por email.
+- **Baja:** cada email lleva un enlace firmado. Abrirlo solo pregunta, porque algunos correos abren los enlaces solos.
+
+Genera las claves de notificaciones y los secretos así:
+
+```powershell
+npx web-push generate-vapid-keys
+```
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+`npm run dev` no ejecuta `api/` ni el service worker. Para probar las funciones usa `npx vercel dev`, y para la PWA, `npm run build` y `npm run preview`.
+
 ## Estructura
 
 ```
-├── public/                  Favicon
+├── api/                     Funciones de Vercel: cron, borrar cuenta y baja de emails
+│   └── _lib/                Lógica de avisos, plantilla y conexiones (no son rutas)
+├── public/                  Favicon e iconos de la PWA
 ├── supabase/migrations/     Tablas, RLS y trigger de registro
 ├── tests/                   Tests del ciclo, reglas, Clue y RLS
 └── src/
@@ -119,8 +155,9 @@ El formato de Clue no está documentado: el parser sale de una exportación real
     ├── content/             phases.ts, personalTips.ts, symptoms.ts y legal.ts
     ├── hooks/               useSession, useCycleData, useVisible, useReveal
     ├── lib/                 cycle.ts, personalize.ts, format.ts y clue/
-    ├── pages/               Landing, Auth, Onboarding, Today, MyCycle, ImportClue, Settings, Privacy
-    ├── services/            supabase.ts, auth.ts, data.ts y demo.ts
+    ├── pages/               Landing, Auth, Onboarding, Today, Guide, MyCycle, ImportClue, Install, Settings, Privacy
+    ├── services/            supabase.ts, auth.ts, data.ts, push.ts, account.ts y demo.ts
+    ├── sw.ts                Service worker: caché de la web y notificaciones
     ├── styles/index.css     Variables en :root y todos los estilos
     └── three/               Scene, Island, Mochi, Floaters, Burst, seasons, shapes, support
 ```
@@ -146,14 +183,17 @@ La escena se dibuja a baja resolución y se amplía con `image-rendering: pixela
 ## Despliegue
 
 1. Sube el repositorio a GitHub e impórtalo en Vercel.
-2. Añade `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en *Settings > Environment Variables*.
+2. Añade todas las variables de la tabla en *Settings > Environment Variables*.
 3. Añade la URL de producción en *Redirect URLs* de Supabase.
 
 Si un cambio toca la base de datos, ejecuta primero el SQL en Supabase y después haz push.
 
+## Ideas para el futuro
+
+- **Gimnasio y fuerza:** información sobre entrenar con pesas a lo largo del ciclo, según tus intereses.
+
 ## Antes de abrirla al público
 
 - Rellenar el responsable en `src/content/legal.ts` y hacer revisar la política de privacidad.
-- Exportar y borrar cuenta (Fase 3) son obligatorios por RGPD.
 - Conectar Resend como SMTP en Supabase, con un dominio propio verificado.
 - El plan gratuito de Supabase no incluye copias de seguridad automáticas: exporta los datos con `supabase db dump` o valora el plan Pro.

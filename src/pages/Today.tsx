@@ -181,15 +181,16 @@ export default function Today() {
           )}
           <Notices state={state} />
 
+          <p className="cycle-caption">{content.summary}</p>
+
+          <AdviceBlocks key={state.phase} phase={state.phase} seed={seed} tips={tips} />
+
           <CycleBar
             ranges={state.ranges}
             cycleDay={state.cycleDay}
             cycleLength={state.estimate.cycleLength}
             loggedDays={loggedDays}
           />
-          <p className="cycle-caption">{content.summary}</p>
-
-          <AdviceBlocks key={state.phase} phase={state.phase} seed={seed} tips={tips} />
 
           <details className="period-form">
             <summary>Cuéntame cómo estás para afinar tus consejos</summary>
