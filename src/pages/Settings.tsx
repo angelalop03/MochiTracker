@@ -80,7 +80,7 @@ export default function Settings() {
   return (
     <>
       <main className="narrow-page with-nav">
-        <h1 className="pixel-title">Ajustes</h1>
+        <h1 className="page-title">Ajustes</h1>
         <h2 className="section-title">Tus datos</h2>
         <DataForm profile={profile} onSaved={reload} />
 

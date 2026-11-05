@@ -13,7 +13,7 @@ import { CAMERA_Z, FOV, WORLD_SIZE, visibleHeight } from "./shapes"
 const { damp } = THREE.MathUtils
 const FPS = 30
 /** Tamaño de cada píxel visible, en píxeles CSS. Más grande es más retro y más ligero */
-const PIXEL_SIZE = { mobile: 2.5, desktop: 3.5 }
+const PIXEL_SIZE = { mobile: 1.75, desktop: 2.25 }
 
 // Vista casi isométrica: el mundo se inclina y Mochi se gira para seguir mirando de frente
 const WORLD_TILT: [number, number, number] = [0.38, -0.55, 0]

@@ -14,6 +14,8 @@ export function visibleHeight(z = 0) {
 // Dos geometrías para casi todo: cada pieza se escala. Pocos polígonos a propósito.
 export const box = new THREE.BoxGeometry(1, 1, 1)
 export const ball = new THREE.IcosahedronGeometry(1, 2)
+/** Esfera lisa para Mochi: las caras planas se quedan para la isla */
+export const round = new THREE.SphereGeometry(1, 24, 16)
 
 const materials = new Map<string, THREE.MeshLambertMaterial>()
 
@@ -23,6 +25,18 @@ export function lambert(color: string) {
   if (!material) {
     material = new THREE.MeshLambertMaterial({ color, flatShading: true })
     materials.set(color, material)
+  }
+  return material
+}
+
+const smoothMaterials = new Map<string, THREE.MeshLambertMaterial>()
+
+/** Igual que lambert(), con sombreado suave */
+export function smooth(color: string) {
+  let material = smoothMaterials.get(color)
+  if (!material) {
+    material = new THREE.MeshLambertMaterial({ color })
+    smoothMaterials.set(color, material)
   }
   return material
 }

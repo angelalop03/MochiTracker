@@ -3,64 +3,75 @@ import { useFrame, type ThreeEvent } from "@react-three/fiber"
 import * as THREE from "three"
 import type { Phase } from "../lib/cycle"
 import { SEASONS } from "./seasons"
-import { ball, box, lambert } from "./shapes"
+import { lambert, round, smooth } from "./shapes"
 
-const INK = "#2B2140"
-const BODY = "#FFF4DC"
-const BLUSH = "#F7A58C"
+const INK = "#4A2F45"
+const BODY = "#FFF9F2"
+const BLUSH = "#FBB3C4"
 
 const tmp = new THREE.Vector3()
 const { clamp, damp } = THREE.MathUtils
 const invisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
 
+function Bow({ color }: { color: string }) {
+  const m = smooth(color)
+  return (
+    <group position={[0.58, 0.72, 0.42]} rotation={[0.1, 0.35, -0.5]}>
+      <mesh geometry={round} material={m} position={[-0.2, 0, 0]} scale={[0.22, 0.15, 0.09]} />
+      <mesh geometry={round} material={m} position={[0.2, 0, 0]} scale={[0.22, 0.15, 0.09]} />
+      <mesh geometry={round} material={m} scale={[0.08, 0.08, 0.09]} />
+    </group>
+  )
+}
+
 function Outfit({ phase }: { phase: Phase }) {
   switch (phase) {
     case "menstrual":
-      // Manta que le arropa por debajo de la cara
+      // Mantita que le arropa por debajo de la cara
       return (
-        <mesh geometry={ball} material={lambert("#FFB84D")} position={[0, -0.74, 0]} scale={[1.18, 0.42, 1.12]} />
+        <mesh geometry={round} material={smooth("#F7C9D6")} position={[0, -0.74, 0]} scale={[1.18, 0.42, 1.12]} />
       )
     case "folicular":
-      // Brote en la cabeza
+      // Brotecito en la cabeza
       return (
-        <group position={[0, 0.98, 0]}>
-          <mesh geometry={box} material={lambert("#47B45F")} position={[0, 0.16, 0]} scale={[0.1, 0.34, 0.1]} />
+        <group position={[-0.1, 0.94, 0]}>
+          <mesh geometry={round} material={smooth("#8CCB8E")} position={[0, 0.14, 0]} scale={[0.05, 0.18, 0.05]} />
           <mesh
-            geometry={box}
-            material={lambert("#9BE564")}
-            position={[0.18, 0.34, 0]}
-            rotation={[0, 0, 0.4]}
-            scale={[0.36, 0.12, 0.16]}
+            geometry={round}
+            material={smooth("#B5E4A6")}
+            position={[0.15, 0.3, 0]}
+            rotation={[0, 0, 0.5]}
+            scale={[0.18, 0.08, 0.08]}
           />
           <mesh
-            geometry={box}
-            material={lambert("#9BE564")}
-            position={[-0.18, 0.34, 0]}
-            rotation={[0, 0, -0.4]}
-            scale={[0.36, 0.12, 0.16]}
+            geometry={round}
+            material={smooth("#B5E4A6")}
+            position={[-0.15, 0.3, 0]}
+            rotation={[0, 0, -0.5]}
+            scale={[0.18, 0.08, 0.08]}
           />
         </group>
       )
     case "ovulatoria":
-      // Sombrero de paja
+      // Pamela de verano
       return (
-        <group position={[0, 0.84, 0]} rotation={[-0.08, 0, 0.08]}>
-          <mesh geometry={box} material={lambert("#FFD23F")} scale={[2, 0.1, 2]} />
-          <mesh geometry={box} material={lambert("#FFD23F")} position={[0, 0.24, 0]} scale={[1.05, 0.46, 1.05]} />
-          <mesh geometry={box} material={lambert("#F28C5A")} position={[0, 0.1, 0]} scale={[1.1, 0.14, 1.1]} />
+        <group position={[0, 0.74, 0]} rotation={[-0.1, 0, 0.1]}>
+          <mesh geometry={round} material={smooth("#FFE7B0")} scale={[1.35, 0.07, 1.35]} />
+          <mesh geometry={round} material={smooth("#FFE7B0")} position={[0, 0.18, 0]} scale={[0.68, 0.34, 0.68]} />
+          <mesh geometry={round} material={smooth("#F4889F")} position={[0, 0.1, 0]} scale={[0.7, 0.09, 0.7]} />
         </group>
       )
     case "lutea":
-      // Bufanda con su punta
+      // Bufanda suave con su punta
       return (
-        <group position={[0, -0.34, 0]}>
-          <mesh geometry={ball} material={lambert("#D9622E")} scale={[1.05, 0.2, 1.02]} />
+        <group position={[0, -0.36, 0]}>
+          <mesh geometry={round} material={smooth("#E88FA0")} scale={[1.04, 0.19, 1.02]} />
           <mesh
-            geometry={box}
-            material={lambert("#F28C5A")}
-            position={[0.46, -0.3, 0.86]}
+            geometry={round}
+            material={smooth("#F2AEB9")}
+            position={[0.46, -0.3, 0.84]}
             rotation={[0.2, 0, 0.1]}
-            scale={[0.3, 0.56, 0.12]}
+            scale={[0.16, 0.3, 0.07]}
           />
         </group>
       )
@@ -81,7 +92,8 @@ export default function Mochi({ phase, onPoke }: Props) {
   const armL = useRef<THREE.Mesh>(null)
   const armR = useRef<THREE.Mesh>(null)
   const anim = useRef({ jump: 0, hover: false, hoverAmt: 0, blink: 2.5 })
-  const style = SEASONS[phase].mochi
+  const season = SEASONS[phase]
+  const style = season.mochi
 
   useFrame((state, delta) => {
     if (!root.current || !face.current || !eyes.current || !armL.current || !armR.current) return
@@ -157,39 +169,31 @@ export default function Mochi({ phase, onPoke }: Props) {
 
   return (
     <group ref={root}>
-      <mesh geometry={ball} material={lambert(BODY)} scale={[1.08, 0.94, 1.02]} />
-      <mesh ref={armL} geometry={ball} material={lambert(BODY)} position={[-1.05, -0.2, 0.15]} scale={0.24} />
-      <mesh ref={armR} geometry={ball} material={lambert(BODY)} position={[1.05, -0.2, 0.15]} scale={0.24} />
-      <mesh geometry={ball} material={lambert(BODY)} position={[-0.5, -0.88, 0.25]} scale={[0.28, 0.14, 0.3]} />
-      <mesh geometry={ball} material={lambert(BODY)} position={[0.5, -0.88, 0.25]} scale={[0.28, 0.14, 0.3]} />
+      <mesh geometry={round} material={smooth(BODY)} scale={[1.08, 0.94, 1.02]} />
+      <mesh ref={armL} geometry={round} material={smooth(BODY)} position={[-1.05, -0.2, 0.15]} scale={0.24} />
+      <mesh ref={armR} geometry={round} material={smooth(BODY)} position={[1.05, -0.2, 0.15]} scale={0.24} />
+      <mesh geometry={round} material={smooth(BODY)} position={[-0.5, -0.88, 0.25]} scale={[0.28, 0.14, 0.3]} />
+      <mesh geometry={round} material={smooth(BODY)} position={[0.5, -0.88, 0.25]} scale={[0.28, 0.14, 0.3]} />
 
       <group ref={face}>
-        <group ref={eyes} position={[0, 0.1, 0.97]}>
-          <mesh geometry={box} material={lambert(INK)} position={[-0.36, 0, 0]} scale={[0.22, 0.34, 0.08]} />
-          <mesh geometry={box} material={lambert(INK)} position={[0.36, 0, 0]} scale={[0.22, 0.34, 0.08]} />
+        {/* Ojitos redondos con su brillo */}
+        <group ref={eyes} position={[0, 0.1, 0.93]}>
+          <mesh geometry={round} material={smooth(INK)} position={[-0.36, 0, 0]} scale={[0.14, 0.18, 0.06]} />
+          <mesh geometry={round} material={smooth(INK)} position={[0.36, 0, 0]} scale={[0.14, 0.18, 0.06]} />
+          <mesh geometry={round} material={lambert("#FFFFFF")} position={[-0.31, 0.07, 0.06]} scale={0.05} />
+          <mesh geometry={round} material={lambert("#FFFFFF")} position={[0.41, 0.07, 0.06]} scale={0.05} />
         </group>
-        <mesh
-          geometry={box}
-          material={lambert(BLUSH)}
-          position={[-0.62, -0.12, 0.83]}
-          rotation={[0, -0.6, 0]}
-          scale={[0.26, 0.12, 0.06]}
-        />
-        <mesh
-          geometry={box}
-          material={lambert(BLUSH)}
-          position={[0.62, -0.12, 0.83]}
-          rotation={[0, 0.6, 0]}
-          scale={[0.26, 0.12, 0.06]}
-        />
-        <mesh geometry={box} material={lambert(INK)} position={[0, -0.1, 1]} scale={[0.16, 0.05, 0.05]} />
+        <mesh geometry={round} material={smooth(BLUSH)} position={[-0.6, -0.12, 0.78]} scale={[0.19, 0.11, 0.05]} />
+        <mesh geometry={round} material={smooth(BLUSH)} position={[0.6, -0.12, 0.78]} scale={[0.19, 0.11, 0.05]} />
+        <mesh geometry={round} material={smooth("#D9798F")} position={[0, -0.1, 0.96]} scale={[0.07, 0.04, 0.03]} />
       </group>
 
+      {phase !== "ovulatoria" && <Bow color={season.bow} />}
       <Outfit phase={phase} />
 
       {/* Zona invisible para detectar el puntero sobre todo Mochi */}
       <mesh
-        geometry={ball}
+        geometry={round}
         material={invisible}
         scale={1.5}
         onPointerOver={handleOver}

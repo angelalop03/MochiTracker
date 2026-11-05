@@ -142,7 +142,7 @@ export default function Today() {
       <main className="today" data-phase={state.phase}>
         <div className="today-scene">
           <header className="today-head">
-            <h1 className="pixel-title">Día {state.cycleDay}</h1>
+            <h1 className="page-title">Día {state.cycleDay}</h1>
             <p className="phase-chip">
               Fase {content.name.toLowerCase()} · {content.season}
             </p>

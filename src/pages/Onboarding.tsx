@@ -49,7 +49,7 @@ export default function Onboarding() {
   if (!profile.health_consent_at) {
     return (
       <main className="narrow-page">
-        <h1 className="pixel-title">Antes de empezar</h1>
+        <h1 className="page-title">Antes de empezar</h1>
         <form
           className="form"
           onSubmit={(e) => {
@@ -91,7 +91,7 @@ export default function Onboarding() {
 
   return (
     <main className="narrow-page">
-      <h1 className="pixel-title">{profile.name ? `Hola, ${profile.name}` : "Hola"}</h1>
+      <h1 className="page-title">{profile.name ? `Hola, ${profile.name}` : "Hola"}</h1>
       <DialogBox speaker="Mochi">
         Soy Mochi. Con tres datos ya puedo saber qué estación hay hoy en tu isla. Si no sabes alguno, deja el valor
         que viene puesto y lo iré ajustando.

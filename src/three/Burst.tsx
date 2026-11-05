@@ -4,7 +4,7 @@ import * as THREE from "three"
 import { box, lambert } from "./shapes"
 
 const COUNT = 14
-const COLORS = ["#FFD23F", "#FFB84D", "#F28C5A", "#9BE564", "#FFF4DC"]
+const COLORS = ["#F7B6C6", "#E2D6F5", "#FFE2A8", "#CDE8D0", "#FFFFFF"]
 
 export interface BurstHandle {
   burst: (origin: THREE.Vector3, scale: number) => void

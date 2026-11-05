@@ -7,7 +7,7 @@ export default function Privacy() {
       <Link to="/" className="brand">
         Isla Mochi
       </Link>
-      <h1 className="pixel-title">Política de privacidad</h1>
+      <h1 className="page-title">Política de privacidad</h1>
       <p className="notice">
         Borrador pendiente de revisión legal. Versión {PRIVACY_VERSION}.
       </p>

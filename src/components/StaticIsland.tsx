@@ -1,14 +1,14 @@
 import type { Phase } from "../lib/cycle"
 import { SEASONS } from "../three/seasons"
 
-const INK = "#2B2140"
-const BODY = "#FFF4DC"
+const INK = "#4A2F45"
+const BODY = "#FFF9F2"
 
 const OUTFIT: Record<Phase, string> = {
-  menstrual: "#FFB84D",
-  folicular: "#9BE564",
-  ovulatoria: "#FFD23F",
-  lutea: "#D9622E",
+  menstrual: "#F7C9D6",
+  folicular: "#8CCB8E",
+  ovulatoria: "#FFE2A8",
+  lutea: "#E88FA0",
 }
 
 /** La isla en píxeles, sin 3D: para quien no tiene WebGL o pide menos movimiento */
@@ -36,8 +36,8 @@ export default function StaticIsland({ phase }: { phase: Phase }) {
       <rect x="29" y="19" width="10" height="2" fill={BODY} />
       <rect x="31" y="23" width="1" height="2" fill={INK} />
       <rect x="36" y="23" width="1" height="2" fill={INK} />
-      <rect x="29" y="25" width="2" height="1" fill="#F7A58C" />
-      <rect x="37" y="25" width="2" height="1" fill="#F7A58C" />
+      <rect x="29" y="25" width="2" height="1" fill="#FBB3C4" />
+      <rect x="37" y="25" width="2" height="1" fill="#FBB3C4" />
       {phase === "menstrual" && <rect x="27" y="26" width="14" height="3" fill={OUTFIT.menstrual} />}
       {phase === "folicular" && <rect x="33" y="16" width="2" height="3" fill={OUTFIT.folicular} />}
       {phase === "ovulatoria" && (

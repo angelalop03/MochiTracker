@@ -62,7 +62,7 @@ export default function Auth({ mode }: { mode: "signin" | "signup" }) {
 
       {sent ? (
         <>
-          <h1 className="pixel-title">Mira tu correo</h1>
+          <h1 className="page-title">Mira tu correo</h1>
           <DialogBox speaker="Mochi">
             Te he enviado un enlace a <strong>{email}</strong>. Si usas la app instalada en el móvil, escribe aquí
             el código que viene en el correo.
@@ -95,7 +95,7 @@ export default function Auth({ mode }: { mode: "signin" | "signup" }) {
         </>
       ) : (
         <>
-          <h1 className="pixel-title">{signup ? "Crea tu isla" : "Vuelve a tu isla"}</h1>
+          <h1 className="page-title">{signup ? "Crea tu isla" : "Vuelve a tu isla"}</h1>
           <form className="form" onSubmit={handleSend}>
             {signup && (
               <label className="field">

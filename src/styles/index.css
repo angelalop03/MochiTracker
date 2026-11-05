@@ -1,60 +1,57 @@
 :root {
   /* Base */
-  --night: #2b2140;
-  --night-soft: #3d3158;
-  --paper: #fff4dc;
-  --paper-deep: #f3e3c3;
-  --amber: #ffb84d;
-  --ink: #2b2140;
-  --ink-soft: #5a4d70;
-  --danger: #a32d2d;
+  --bg: #fff7f3;
+  --card: #ffffff;
+  --ink: #4a2f45;
+  --ink-soft: #6e5068;
+  --rose: #b0406f;
+  --rose-soft: #fbe3ea;
+  --line: #f1dfe3;
+  --danger: #a32d3d;
 
   /* Fases: las sobrescribe [data-phase] */
-  --phase: #ffb84d;
-  --on-phase: #2b2140;
-  --deep: #2b2140;
-  --sky-top: #3b3a6b;
-  --sky-bottom: #2b2140;
+  --phase: #fbe3ea;
+  --deep: #fff7f3;
+  --sky-top: #fbe3ea;
+  --sky-bottom: #fff7f3;
 
   /* Celdas del ciclo */
-  --menstrual: #7c79d6;
-  --folicular: #9be564;
-  --ovulatoria: #ffd23f;
-  --lutea: #f28c5a;
+  --menstrual: #b7a0e3;
+  --folicular: #94cfa0;
+  --ovulatoria: #f6c65f;
+  --lutea: #ee9e84;
 
-  --px: 3px;
-  --font-pixel: "Pixelify Sans", "M PLUS Rounded 1c", system-ui, sans-serif;
+  --radius: 22px;
+  --radius-sm: 14px;
+  --shadow: 0 12px 30px -20px rgba(122, 74, 110, 0.5);
+  --font-display: "Baloo 2", "M PLUS Rounded 1c", system-ui, sans-serif;
   --font-body: "M PLUS Rounded 1c", system-ui, sans-serif;
-  --nav-height: 60px;
+  --nav-height: 64px;
 }
 
 [data-phase="menstrual"] {
-  --phase: #3b3a6b;
-  --on-phase: #fff4dc;
-  --deep: #2b2140;
-  --sky-top: #3b3a6b;
-  --sky-bottom: #241b38;
+  --phase: #e2d6f5;
+  --deep: #f5effb;
+  --sky-top: #cfc4ee;
+  --sky-bottom: #f6e9f5;
 }
 [data-phase="folicular"] {
-  --phase: #9be564;
-  --on-phase: #2b2140;
-  --deep: #1f3a44;
-  --sky-top: #7fd0e6;
-  --sky-bottom: #d6f3dc;
+  --phase: #cde8d0;
+  --deep: #f0f8f1;
+  --sky-top: #c7ebe4;
+  --sky-bottom: #fbf4de;
 }
 [data-phase="ovulatoria"] {
-  --phase: #ffd23f;
-  --on-phase: #2b2140;
-  --deep: #1f3560;
-  --sky-top: #62b8ee;
-  --sky-bottom: #ffeab0;
+  --phase: #ffe2a8;
+  --deep: #fff7e8;
+  --sky-top: #bfe3f5;
+  --sky-bottom: #ffe9d6;
 }
 [data-phase="lutea"] {
-  --phase: #f28c5a;
-  --on-phase: #2b2140;
-  --deep: #43283a;
-  --sky-top: #e9a06b;
-  --sky-bottom: #b9583f;
+  --phase: #f9cdb8;
+  --deep: #fdf0ea;
+  --sky-top: #fad8c7;
+  --sky-bottom: #f1bdb9;
 }
 
 * {
@@ -69,11 +66,11 @@ body {
   margin: 0;
   min-height: 100dvh;
   overflow-x: hidden;
-  background: var(--night);
-  color: var(--paper);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -81,72 +78,53 @@ h1,
 h2,
 h3,
 p,
-ul {
+ul,
+ol {
   margin: 0;
 }
 
 a {
-  color: var(--amber);
+  color: var(--rose);
   text-underline-offset: 3px;
 }
 
 :focus-visible {
-  outline: 3px solid var(--amber);
+  outline: 3px solid var(--rose);
   outline-offset: 2px;
 }
 
-.paper-box :focus-visible,
-.dialog-box :focus-visible {
-  outline-color: var(--ink);
-}
-
 /* ---------- Tipografía ---------- */
-.pixel-title {
-  font-family: var(--font-pixel);
+.page-title {
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 2rem;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .section-title {
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.4rem;
-  line-height: 1.2;
+  font-size: 1.35rem;
+  line-height: 1.25;
 }
 
 .brand {
   display: inline-block;
-  font-family: var(--font-pixel);
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: var(--amber);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--rose);
   text-decoration: none;
 }
 
-/* ---------- Cajas con borde de píxel: esquinas recortadas, sin border-radius ---------- */
-.dialog-box,
-.paper-box,
-.button,
-.advice-tab,
-.season-picker button,
-.field input,
-.notice,
-.period-form,
-.consult {
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--edge, var(--amber)),
-    0 var(--px) 0 0 var(--edge, var(--amber)),
-    calc(var(--px) * -1) 0 0 0 var(--edge, var(--amber)),
-    var(--px) 0 0 0 var(--edge, var(--amber));
-}
-
+/* ---------- Tarjetas ---------- */
 .dialog-box {
   position: relative;
-  margin-top: calc(var(--px) + 12px);
-  padding: 20px 16px 14px;
-  background: var(--paper);
-  color: var(--ink);
+  margin-top: 12px;
+  padding: 22px 18px 16px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
 
 .dialog-text {
@@ -156,35 +134,40 @@ a {
 
 .dialog-speaker {
   position: absolute;
-  top: -13px;
-  left: 12px;
-  padding: 0 8px;
-  background: var(--amber);
-  color: var(--ink);
-  font-family: var(--font-pixel);
+  top: -12px;
+  left: 16px;
+  padding: 1px 12px;
+  border-radius: 999px;
+  background: var(--rose-soft);
+  color: var(--rose);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.95rem;
 }
 
 .paper-box {
-  padding: 14px 16px;
-  background: var(--paper);
-  color: var(--ink);
-  --edge: var(--ink);
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
 
 .paper-box h3 {
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .notice {
-  padding: 10px 14px;
-  background: var(--night-soft);
-  color: var(--paper);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--rose-soft);
   font-size: 0.92rem;
-  --edge: var(--amber);
+}
+
+.notice-alert {
+  background: #fde4e0;
+  font-weight: 700;
 }
 
 /* ---------- Botones ---------- */
@@ -193,24 +176,21 @@ a {
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 8px 20px;
+  padding: 8px 24px;
   border: 0;
-  background: var(--amber);
-  color: var(--ink);
-  font-family: var(--font-pixel);
+  border-radius: 999px;
+  background: var(--rose);
+  color: #fff;
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   text-decoration: none;
   cursor: pointer;
-  --edge: var(--ink);
+  transition: background-color 0.2s;
 }
 
 .button:hover {
-  background: #ffc871;
-}
-
-.button:active {
-  transform: translateY(2px);
+  background: #9c3560;
 }
 
 .button:disabled {
@@ -220,19 +200,19 @@ a {
 
 .button-quiet {
   background: transparent;
-  color: var(--paper);
-  --edge: var(--paper);
+  color: var(--rose);
+  box-shadow: inset 0 0 0 2px var(--rose);
 }
 
 .button-quiet:hover {
-  background: var(--night-soft);
+  background: var(--rose-soft);
 }
 
 .button-link {
   min-height: 44px;
   border: 0;
   background: none;
-  color: var(--amber);
+  color: var(--rose);
   font: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -256,19 +236,25 @@ a {
 
 .field small,
 .form-hint {
-  color: #d9cfe6;
+  color: var(--ink-soft);
   font-size: 0.85rem;
 }
 
-.field input {
+.field input,
+.field textarea {
   width: 100%;
   min-height: 48px;
-  padding: 8px 12px;
-  border: 0;
-  background: var(--paper);
+  padding: 10px 14px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
   color: var(--ink);
   font: inherit;
-  --edge: var(--ink-soft);
+}
+
+.field textarea {
+  min-height: 84px;
+  resize: vertical;
 }
 
 .consent {
@@ -296,13 +282,19 @@ a {
   width: 22px;
   height: 22px;
   margin: 2px 0 0;
-  accent-color: var(--amber);
+  accent-color: var(--rose);
 }
 
 .form-error {
-  padding: 8px 12px;
-  background: var(--paper);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #fde4e0;
   color: var(--danger);
+  font-weight: 700;
+}
+
+.form-ok {
+  color: var(--ink-soft);
   font-weight: 700;
 }
 
@@ -311,9 +303,47 @@ a {
 }
 
 .dev-note {
-  padding: 6px 10px;
-  background: var(--night-soft);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--rose-soft);
   font-size: 0.85rem;
+}
+
+/* ---------- Chips ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  box-shadow: inset 0 0 0 2px var(--line);
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--rose);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.energy {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.energy .chip {
+  padding-inline: 0;
 }
 
 /* ---------- Páginas ---------- */
@@ -340,7 +370,7 @@ a {
 }
 
 .prose h2 {
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.2rem;
 }
@@ -370,12 +400,9 @@ a {
   position: relative;
   overflow: hidden;
   aspect-ratio: 4 / 3;
+  border-radius: 28px;
   background: linear-gradient(var(--sky-top), var(--sky-bottom));
-  box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--paper),
-    0 var(--px) 0 0 var(--paper),
-    calc(var(--px) * -1) 0 0 0 var(--paper),
-    var(--px) 0 0 0 var(--paper);
+  box-shadow: var(--shadow);
 }
 
 .static-island {
@@ -392,10 +419,6 @@ a {
   min-height: 100dvh;
   margin: 0 auto;
   padding: 16px 16px calc(var(--nav-height) + 32px);
-}
-
-body:has(.today[data-phase]) {
-  background: var(--night);
 }
 
 .today-scene,
@@ -415,23 +438,24 @@ body:has(.today[data-phase]) {
 }
 
 .phase-chip {
-  padding: 2px 10px;
+  padding: 2px 14px;
+  border-radius: 999px;
   background: var(--phase);
-  color: var(--on-phase);
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-weight: 600;
 }
 
 .cycle-bar {
   display: flex;
-  gap: 2px;
-  height: 22px;
+  gap: 3px;
+  height: 20px;
 }
 
 .cycle-cell {
   flex: 1;
   min-width: 0;
-  opacity: 0.55;
+  border-radius: 999px;
+  opacity: 0.5;
 }
 
 .cycle-cell[data-cell-phase="menstrual"] { background: var(--menstrual); }
@@ -441,8 +465,12 @@ body:has(.today[data-phase]) {
 
 .cycle-cell.is-today {
   opacity: 1;
-  outline: 2px solid var(--paper);
-  transform: scaleY(1.3);
+  outline: 2px solid var(--rose);
+  outline-offset: 1px;
+}
+
+.cycle-cell.has-log {
+  opacity: 0.95;
 }
 
 .cycle-caption {
@@ -463,27 +491,61 @@ body:has(.today[data-phase]) {
 .advice-tab {
   min-height: 46px;
   border: 0;
-  background: var(--night-soft);
-  color: var(--paper);
-  font-family: var(--font-pixel);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-display);
   font-weight: 500;
   font-size: 1.05rem;
+  box-shadow: inset 0 0 0 2px var(--line);
   cursor: pointer;
-  --edge: var(--ink-soft);
 }
 
 .advice-tab[aria-pressed="true"] {
-  background: var(--amber);
-  color: var(--ink);
+  background: var(--phase);
   font-weight: 600;
-  --edge: var(--paper);
+  box-shadow: none;
+}
+
+.for-you {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid var(--line);
+}
+
+.for-you-label {
+  display: block;
+  color: var(--rose);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.quick-log {
+  display: grid;
+  gap: 14px;
+}
+
+.quick-log fieldset {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.quick-log legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-weight: 700;
 }
 
 .period-form,
 .consult {
-  padding: 4px 14px;
-  background: var(--night-soft);
-  --edge: var(--ink-soft);
+  padding: 4px 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
 
 .period-form > summary,
@@ -496,7 +558,7 @@ body:has(.today[data-phase]) {
 
 .period-form[open],
 .consult[open] {
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 }
 
 .consult ul {
@@ -516,7 +578,7 @@ body:has(.today[data-phase]) {
 .landing-footer {
   display: grid;
   gap: 6px;
-  color: #d9cfe6;
+  color: var(--ink-soft);
   font-size: 0.82rem;
 }
 
@@ -525,17 +587,122 @@ body:has(.today[data-phase]) {
   flex-wrap: wrap;
   gap: 6px;
   padding: 6px;
-  border: 2px dashed var(--ink-soft);
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-sm);
 }
 
 .dev-bar button {
   min-height: 32px;
   border: 0;
-  background: var(--night-soft);
-  color: var(--paper);
+  border-radius: 999px;
+  background: var(--rose-soft);
+  color: var(--ink);
   font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
+}
+
+/* ---------- Mi ciclo ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.stat span {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.cycle-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.cycle-row {
+  display: grid;
+  gap: 8px;
+}
+
+.cycle-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 0.92rem;
+}
+
+.cycle-row-head strong {
+  font-weight: 700;
+}
+
+.mini-bar {
+  display: flex;
+  overflow: hidden;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--rose-soft);
+}
+
+.mini-bar span {
+  background: var(--menstrual);
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px 14px;
+}
+
+.row-actions .field {
+  flex: 1 1 160px;
+}
+
+.row-actions .field span {
+  font-size: 0.85rem;
+}
+
+/* ---------- Guía de Clue ---------- */
+.guide {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.guide li {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.guide svg {
+  width: 64px;
+  height: 64px;
+}
+
+.drop-zone input[type="file"] {
+  padding: 10px;
 }
 
 /* ---------- Navegación inferior ---------- */
@@ -547,26 +714,27 @@ body:has(.today[data-phase]) {
   justify-content: center;
   gap: 8px;
   height: calc(var(--nav-height) + env(safe-area-inset-bottom));
-  padding: 8px 16px env(safe-area-inset-bottom);
-  background: var(--night);
-  border-top: var(--px) solid var(--ink-soft);
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+  background: var(--card);
+  box-shadow: 0 -10px 24px -20px rgba(122, 74, 110, 0.6);
 }
 
 .bottom-nav a {
   display: grid;
   place-items: center;
   flex: 1;
-  max-width: 200px;
-  color: var(--paper);
-  font-family: var(--font-pixel);
+  max-width: 180px;
+  border-radius: 999px;
+  color: var(--ink);
+  font-family: var(--font-display);
   font-weight: 500;
   font-size: 1.05rem;
   text-decoration: none;
 }
 
 .bottom-nav a.active {
-  background: var(--amber);
-  color: var(--ink);
+  background: var(--rose-soft);
+  color: var(--rose);
   font-weight: 600;
 }
 
@@ -604,10 +772,10 @@ body:has(.today[data-phase]) {
 }
 
 .hero-title {
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(2.1rem, 8vw, 3.4rem);
-  line-height: 1.05;
+  font-size: clamp(2.2rem, 8.5vw, 3.5rem);
+  line-height: 1.1;
 }
 
 .hero-lead {
@@ -617,7 +785,7 @@ body:has(.today[data-phase]) {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 12px;
   margin-top: 6px;
 }
 
@@ -648,29 +816,25 @@ body:has(.today[data-phase]) {
   width: 100%;
 }
 
-@media (min-width: 480px) {
-  .season-picker {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
 .season-picker button {
   min-height: 44px;
   padding: 4px 12px;
   border: 0;
-  background: var(--night);
-  color: var(--paper);
-  font-family: var(--font-pixel);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-display);
   font-weight: 500;
   font-size: 1rem;
+  box-shadow: inset 0 0 0 2px var(--line);
   cursor: pointer;
-  --edge: var(--paper);
 }
 
 .season-picker button[aria-pressed="true"] {
-  background: var(--amber);
-  color: var(--ink);
+  background: var(--rose);
+  color: #fff;
   font-weight: 600;
+  box-shadow: none;
 }
 
 .feature-list {
@@ -690,6 +854,12 @@ body:has(.today[data-phase]) {
 [data-reveal].is-visible {
   opacity: 1;
   transform: none;
+}
+
+@media (min-width: 480px) {
+  .season-picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* ---------- Escritorio ---------- */
@@ -725,7 +895,8 @@ body:has(.today[data-phase]) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing {
+  .landing,
+  .button {
     transition: none;
   }
 
@@ -733,9 +904,5 @@ body:has(.today[data-phase]) {
     opacity: 1;
     transform: none;
     transition: none;
-  }
-
-  .button:active {
-    transform: none;
   }
 }
