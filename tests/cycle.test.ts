@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   addDays,
+  cycleHistory,
   cycleLengths,
   diffDays,
   estimateCycle,
@@ -203,5 +204,22 @@ describe("getCycleState", () => {
     )
     expect(state.status).toBe("ok")
     expect(state.estimate.irregular).toBe(true)
+  })
+})
+
+describe("cycleHistory", () => {
+  it("devuelve los ciclos del más reciente al más antiguo", () => {
+    const history = cycleHistory([
+      { start_date: "2026-09-03", end_date: "2026-09-07" },
+      { start_date: "2026-10-01" },
+    ])
+    expect(history).toEqual([
+      { start: "2026-10-01", end: null, length: null, periodLength: null, periodEnd: null },
+      { start: "2026-09-03", end: "2026-09-30", length: 28, periodLength: 5, periodEnd: "2026-09-07" },
+    ])
+  })
+
+  it("sin reglas no hay historial", () => {
+    expect(cycleHistory([])).toEqual([])
   })
 })

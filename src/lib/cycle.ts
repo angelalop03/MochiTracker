@@ -226,3 +226,32 @@ export function getCycleState(
     daysLate: 0,
   }
 }
+
+export interface CycleRecord {
+  start: string
+  /** Último día del ciclo. null si es el ciclo en curso */
+  end: string | null
+  /** Duración en días. null si es el ciclo en curso */
+  length: number | null
+  /** Duración de la regla, si se marcó el final */
+  periodLength: number | null
+  /** Final de la regla marcado por la usuaria */
+  periodEnd: string | null
+}
+
+/** Historial de ciclos, del más reciente al más antiguo */
+export function cycleHistory(periods: PeriodRecord[]): CycleRecord[] {
+  const sorted = [...periods].sort((a, b) => a.start_date.localeCompare(b.start_date))
+  return sorted
+    .map((period, i) => {
+      const next = sorted[i + 1]
+      return {
+        start: period.start_date,
+        end: next ? addDays(next.start_date, -1) : null,
+        length: next ? diffDays(period.start_date, next.start_date) : null,
+        periodLength: period.end_date ? diffDays(period.start_date, period.end_date) + 1 : null,
+        periodEnd: period.end_date ?? null,
+      }
+    })
+    .reverse()
+}
