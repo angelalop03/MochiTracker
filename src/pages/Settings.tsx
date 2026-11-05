@@ -84,6 +84,11 @@ export default function Settings() {
         <h2 className="section-title">Tus datos</h2>
         <DataForm profile={profile} onSaved={reload} />
 
+        <h2 className="section-title">Importar</h2>
+        <p>
+          <Link to="/importar">Importar desde Clue</Link>
+        </p>
+
         <h2 className="section-title">Cuenta</h2>
         <p>
           <Link to="/privacidad">Política de privacidad</Link>

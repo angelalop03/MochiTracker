@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react"
-import { Navigate } from "react-router-dom"
+import { Link, Navigate } from "react-router-dom"
 import ConsentFields from "../components/ConsentFields"
 import DialogBox from "../components/DialogBox"
 import Loading from "../components/Loading"
@@ -9,6 +9,7 @@ import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
 import { todayInTimeZone } from "../lib/cycle"
 import { deviceTimeZone } from "../lib/format"
+import { CLUE_PARSER_READY } from "../lib/clue/parser"
 import { addPeriod, updateProfile } from "../services/data"
 
 export default function Onboarding() {
@@ -96,6 +97,12 @@ export default function Onboarding() {
         Soy Mochi. Con tres datos ya puedo saber qué estación hay hoy en tu isla. Si no sabes alguno, deja el valor
         que viene puesto y lo iré ajustando.
       </DialogBox>
+
+      {CLUE_PARSER_READY && (
+        <p>
+          ¿Usas Clue? <Link to="/importar">Importa tus datos</Link> y te ahorras este paso.
+        </p>
+      )}
 
       <form className="form" onSubmit={handleSubmit}>
         <label className="field">

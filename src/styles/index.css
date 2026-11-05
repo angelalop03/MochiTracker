@@ -93,6 +93,16 @@ a {
   outline-offset: 2px;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ---------- Tipografía ---------- */
 .page-title {
   font-family: var(--font-display);
@@ -654,6 +664,12 @@ a {
   font-weight: 700;
 }
 
+.cycle-row summary {
+  min-height: 44px;
+  padding-block: 8px;
+  cursor: pointer;
+}
+
 .mini-bar {
   display: flex;
   overflow: hidden;
@@ -702,7 +718,20 @@ a {
 }
 
 .drop-zone input[type="file"] {
-  padding: 10px;
+  padding: 8px;
+}
+
+.drop-zone input[type="file"]::file-selector-button {
+  min-height: 36px;
+  margin-right: 10px;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rose-soft);
+  color: var(--rose);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 /* ---------- Navegación inferior ---------- */

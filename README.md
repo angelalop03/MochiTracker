@@ -1,6 +1,6 @@
 # Isla Mochi
 
-Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en una pequeña isla 3D, y Mochi, un personaje hecho solo con código, refleja la energía de esa fase. Muestra en qué fase estás hoy, qué día de ciclo es y consejos en cuatro bloques: emociones, cuerpo, comida y movimiento.
+Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en una pequeña isla 3D, y Mochi, un personaje hecho solo con código, refleja la energía de esa fase. Muestra en qué fase estás hoy, qué día de ciclo es y consejos en cuatro bloques: emociones, cuerpo, comida y movimiento. Lo que registras cada día personaliza esos consejos.
 
 > El nombre es provisional. El contenido es informativo y no sustituye a un profesional sanitario. No sirve como método anticonceptivo.
 
@@ -9,7 +9,7 @@ Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en un
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Base, Supabase, auth, bienvenida manual, lógica del ciclo, pantalla Hoy y escena 3D | Hecha |
-| 2 | Importar desde Clue, registro diario, Mi ciclo y personalización por reglas | Pendiente |
+| 2 | Registro diario, Mi ciclo, personalización por reglas y guía de Clue | Hecha, salvo el parser de Clue |
 | 3 | PWA, push, emails y cron. Exportar y borrar cuenta | Pendiente |
 | 4 | Consejos con IA en el navegador (WebLLM) | Pendiente |
 
@@ -21,6 +21,7 @@ Web app de acompañamiento del ciclo menstrual. Cada fase es una estación en un
 | React Three Fiber + drei + Three.js | Escena 3D |
 | React Router | Rutas |
 | Supabase | Auth (magic link y código) y Postgres con Row Level Security |
+| zip.js | Abrir en el navegador el ZIP con contraseña de Clue |
 | Vitest + PGlite | Tests de la lógica y de las políticas RLS |
 | Vercel | Hosting |
 
@@ -93,18 +94,30 @@ Vive en `src/lib/cycle.ts`, sin dependencias de interfaz, para poder usarla tamb
 - La ovulación se estima en (duración − 14) ± 1 día. Con ciclos cortos y reglas largas, la ventana empieza el día después de la regla y la fase folicular puede quedarse sin días.
 - Estados especiales: `late` (retraso), `stale` (más de 30 días de retraso, pide actualizar), `no_data`, y aviso de ciclo irregular si la variación pasa de 7 días.
 
+## Personalización por reglas
+
+Vive en `src/lib/personalize.ts`, sin IA ni red, y los textos en `src/content/personalTips.ts`.
+
+- **Reglas:** si una señal aparece al menos 2 de los últimos 5 días, se añade un consejo «Para ti». Por ejemplo, cansancio varios días en fase lútea muestra los consejos de energía de esa fase.
+- **Patrones:** un síntoma registrado en la misma fase de 2 ciclos anteriores se avisa en el bloque Cuerpo.
+- **Alarma:** registrar dolor o sangrado muy fuertes muestra durante 3 días la recomendación de consultar con un profesional.
+
+## Importar desde Clue
+
+Todo ocurre en el navegador: `src/lib/clue/read.ts` abre el ZIP con contraseña o el JSON y da errores claros. **Falta el parser** (`src/lib/clue/parser.ts`): el formato de Clue no está documentado y se adaptará a un ejemplo real. Hasta entonces, `CLUE_PARSER_READY` es `false`: el archivo se abre, se avisa y no se guarda nada.
+
 ## Estructura
 
 ```
 ├── public/                  Favicon
 ├── supabase/migrations/     Tablas, RLS y trigger de registro
-├── tests/                   Tests del ciclo y de RLS
+├── tests/                   Tests del ciclo, reglas, Clue y RLS
 └── src/
     ├── components/          DialogBox, AdviceBlocks, CycleBar, SkyPanel, StaticIsland...
-    ├── content/             phases.ts (consejos) y legal.ts (responsable y versión de la política)
+    ├── content/             phases.ts, personalTips.ts, symptoms.ts y legal.ts
     ├── hooks/               useSession, useCycleData, useVisible, useReveal
-    ├── lib/                 cycle.ts y format.ts
-    ├── pages/               Landing, Auth, Onboarding, Today, Settings, Privacy
+    ├── lib/                 cycle.ts, personalize.ts, format.ts y clue/
+    ├── pages/               Landing, Auth, Onboarding, Today, MyCycle, ImportClue, Settings, Privacy
     ├── services/            supabase.ts, auth.ts, data.ts y demo.ts
     ├── styles/index.css     Variables en :root y todos los estilos
     └── three/               Scene, Island, Mochi, Floaters, Burst, seasons, shapes, support
@@ -116,6 +129,8 @@ Vive en `src/lib/cycle.ts`, sin dependencias de interfaz, para poder usarla tamb
 |---|---|
 | Colores y tipografías | Variables `:root` y `[data-phase]` en `src/styles/index.css` |
 | Consejos de cada fase | `src/content/phases.ts` |
+| Consejos personalizados | `src/content/personalTips.ts` |
+| Síntomas y ánimos | `src/content/symptoms.ts`. Los ánimos también están en el `check` de `daily_logs.mood` |
 | Colores de cada estación y energía de Mochi | `src/three/seasons.ts` |
 | Aspecto y ropa de Mochi | `src/three/Mochi.tsx` |
 | Objetos de la isla | `Props` en `src/three/Island.tsx` |
