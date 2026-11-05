@@ -1,5 +1,6 @@
 import { DEMO, supabase } from "./supabase"
 import { readDemo, writeDemo } from "./demo"
+import type { ImportResult } from "../lib/clue/types"
 
 export interface Profile {
   id: string
@@ -18,6 +19,14 @@ export interface Profile {
 export interface PeriodRow {
   start_date: string
   end_date: string | null
+}
+
+export interface DailyLog {
+  date: string
+  symptoms: string[]
+  mood: string | null
+  energy: number | null
+  notes: string | null
 }
 
 export type ProfilePatch = Partial<Omit<Profile, "id">>
@@ -86,4 +95,84 @@ export async function addPeriod(userId: string, startDate: string): Promise<void
       { onConflict: "user_id,start_date", ignoreDuplicates: true }
     )
   if (error) throw error
+}
+
+export async function setPeriodEnd(startDate: string, endDate: string | null): Promise<void> {
+  if (DEMO) {
+    writeDemo({
+      periods: readDemo().periods.map((p) =>
+        p.start_date === startDate ? { ...p, end_date: endDate } : p
+      ),
+    })
+    return
+  }
+  const { error } = await db().from("periods").update({ end_date: endDate }).eq("start_date", startDate)
+  if (error) throw error
+}
+
+export async function deletePeriod(startDate: string): Promise<void> {
+  if (DEMO) {
+    writeDemo({ periods: readDemo().periods.filter((p) => p.start_date !== startDate) })
+    return
+  }
+  const { error } = await db().from("periods").delete().eq("start_date", startDate)
+  if (error) throw error
+}
+
+export async function fetchLogs(since: string): Promise<DailyLog[]> {
+  if (DEMO) return readDemo().logs.filter((log) => log.date >= since)
+  const { data, error } = await db()
+    .from("daily_logs")
+    .select("date, symptoms, mood, energy, notes")
+    .gte("date", since)
+    .order("date", { ascending: true })
+  if (error) throw error
+  return data as DailyLog[]
+}
+
+/** Guarda el registro de un día. Si ya existe, lo sustituye */
+export async function saveLog(userId: string, log: DailyLog): Promise<void> {
+  if (DEMO) {
+    const others = readDemo().logs.filter((l) => l.date !== log.date)
+    writeDemo({ logs: [...others, log].sort((a, b) => a.date.localeCompare(b.date)) })
+    return
+  }
+  const { error } = await db()
+    .from("daily_logs")
+    .upsert({ ...log, user_id: userId }, { onConflict: "user_id,date" })
+  if (error) throw error
+}
+
+/** Guarda lo importado sin pisar nada de lo que la usuaria ya tenía */
+export async function saveImport(userId: string, result: ImportResult): Promise<void> {
+  if (DEMO) {
+    const state = readDemo()
+    const starts = new Set(state.periods.map((p) => p.start_date))
+    const days = new Set(state.logs.map((l) => l.date))
+    writeDemo({
+      periods: [...state.periods, ...result.periods.filter((p) => !starts.has(p.start_date))],
+      logs: [
+        ...state.logs,
+        ...result.logs
+          .filter((l) => !days.has(l.date))
+          .map((l) => ({ ...l, mood: null, energy: null, notes: null })),
+      ],
+    })
+    return
+  }
+  const periods = await db()
+    .from("periods")
+    .upsert(
+      result.periods.map((p) => ({ ...p, user_id: userId, source: "clue" })),
+      { onConflict: "user_id,start_date", ignoreDuplicates: true }
+    )
+  if (periods.error) throw periods.error
+  if (result.logs.length === 0) return
+  const logs = await db()
+    .from("daily_logs")
+    .upsert(
+      result.logs.map((l) => ({ ...l, user_id: userId, source: "clue" })),
+      { onConflict: "user_id,date", ignoreDuplicates: true }
+    )
+  if (logs.error) throw logs.error
 }

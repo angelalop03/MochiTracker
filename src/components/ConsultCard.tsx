@@ -1,8 +1,8 @@
 import { WHEN_TO_CONSULT } from "../content/phases"
 
-export default function ConsultCard() {
+export default function ConsultCard({ open = false }: { open?: boolean }) {
   return (
-    <details className="consult">
+    <details className="consult" open={open}>
       <summary>{WHEN_TO_CONSULT.title}</summary>
       <p>{WHEN_TO_CONSULT.intro}</p>
       <ul>

@@ -5,10 +5,12 @@ interface Props {
   ranges: PhaseRange[]
   cycleDay: number
   cycleLength: number
+  /** Días de ciclo con registro: se ven más intensos */
+  loggedDays?: Set<number>
 }
 
 /** Barra del ciclo por casillas: cada día es un píxel y el de hoy va marcado */
-export default function CycleBar({ ranges, cycleDay, cycleLength }: Props) {
+export default function CycleBar({ ranges, cycleDay, cycleLength, loggedDays }: Props) {
   const today = Math.min(cycleDay, cycleLength)
   const summary = ranges
     .map((r) => `${PHASE_CONTENT[r.phase].name}: días ${r.startDay} a ${r.endDay}`)
@@ -22,7 +24,7 @@ export default function CycleBar({ ranges, cycleDay, cycleLength }: Props) {
           return (
             <span
               key={day}
-              className={day === today ? "cycle-cell is-today" : "cycle-cell"}
+              className={`cycle-cell${day === today ? " is-today" : ""}${loggedDays?.has(day) ? " has-log" : ""}`}
               data-cell-phase={range.phase}
             />
           )

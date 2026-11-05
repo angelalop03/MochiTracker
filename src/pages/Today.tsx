@@ -5,12 +5,22 @@ import ConsultCard from "../components/ConsultCard"
 import CycleBar from "../components/CycleBar"
 import DialogBox from "../components/DialogBox"
 import Loading from "../components/Loading"
+import QuickLog from "../components/QuickLog"
 import SkyPanel from "../components/SkyPanel"
 import { CONTRACEPTION_NOTICE, DISCLAIMER, PHASE_CONTENT, pickVariant } from "../content/phases"
 import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
-import { addDays, getCycleState, PHASES, todayInTimeZone, type CycleState, type Phase } from "../lib/cycle"
+import {
+  addDays,
+  diffDays,
+  getCycleState,
+  PHASES,
+  todayInTimeZone,
+  type CycleState,
+  type Phase,
+} from "../lib/cycle"
 import { daySeed, formatDay, formatInDays } from "../lib/format"
+import { personalize } from "../lib/personalize"
 import { addPeriod } from "../services/data"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
@@ -109,7 +119,7 @@ function DevPhaseBar({ state, onJump }: { state: KnownState; onJump: (offset: nu
 }
 
 export default function Today() {
-  const { profile, periods, reload } = useCycleData()
+  const { profile, periods, logs, reload } = useCycleData()
   const [devDay, setDevDay] = useState<number | null>(null)
 
   if (!profile) return <Loading />
@@ -136,6 +146,10 @@ export default function Today() {
   const state = getCycleState(periods, settings, today) as KnownState
   const content = PHASE_CONTENT[state.phase]
   const seed = daySeed(today)
+  const { tips, alarm } = personalize({ phase: state.phase, today, logs, periods, settings, seed })
+  const loggedDays = new Set(
+    logs.filter((l) => l.date >= state.cycleStart).map((l) => diffDays(state.cycleStart, l.date) + 1)
+  )
 
   return (
     <>
@@ -159,18 +173,31 @@ export default function Today() {
         <div className="today-info">
           {import.meta.env.DEV && <DevPhaseBar state={realState} onJump={setDevDay} />}
 
+          {alarm && (
+            <p className="notice notice-alert" role="alert">
+              Has registrado un dolor o un sangrado muy fuertes. Te recomendamos consultarlo con un profesional
+              sanitario. Abajo tienes cuándo hacerlo.
+            </p>
+          )}
           <Notices state={state} />
 
-          <CycleBar ranges={state.ranges} cycleDay={state.cycleDay} cycleLength={state.estimate.cycleLength} />
+          <CycleBar
+            ranges={state.ranges}
+            cycleDay={state.cycleDay}
+            cycleLength={state.estimate.cycleLength}
+            loggedDays={loggedDays}
+          />
           <p className="cycle-caption">
             {content.summary}
             {state.nextPeriodDate && ` Próxima regla estimada: ${formatDay(state.nextPeriodDate)}.`}
           </p>
 
-          <AdviceBlocks phase={state.phase} seed={seed} />
+          <AdviceBlocks key={state.phase} phase={state.phase} seed={seed} tips={tips} />
+
+          <QuickLog key={realToday} date={realToday} log={logs.find((l) => l.date === realToday)} onSaved={reload} />
 
           <PeriodForm today={realToday} onSaved={reload} />
-          <ConsultCard />
+          <ConsultCard open={alarm} />
 
           <footer className="legal-note">
             <p>{DISCLAIMER}</p>

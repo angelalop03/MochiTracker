@@ -7,12 +7,25 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { fetchPeriods, fetchProfile, type PeriodRow, type Profile } from "../services/data"
+import { addDays, todayInTimeZone } from "../lib/cycle"
+import { deviceTimeZone } from "../lib/format"
+import {
+  fetchLogs,
+  fetchPeriods,
+  fetchProfile,
+  type DailyLog,
+  type PeriodRow,
+  type Profile,
+} from "../services/data"
 import { useSession } from "./useSession"
+
+/** Suficiente para detectar patrones en los últimos ciclos */
+const LOG_HISTORY_DAYS = 220
 
 interface CycleData {
   profile: Profile | null
   periods: PeriodRow[]
+  logs: DailyLog[]
   loading: boolean
   failed: boolean
   reload: () => Promise<void>
@@ -21,6 +34,7 @@ interface CycleData {
 const CycleDataContext = createContext<CycleData>({
   profile: null,
   periods: [],
+  logs: [],
   loading: true,
   failed: false,
   reload: async () => {},
@@ -31,6 +45,7 @@ export function CycleDataProvider({ children }: { children: ReactNode }) {
   const userId = session.status === "in" ? session.user.id : null
   const [profile, setProfile] = useState<Profile | null>(null)
   const [periods, setPeriods] = useState<PeriodRow[]>([])
+  const [logs, setLogs] = useState<DailyLog[]>([])
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
 
@@ -38,13 +53,16 @@ export function CycleDataProvider({ children }: { children: ReactNode }) {
     if (!userId) {
       setProfile(null)
       setPeriods([])
+      setLogs([])
       setLoading(false)
       return
     }
     try {
-      const [p, list] = await Promise.all([fetchProfile(userId), fetchPeriods()])
+      const since = addDays(todayInTimeZone(deviceTimeZone()), -LOG_HISTORY_DAYS)
+      const [p, list, days] = await Promise.all([fetchProfile(userId), fetchPeriods(), fetchLogs(since)])
       setProfile(p)
       setPeriods(list)
+      setLogs(days)
       setFailed(false)
     } catch (error) {
       console.error("No se han podido cargar los datos", error)
@@ -60,8 +78,8 @@ export function CycleDataProvider({ children }: { children: ReactNode }) {
   }, [reload])
 
   const value = useMemo(
-    () => ({ profile, periods, loading, failed, reload }),
-    [profile, periods, loading, failed, reload]
+    () => ({ profile, periods, logs, loading, failed, reload }),
+    [profile, periods, logs, loading, failed, reload]
   )
   return <CycleDataContext.Provider value={value}>{children}</CycleDataContext.Provider>
 }
