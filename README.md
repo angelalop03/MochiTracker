@@ -72,16 +72,46 @@ Mochi es 3D y está hecho solo con código, sin modelos ni texturas. Respira, pa
 
 ## Consejos con IA
 
-> **En desarrollo.** Esta parte aún no está publicada. Hoy los consejos «Para ti» salen de reglas fijas, y la app funciona por completo sin IA.
+Si tu ordenador puede, Mochi te escribe consejos a tu medida con una IA gratuita que se ejecuta **dentro de tu navegador**, con [WebLLM](https://webllm.mlc.ai) y WebGPU. No hay servidores de IA, claves ni costes.
 
-La idea es una IA gratuita que se ejecuta **dentro de tu navegador** con [WebLLM](https://webllm.mlc.ai) y WebGPU:
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/ia-aviso.jpg" alt="Aviso antes de descargar el modelo" /></td>
+    <td width="50%"><img src="docs/screenshots/ia-consejos.jpg" alt="Consejo escrito por la IA" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Aviso antes de descargar</sub></td>
+    <td align="center"><sub>Consejo «Para ti» escrito por la IA</sub></td>
+  </tr>
+</table>
 
-- **Privada:** lo que registras no se envía a ningún servicio de IA. Internet solo se usa para descargar el modelo una vez.
-- **Opcional:** se activa con un botón, avisando antes del tamaño de la descarga.
-- **Con red de seguridad:** si el dispositivo no puede ejecutarla o la respuesta no es válida, se usan las reglas sin que se note.
-- **Vigilada:** los modelos pequeños se equivocan, así que todo lo que escriben se valida antes de mostrarlo. Nunca decide nada sobre señales de alarma: eso lo hacen reglas fijas.
+### Cómo funciona
 
-Las primeras pruebas con el modelo real mostraron que el más pequeño no escribe con calidad suficiente para un tema de salud, así que se están comparando otros modelos antes de publicarla.
+1. **La activas tú.** Pulsas «Activar consejos con IA» y la app te avisa antes del tamaño de la descarga, unos 2,3 GB, solo la primera vez.
+2. **Le cuentas cómo estás.** Sin datos no hay nada que personalizar, así que el modelo ni se carga.
+3. **Adapta, no inventa.** Para cada bloque recibe un consejo ya revisado y lo adapta a tus síntomas, ánimo y energía de la última semana. Tus notas nunca se usan.
+4. **Todo se valida.** Si nombra medicamentos o diagnósticos, cambia de idioma, se pasa de largo o anima a entrenar fuerte a quien lleva días sin energía, ese bloque se descarta.
+5. **Si falla, no se nota.** Sin WebGPU, sin memoria o con una respuesta no válida, se usan los consejos por reglas. La app funciona igual sin IA.
+
+Los consejos se guardan en el dispositivo y solo se generan de nuevo si cambia el día o lo que has registrado. Mientras Mochi escribe, la escena 3D se pausa para dejarle la GPU. En Ajustes puedes desactivarla y borrar el modelo.
+
+**Lo que nunca hace la IA:** decidir sobre señales de alarma. Si registras dolor o sangrado muy fuertes, el modelo no se usa: el aviso de consultar con un profesional sale de reglas fijas. Los emails y notificaciones tampoco usan IA.
+
+### Por qué este modelo, y por qué no en el móvil
+
+El modelo se eligió probando 5 opciones reales, en español, con los mismos casos:
+
+| Modelo | Descarga | Resultado |
+|---|---|---|
+| Qwen3.5 0.8B | 447 MB | Incoherente |
+| Gemma 3 1B | 602 MB | Robótico, confunde datos y género |
+| Qwen3 1.7B | 984 MB | Repite los datos en lugar de aconsejar |
+| Qwen3.5 2B | 1,1 GB | Natural, pero con consejos equivocados, como entrenar intenso con energía mínima |
+| **Qwen3 4B** | **2,3 GB** | **Coherente y bien adaptado** |
+
+Los que caben en un móvil fallan justo donde importa, así que se priorizó la seguridad: Qwen3 4B necesita unos 3,4 GB de memoria de GPU y se ofrece solo en ordenadores con WebGPU y `shader-f16`. En móviles y tablets no aparece el botón y se usan las reglas.
+
+En un portátil con una RTX 3050 cargó en unos 20 segundos desde la caché y tardó unos 2 minutos en escribir los 4 bloques la primera vez, porque compila el código de la GPU. Un modelo tan pequeño puede equivocarse: los consejos son orientativos y la app lo indica.
 
 ## Privacidad
 
@@ -99,7 +129,7 @@ Son datos de salud, una categoría especial del RGPD:
 | 1 | Base, Supabase, auth, bienvenida manual, lógica del ciclo, pantalla Hoy y escena 3D | Hecha |
 | 2 | Importar desde Clue, registro diario, Mi ciclo y personalización por reglas | Hecha |
 | 3 | PWA, push, emails y cron. Exportar y borrar cuenta | Hecha, sin probar con servicios reales |
-| 4 | Consejos con IA en el navegador (WebLLM) | En desarrollo |
+| 4 | Consejos con IA en el navegador (WebLLM) | Hecha, solo en ordenadores con WebGPU |
 
 ## Stack
 
@@ -109,6 +139,7 @@ Son datos de salud, una categoría especial del RGPD:
 | React Three Fiber + drei + Three.js | Escena 3D |
 | React Router | Rutas |
 | Supabase | Auth (magic link y código) y Postgres con Row Level Security |
+| WebLLM + Qwen3 4B | Consejos con IA dentro del navegador, sin servidor |
 | zip.js | Abrir en el navegador el ZIP con contraseña de Clue |
 | Vitest + PGlite | Tests de la lógica y de las políticas RLS |
 | Resend | Emails de los avisos |
@@ -240,7 +271,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
     ├── components/          DialogBox, AdviceBlocks, CycleBar, SkyPanel, StaticIsland...
     ├── content/             phases.ts, personalTips.ts, symptoms.ts y legal.ts
     ├── hooks/               useSession, useCycleData, useVisible, useReveal
-    ├── lib/                 cycle.ts, personalize.ts, format.ts y clue/
+    ├── lib/                 cycle.ts, personalize.ts, format.ts, clue/ y ai/
     ├── pages/               Landing, Auth, Onboarding, Today, Guide, MyCycle, ImportClue, Install, Settings, Privacy
     ├── services/            supabase.ts, auth.ts, data.ts, push.ts, account.ts y demo.ts
     ├── sw.ts                Service worker: caché de la web y notificaciones
@@ -255,6 +286,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 | Colores y tipografías | Variables `:root` y `[data-phase]` en `src/styles/index.css` |
 | Consejos de cada fase | `src/content/phases.ts` |
 | Consejos personalizados | `src/content/personalTips.ts` |
+| Prompt y validación de la IA | `src/lib/ai/advice.ts` |
 | Síntomas y ánimos | `src/content/symptoms.ts`. Los ánimos también están en el `check` de `daily_logs.mood` |
 | Colores de cada estación y energía de Mochi | `src/three/seasons.ts` |
 | Aspecto y ropa de Mochi | `src/three/Mochi.tsx` |
