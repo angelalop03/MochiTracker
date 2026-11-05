@@ -38,12 +38,7 @@ export default function QuickLog({ date, log, onSaved }: Props) {
   }
 
   return (
-    <section aria-labelledby="log-title" className="paper-box">
       <form className="quick-log" onSubmit={(e) => void save(e)}>
-        <h2 id="log-title" className="section-title">
-          ¿Cómo estás hoy?
-        </h2>
-
         <fieldset>
           <legend>Energía</legend>
           <div className="energy">
@@ -129,6 +124,5 @@ export default function QuickLog({ date, log, onSaved }: Props) {
           {status === "saving" ? "Guardando…" : "Guardar"}
         </button>
       </form>
-    </section>
   )
 }

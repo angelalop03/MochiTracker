@@ -19,7 +19,7 @@ export default function AdviceBlocks({ phase, seed, tips }: Props) {
   return (
     <section className="advice" aria-labelledby="advice-title">
       <h2 id="advice-title" className="section-title">
-        Para esta fase
+        Cómo te puedes sentir
       </h2>
       <div className="advice-tabs" role="group" aria-label="Tipo de consejo">
         {BLOCKS.map((block) => (

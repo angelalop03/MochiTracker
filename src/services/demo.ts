@@ -32,3 +32,11 @@ export function writeDemo(patch: Partial<DemoState>) {
     // sin almacenamiento, la demo no guarda nada
   }
 }
+
+export function clearDemo() {
+  try {
+    sessionStorage.removeItem(KEY)
+  } catch {
+    // nada que borrar
+  }
+}

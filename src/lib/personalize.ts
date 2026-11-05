@@ -1,10 +1,10 @@
 // Personalización por reglas: módulo puro que no necesita IA ni red.
 // Es el camino normal de la app y lo reutilizará el cron de avisos.
 
-import type { BlockId } from "../content/phases"
-import { pickVariant } from "../content/phases"
-import { PERSONAL_TIPS, type RuleId } from "../content/personalTips"
-import { ALARM_SYMPTOMS, LOW_MOODS, symptomLabel } from "../content/symptoms"
+import type { BlockId } from "../content/phases.js"
+import { pickVariant } from "../content/phases.js"
+import { PERSONAL_TIPS, type RuleId } from "../content/personalTips.js"
+import { ALARM_SYMPTOMS, LOW_MOODS, symptomLabel } from "../content/symptoms.js"
 import {
   addDays,
   diffDays,
@@ -14,7 +14,7 @@ import {
   type CycleSettings,
   type PeriodRecord,
   type Phase,
-} from "./cycle"
+} from "./cycle.js"
 
 export interface LogEntry {
   date: string

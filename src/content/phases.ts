@@ -2,7 +2,7 @@
 // Orientación general, nunca diagnóstico. Cada bloque tiene varias variantes para
 // que los avisos diarios no se repitan siempre.
 
-import type { Phase } from "../lib/cycle"
+import type { Phase } from "../lib/cycle.js"
 
 export type BlockId = "emociones" | "cuerpo" | "comida" | "movimiento"
 

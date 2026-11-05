@@ -734,6 +734,18 @@ a {
   cursor: pointer;
 }
 
+.guide-tips,
+.install-steps {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+  padding-left: 20px;
+}
+
+.guide-sky {
+  aspect-ratio: 16 / 9;
+}
+
 /* ---------- Navegación inferior ---------- */
 .bottom-nav {
   position: fixed;

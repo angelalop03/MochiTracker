@@ -37,7 +37,7 @@ function Notices({ state }: { state: KnownState }) {
       {state.status === "late" && (
         <p className="notice">
           Tu regla lleva {state.daysLate} {state.daysLate === 1 ? "día" : "días"} de retraso según tu media. Es algo
-          frecuente: el estrés, los viajes o los cambios de rutina pueden moverla. Cuando te venga, regístrala abajo.
+          frecuente: el estrés, los viajes o los cambios de rutina pueden moverla. Cuando te venga, actualiza la fecha abajo.
         </p>
       )}
       {state.status === "stale" && (
@@ -79,7 +79,7 @@ function PeriodForm({ today, onSaved }: { today: string; onSaved: () => Promise<
 
   return (
     <details className="period-form">
-      <summary>Me ha venido la regla</summary>
+      <summary>¿Te ha venido la regla? Actualiza la fecha</summary>
       <form className="form" onSubmit={(e) => void save(e)}>
         <label className="field">
           <span>¿Qué día empezó?</span>
@@ -187,14 +187,19 @@ export default function Today() {
             cycleLength={state.estimate.cycleLength}
             loggedDays={loggedDays}
           />
-          <p className="cycle-caption">
-            {content.summary}
-            {state.nextPeriodDate && ` Próxima regla estimada: ${formatDay(state.nextPeriodDate)}.`}
-          </p>
+          <p className="cycle-caption">{content.summary}</p>
 
           <AdviceBlocks key={state.phase} phase={state.phase} seed={seed} tips={tips} />
 
-          <QuickLog key={realToday} date={realToday} log={logs.find((l) => l.date === realToday)} onSaved={reload} />
+          <details className="period-form">
+            <summary>Cuéntame cómo estás para afinar tus consejos</summary>
+            <QuickLog
+              key={realToday}
+              date={realToday}
+              log={logs.find((l) => l.date === realToday)}
+              onSaved={reload}
+            />
+          </details>
 
           <PeriodForm today={realToday} onSaved={reload} />
           <ConsultCard open={alarm} />

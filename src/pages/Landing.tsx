@@ -31,7 +31,7 @@ export default function Landing() {
             <p className="brand">Isla Mochi</p>
             <h1 className="hero-title">Tu ciclo, como las estaciones de una pequeña isla</h1>
             <p className="hero-lead">
-              Cada fase es una estación. Mochi te cuenta cuál vives hoy y qué te puede sentar bien.
+              Cada fase es una estación. Mochi te cuenta cómo te puedes sentir hoy, por dentro y por fuera, y qué te puede sentar bien.
             </p>
             <div className="hero-actions">
               <Link className="button" to="/registro">
@@ -71,6 +71,7 @@ export default function Landing() {
         <section className="landing-section" data-reveal>
           <div>
             <h2 className="section-title">Consejos para cada día</h2>
+            <p>No es otra app para apuntar tu regla: para eso ya tienes la tuya. Aquí vienes a entenderte mejor.</p>
             <ul className="feature-list">
               <li>
                 <strong>Emociones.</strong> Cómo puedes sentirte y qué te puede ayudar.

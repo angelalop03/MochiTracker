@@ -178,7 +178,8 @@ export default function MyCycle() {
   return (
     <>
       <main className="narrow-page with-nav">
-        <h1 className="page-title">Mi ciclo</h1>
+        <h1 className="page-title">Mis fechas</h1>
+        <p>Mochi solo las usa para saber en qué fase estás. El seguimiento lo puedes seguir haciendo en tu app.</p>
 
         <div className="stats">
           <div className="stat">

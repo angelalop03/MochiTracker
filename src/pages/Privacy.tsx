@@ -57,7 +57,7 @@ export default function Privacy() {
       <h2>Tus derechos</h2>
       <p>
         Puedes acceder a tus datos, corregirlos, exportarlos, borrarlos y retirar tu consentimiento en cualquier
-        momento, escribiendo a {CONTROLLER.email}. Si crees que no los tratamos bien, puedes reclamar ante la Agencia
+        momento desde Ajustes o escribiendo a {CONTROLLER.email}. Si crees que no los tratamos bien, puedes reclamar ante la Agencia
         Española de Protección de Datos (aepd.es).
       </p>
 

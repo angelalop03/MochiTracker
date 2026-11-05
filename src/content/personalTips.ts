@@ -1,8 +1,8 @@
 // Consejos que se muestran cuando el registro diario activa una regla (src/lib/personalize.ts).
 // Orientación general, nunca diagnóstico. Si una fase tiene textos propios se usan esos.
 
-import type { Phase } from "../lib/cycle"
-import type { BlockId } from "./phases"
+import type { Phase } from "../lib/cycle.js"
+import type { BlockId } from "./phases.js"
 
 export interface TipSet {
   block: BlockId
