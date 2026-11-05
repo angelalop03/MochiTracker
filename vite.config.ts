@@ -8,7 +8,7 @@ export default defineConfig({
       output: {
         // Three.js va en su propio archivo: quien no ve la escena no lo descarga
         manualChunks(id) {
-          if (/node_modules[\/](three|@react-three)/.test(id)) return "three"
+          if (/node_modules.(three|@react-three)/.test(id)) return "three"
         },
       },
     },

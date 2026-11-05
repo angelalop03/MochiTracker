@@ -1,0 +1,24 @@
+import { diffDays } from "./cycle"
+
+const noon = (date: string) => new Date(`${date}T12:00:00`)
+
+/** "9 de noviembre" */
+export function formatDay(date: string) {
+  return noon(date).toLocaleDateString("es-ES", { day: "numeric", month: "long" })
+}
+
+/** "en 3 días", "mañana", "hoy" */
+export function formatInDays(days: number) {
+  if (days <= 0) return "hoy"
+  if (days === 1) return "mañana"
+  return `en ${days} días`
+}
+
+/** Un número que cambia cada día: sirve para elegir la variante de un texto */
+export function daySeed(date: string) {
+  return diffDays("2020-01-01", date)
+}
+
+export function deviceTimeZone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Madrid"
+}
