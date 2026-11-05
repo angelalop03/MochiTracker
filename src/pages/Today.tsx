@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 import AdviceBlocks from "../components/AdviceBlocks"
+import AiPanel from "../components/AiPanel"
 import BottomNav from "../components/BottomNav"
 import ConsultCard from "../components/ConsultCard"
 import CycleBar from "../components/CycleBar"
@@ -8,6 +9,7 @@ import Loading from "../components/Loading"
 import QuickLog from "../components/QuickLog"
 import SkyPanel from "../components/SkyPanel"
 import { CONTRACEPTION_NOTICE, DISCLAIMER, PHASE_CONTENT, pickVariant } from "../content/phases"
+import { useAiAdvice } from "../hooks/useAiAdvice"
 import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
 import {
@@ -20,7 +22,8 @@ import {
   type Phase,
 } from "../lib/cycle"
 import { daySeed, formatDay, formatInDays } from "../lib/format"
-import { personalize } from "../lib/personalize"
+import type { AiInput } from "../lib/ai/advice"
+import { personalize, type PersonalTip } from "../lib/personalize"
 import { addPeriod } from "../services/data"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
@@ -118,6 +121,26 @@ function DevPhaseBar({ state, onJump }: { state: KnownState; onJump: (offset: nu
   )
 }
 
+function PersonalAdvice({
+  input,
+  aiKey,
+  seed,
+  tips,
+}: {
+  input: AiInput
+  aiKey: string
+  seed: number
+  tips: PersonalTip[]
+}) {
+  const { status, progress, advice, activate } = useAiAdvice(input, aiKey)
+  return (
+    <>
+      <AdviceBlocks key={input.phase} phase={input.phase} seed={seed} tips={tips} aiAdvice={advice} />
+      <AiPanel status={status} progress={progress} onActivate={activate} />
+    </>
+  )
+}
+
 export default function Today() {
   const { profile, periods, logs, reload } = useCycleData()
   const [devDay, setDevDay] = useState<number | null>(null)
@@ -147,6 +170,12 @@ export default function Today() {
   const content = PHASE_CONTENT[state.phase]
   const seed = daySeed(today)
   const { tips, alarm } = personalize({ phase: state.phase, today, logs, periods, settings, seed })
+  // Solo síntomas, ánimo y energía de los últimos días. Las notas no se usan
+  const recentLogs = logs
+    .filter((l) => l.date >= addDays(today, -6) && l.date <= today)
+    .map(({ date, symptoms, mood, energy }) => ({ date, symptoms, mood, energy }))
+  const aiInput: AiInput = { phase: state.phase, cycleDay: state.cycleDay, seed, days: recentLogs, alarm }
+  const aiKey = JSON.stringify([today, aiInput])
   const loggedDays = new Set(
     logs.filter((l) => l.date >= state.cycleStart).map((l) => diffDays(state.cycleStart, l.date) + 1)
   )
@@ -183,7 +212,7 @@ export default function Today() {
 
           <p className="cycle-caption">{content.summary}</p>
 
-          <AdviceBlocks key={state.phase} phase={state.phase} seed={seed} tips={tips} />
+          <PersonalAdvice input={aiInput} aiKey={aiKey} seed={seed} tips={tips} />
 
           <CycleBar
             ranges={state.ranges}

@@ -2,6 +2,7 @@ import { fetchLogs, fetchPeriods, fetchProfile } from "./data"
 import { signOut } from "./auth"
 import { DEMO, supabase } from "./supabase"
 import { clearDemo } from "./demo"
+import { setAiEnabled } from "../lib/ai/storage"
 
 /** Descarga todos los datos de la cuenta en un JSON. Se genera en el propio navegador */
 export async function exportData(userId: string, email: string) {
@@ -22,6 +23,7 @@ export async function exportData(userId: string, email: string) {
 
 /** Borra la cuenta y, por cascada, todos sus datos */
 export async function deleteAccount() {
+  setAiEnabled(false)
   if (DEMO) {
     clearDemo()
     window.dispatchEvent(new Event("demo-auth"))

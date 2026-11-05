@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 import { Link } from "react-router-dom"
+import AiSettings from "../components/AiSettings"
 import BottomNav from "../components/BottomNav"
 import Loading from "../components/Loading"
 import NotificationSettings from "../components/NotificationSettings"
@@ -160,6 +161,9 @@ export default function Settings() {
         <p>
           <Link to="/instalar">Instalar en el móvil</Link>
         </p>
+
+        <h2 className="section-title">Consejos con IA</h2>
+        <AiSettings />
 
         <h2 className="section-title">Cuenta</h2>
         <p>

@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import * as THREE from "three"
 import type { Phase } from "../lib/cycle"
 import { useVisible } from "../hooks/useVisible"
+import { isAiBusy, subscribeAiBusy } from "../lib/ai/busy"
 import Burst, { type BurstHandle } from "./Burst"
 import Floaters from "./Floaters"
 import Island from "./Island"
@@ -137,6 +138,7 @@ interface SceneProps {
 export default function Scene({ phase, mode = "embedded" }: SceneProps) {
   const wrapper = useRef<HTMLDivElement>(null)
   const visible = useVisible(wrapper)
+  const aiBusy = useSyncExternalStore(subscribeAiBusy, isAiBusy)
   const [mobile] = useState(() => window.matchMedia("(max-width: 820px)").matches)
   const light = SEASONS[phase].light
   const Rig = mode === "scroll" ? ScrollRig : EmbeddedRig
@@ -154,7 +156,7 @@ export default function Scene({ phase, mode = "embedded" }: SceneProps) {
         camera={{ position: [0, 0, CAMERA_Z], fov: FOV }}
         gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
       >
-        <Ticker active={visible} />
+        <Ticker active={visible && !aiBusy} />
         <hemisphereLight args={[light.hemiSky, light.hemiGround, light.hemi]} />
         <directionalLight position={[5, 9, 7]} intensity={light.sun} color={light.sunColor} />
         <Floaters phase={phase} count={mobile ? 22 : 40} parallax={mode === "scroll"} />

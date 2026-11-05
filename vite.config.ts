@@ -12,6 +12,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // WebLLM pesa varios MB y solo lo usa quien active la IA
+        globIgnores: ["**/worker-*.js", "**/web-llm-*.js", "**/lib-*.js"],
       },
       manifest: {
         name: "Isla Mochi",
@@ -30,6 +32,7 @@ export default defineConfig({
       },
     }),
   ],
+  worker: { format: "es" },
   build: {
     // La escena 3D va en su propio archivo con lazy(): no bloquea la carga inicial
     chunkSizeWarningLimit: 1200,

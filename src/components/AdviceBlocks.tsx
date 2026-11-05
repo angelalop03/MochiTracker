@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { BLOCKS, PHASE_CONTENT, pickVariant, type BlockId } from "../content/phases"
 import type { Phase } from "../lib/cycle"
+import type { AiAdvice } from "../lib/ai/advice"
 import type { PersonalTip } from "../lib/personalize"
 
 /** Los 4 bloques de consejos de la fase. Se abre uno cada vez para no saturar el móvil */
@@ -8,13 +9,15 @@ interface Props {
   phase: Phase
   seed: number
   tips: PersonalTip[]
+  /** Consejos de la IA. Si falta un bloque, se usa el de las reglas */
+  aiAdvice?: AiAdvice | null
 }
 
-export default function AdviceBlocks({ phase, seed, tips }: Props) {
+export default function AdviceBlocks({ phase, seed, tips, aiAdvice }: Props) {
   // Si hay un consejo para ella, se abre directamente ese bloque
   const [open, setOpen] = useState<BlockId>(tips[0]?.block ?? "emociones")
   const content = PHASE_CONTENT[phase]
-  const tip = tips.find((t) => t.block === open)
+  const personal = aiAdvice?.[open] ?? tips.find((t) => t.block === open)?.text
 
   return (
     <section className="advice" aria-labelledby="advice-title">
@@ -31,7 +34,7 @@ export default function AdviceBlocks({ phase, seed, tips }: Props) {
             onClick={() => setOpen(block.id)}
           >
             {block.title}
-            {tips.some((t) => t.block === block.id) && (
+            {(aiAdvice?.[block.id] || tips.some((t) => t.block === block.id)) && (
               <>
                 <span aria-hidden="true"> ♡</span>
                 <span className="sr-only"> (con un consejo para ti)</span>
@@ -42,10 +45,10 @@ export default function AdviceBlocks({ phase, seed, tips }: Props) {
       </div>
       <div className="paper-box" aria-live="polite">
         <p>{pickVariant(content.blocks[open], seed)}</p>
-        {tip && (
+        {personal && (
           <p className="for-you">
             <span className="for-you-label">Para ti</span>
-            {tip.text}
+            {personal}
           </p>
         )}
       </div>

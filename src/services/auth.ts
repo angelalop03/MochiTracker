@@ -1,6 +1,7 @@
 import { DEMO, supabase } from "./supabase"
 import { readDemo, writeDemo } from "./demo"
 import { PRIVACY_VERSION } from "../content/legal"
+import { clearAiAdvice } from "../lib/ai/storage"
 
 export interface SignUpData {
   email: string
@@ -59,6 +60,7 @@ export async function verifyCode(email: string, token: string) {
 }
 
 export async function signOut() {
+  clearAiAdvice()
   if (DEMO) {
     writeDemo({ signedIn: false })
     window.dispatchEvent(new Event("demo-auth"))

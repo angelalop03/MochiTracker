@@ -48,7 +48,8 @@ export default function Privacy() {
       <h2>Consejos con IA</h2>
       <p>
         Si activas esta opción, el modelo se ejecuta en tu propio dispositivo y tus datos no se envían a ningún
-        servicio de IA externo. El modelo se descarga una vez desde Hugging Face. Esa descarga no incluye tus datos.
+        servicio de IA externo. El modelo se descarga una vez desde Hugging Face y GitHub. Esa descarga no incluye tus
+        datos. La preferencia y los últimos consejos generados se guardan solo en este dispositivo.
       </p>
 
       <h2>Cuánto tiempo</h2>

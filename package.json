@@ -15,6 +15,7 @@
   "dependencies": {
     "@fontsource/baloo-2": "^5.3.0",
     "@fontsource/m-plus-rounded-1c": "^5.3.0",
+    "@mlc-ai/web-llm": "^0.2.87",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@supabase/supabase-js": "^2.119.0",
@@ -35,6 +36,7 @@
     "@types/web-push": "^3.6.4",
     "@vercel/node": "^29.0.1",
     "@vitejs/plugin-react": "^6.2.1",
+    "@webgpu/types": "^0.1.74",
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
