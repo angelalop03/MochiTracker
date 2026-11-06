@@ -14,3 +14,6 @@ clue-export*
 
 # Configuración local de herramientas
 .claude
+
+.vercel
+.env*
