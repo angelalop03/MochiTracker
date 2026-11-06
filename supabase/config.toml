@@ -1,0 +1,18 @@
+# Configuración del proyecto hospedado. Se aplica con: npx.cmd supabase config push
+project_id = "ihqysdaqktkqknuvqaye"
+
+[auth]
+site_url = "https://isla-mochi.vercel.app"
+additional_redirect_urls = ["https://isla-mochi.vercel.app/**", "http://localhost:5173/**"]
+
+# PENDIENTE: el plan gratuito solo deja cambiar las plantillas con un SMTP propio.
+# Al conectar Brevo, quita los comentarios y vuelve a aplicar la configuración.
+# Los asuntos son neutros porque se ven en la pantalla de bloqueo.
+#
+# [auth.email.template.magic_link]
+# subject = "Tu acceso a Isla Mochi"
+# content_path = "./supabase/templates/acceso.html"
+#
+# [auth.email.template.confirmation]
+# subject = "Tu acceso a Isla Mochi"
+# content_path = "./supabase/templates/acceso.html"
