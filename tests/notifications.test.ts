@@ -3,7 +3,7 @@ import handler from "../api/cron/daily"
 import { renderEmail } from "../api/_lib/email"
 import { planNotice, type Recipient } from "../api/_lib/notifications"
 import { runDaily, type Claim, type PushTarget, type Store } from "../api/_lib/runDaily"
-import { sameSecret, unsubscribeToken } from "../api/_lib/server"
+import { brevoPayload, sameSecret, unsubscribeToken } from "../api/_lib/server"
 import type { Phase } from "../src/lib/cycle"
 import type { LogEntry } from "../src/lib/personalize"
 
@@ -98,7 +98,7 @@ describe("renderEmail", () => {
     expect(mail.html).toContain("api/unsubscribe")
     expect(mail.html).toContain("Ana &lt;b&gt;")
     expect(mail.html).not.toContain("<b>")
-    expect(mail.text).toContain("Dejar de recibir")
+    expect(mail.html).toContain("Dejar de recibir")
   })
 
   it("con señal de alarma recomienda consultar", () => {
@@ -200,6 +200,24 @@ describe("runDaily", () => {
     }
     const report = await runDaily({ store, senders: { email: async () => {}, push: async () => {} }, now })
     expect(report).toMatchObject({ emails: 1, failed: 1 })
+  })
+})
+
+describe("brevoPayload", () => {
+  it("prepara el envío con su enlace de baja en un clic", () => {
+    const payload = brevoPayload(
+      { name: "Isla Mochi", email: "mochi@test.dev" },
+      "ana@test.dev",
+      { subject: "Asunto", html: "<p>Hola</p>" },
+      "https://isla.test/baja"
+    )
+    expect(payload).toMatchObject({
+      sender: { email: "mochi@test.dev" },
+      to: [{ email: "ana@test.dev" }],
+      subject: "Asunto",
+      htmlContent: "<p>Hola</p>",
+    })
+    expect(payload.headers["List-Unsubscribe"]).toBe("<https://isla.test/baja>")
   })
 })
 

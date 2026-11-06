@@ -29,18 +29,6 @@ export function renderEmail(notice: Notice, { name, appUrl, unsubscribeUrl }: Co
     : null
   const today = `${appUrl}/hoy`
 
-  const text = [
-    hello,
-    notice.greeting,
-    `${notice.blockTitle}: ${notice.tip}`,
-    consult,
-    `Abre tu isla: ${today}`,
-    DISCLAIMER,
-    `Dejar de recibir estos correos: ${unsubscribeUrl}`,
-  ]
-    .filter(Boolean)
-    .join("\n\n")
-
   const html = `<!doctype html>
 <html lang="es"><body style="margin:0;padding:0;background:#FFF7F3">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFF7F3"><tr><td align="center" style="padding:24px 12px">
@@ -64,5 +52,5 @@ export function renderEmail(notice: Notice, { name, appUrl, unsubscribeUrl }: Co
 </table></td></tr></table>
 </body></html>`
 
-  return { subject: notice.title, html, text }
+  return { subject: notice.title, html }
 }

@@ -105,10 +105,29 @@ export function supabaseStore(db: SupabaseClient, today: string): Store {
   }
 }
 
+/** El cuerpo de la petición a Brevo */
+export function brevoPayload(
+  sender: { name: string; email: string },
+  to: string,
+  mail: { subject: string; html: string },
+  unsubscribeUrl: string
+) {
+  return {
+    sender,
+    to: [{ email: to }],
+    subject: mail.subject,
+    htmlContent: mail.html,
+    headers: {
+      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
+  }
+}
+
 export function realSenders(db: SupabaseClient): Senders {
   const appUrl = env("APP_URL").replace(/\/$/, "")
   const secret = env("UNSUBSCRIBE_SECRET")
-  const from = process.env.RESEND_FROM ?? "Isla Mochi <onboarding@resend.dev>"
+  const sender = { name: "Isla Mochi", email: env("BREVO_SENDER_EMAIL") }
   webpush.setVapidDetails(env("VAPID_SUBJECT"), env("VITE_VAPID_PUBLIC_KEY"), env("VAPID_PRIVATE_KEY"))
 
   return {
@@ -119,20 +138,12 @@ export function realSenders(db: SupabaseClient): Senders {
       const unsubscribeUrl = `${appUrl}/api/unsubscribe?u=${user.id}&t=${unsubscribeToken(user.id, secret)}`
       const mail = renderEmail(notice, { name: user.name, appUrl, unsubscribeUrl })
 
-      const response = await fetch("https://api.resend.com/emails", {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
-        headers: { Authorization: `Bearer ${env("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from,
-          to: data.user.email,
-          ...mail,
-          headers: {
-            "List-Unsubscribe": `<${unsubscribeUrl}>`,
-            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-          },
-        }),
+        headers: { "api-key": env("BREVO_API_KEY"), "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(brevoPayload(sender, data.user.email, mail, unsubscribeUrl)),
       })
-      if (!response.ok) throw new Error(`Resend respondió ${response.status}`)
+      if (!response.ok) throw new Error(`Brevo respondió ${response.status}`)
     },
 
     async push(target, payload) {

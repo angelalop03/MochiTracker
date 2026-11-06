@@ -1,4 +1,4 @@
-// El recorrido diario, sin saber nada de Supabase, Resend ni web-push: se le pasan
+// El recorrido diario, sin saber nada de Supabase, Brevo ni web-push: se le pasan
 // como dependencias para poder probarlo. Los registros nunca incluyen datos de usuarias.
 
 import type { PeriodRecord, Phase } from "../../src/lib/cycle.js"
@@ -45,15 +45,15 @@ export interface Report {
   failed: number
 }
 
-/** El plan gratuito de Resend permite 100 al día, y los accesos por email también cuentan */
-export const DAILY_EMAIL_CAP = 80
+/** El plan gratuito de Brevo permite 300 al día, y los accesos por email también cuentan */
+export const DAILY_EMAIL_CAP = 200
 
 interface Options {
   store: Store
   senders: Senders
   now: Date
   emailCap?: number
-  /** Pausa entre correos, para respetar el límite de peticiones de Resend */
+  /** Pausa entre correos, para no saturar el servicio de correo */
   pause?: () => Promise<void>
 }
 

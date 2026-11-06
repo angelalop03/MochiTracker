@@ -142,7 +142,7 @@ Son datos de salud, una categoría especial del RGPD:
 | WebLLM + Qwen3 4B | Consejos con IA dentro del navegador, sin servidor |
 | zip.js | Abrir en el navegador el ZIP con contraseña de Clue |
 | Vitest + PGlite | Tests de la lógica y de las políticas RLS |
-| Resend | Emails de los avisos |
+| Brevo | Correos de acceso y de avisos, sin dominio propio |
 | web-push + service worker | Notificaciones y PWA instalable |
 | Vercel | Hosting, funciones de `api/` y cron diario |
 
@@ -183,6 +183,13 @@ Copy-Item .env.example .env.local
 
 > Hasta conectar un SMTP propio, Supabase solo envía 2 correos por hora y únicamente a miembros de tu organización. Sirve para que pruebes tú, no para usuarias reales.
 
+### Correos sin dominio propio
+
+1. Crea una cuenta en [brevo.com](https://www.brevo.com) y verifica como remitente un correo creado solo para la app.
+2. En Brevo, genera una clave SMTP y una clave API.
+3. En Supabase, entra en *Authentication > Emails > SMTP Settings*, activa el SMTP propio y usa `smtp-relay.brevo.com`, puerto 587, tu usuario SMTP de Brevo y la clave SMTP como contraseña.
+4. Sube el límite de correos por hora en *Authentication > Rate Limits*.
+
 ## Variables de entorno
 
 | Variable | Dónde | Para qué |
@@ -193,8 +200,8 @@ Copy-Item .env.example .env.local
 | `SUPABASE_SERVICE_ROLE_KEY` | **Solo Vercel** | Se salta RLS. Para el cron y borrar cuentas |
 | `VAPID_PRIVATE_KEY` | **Solo Vercel** | Clave privada de notificaciones |
 | `VAPID_SUBJECT` | **Solo Vercel** | Contacto, por ejemplo `mailto:hola@tudominio.es` |
-| `RESEND_API_KEY` | **Solo Vercel** | Clave de Resend |
-| `RESEND_FROM` | **Solo Vercel** | Remitente con dominio verificado |
+| `BREVO_API_KEY` | **Solo Vercel** | Clave de la API de Brevo |
+| `BREVO_SENDER_EMAIL` | **Solo Vercel** | Remitente verificado en Brevo |
 | `APP_URL` | **Solo Vercel** | URL pública, sin barra final |
 | `CRON_SECRET` | **Solo Vercel** | Protege el cron. Vercel lo envía solo |
 | `UNSUBSCRIBE_SECRET` | **Solo Vercel** | Firma los enlaces de baja |
@@ -244,7 +251,7 @@ El formato de Clue no está documentado: el parser sale de una exportación real
 
 - **Discreción:** el asunto y el push se ven en la pantalla de bloqueo, así que usan la metáfora de la isla y nunca mencionan el ciclo. Hay un test que lo comprueba. Las notas personales ni se leen.
 - **Sin duplicados:** cada envío se reserva antes en `notification_log`. Si el cron se repite, no se envía dos veces. Si un envío falla, se libera para reintentarlo.
-- **Límite de Resend:** como mucho 80 emails al día, con prioridad para los cambios de estación. El resto del cupo gratuito queda para los accesos por email.
+- **Límite de Brevo:** como mucho 200 emails al día, con prioridad para los cambios de estación. El resto del cupo gratuito queda para los accesos por email.
 - **Baja:** cada email lleva un enlace firmado. Abrirlo solo pregunta, porque algunos correos abren los enlaces solos.
 
 Genera las claves de notificaciones y los secretos así:
@@ -313,5 +320,5 @@ Si un cambio toca la base de datos, ejecuta primero el SQL en Supabase y despué
 ## Antes de abrirla al público
 
 - Rellenar el responsable en `src/content/legal.ts` y hacer revisar la política de privacidad.
-- Conectar Resend como SMTP en Supabase, con un dominio propio verificado.
+- Conectar Brevo como SMTP en Supabase. Sin dominio propio, algunos correos pueden llegar a spam.
 - El plan gratuito de Supabase no incluye copias de seguridad automáticas: exporta los datos con `supabase db dump` o valora el plan Pro.

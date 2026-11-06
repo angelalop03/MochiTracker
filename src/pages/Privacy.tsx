@@ -37,7 +37,7 @@ export default function Privacy() {
       <ul>
         <li>Supabase: base de datos y acceso a la cuenta.</li>
         <li>Vercel: alojamiento de la web y envío programado de avisos.</li>
-        <li>Resend: envío de correos, solo si activas los avisos por email.</li>
+        <li>Brevo: envío de los correos de acceso y, si los activas, de los avisos por email.</li>
         <li>El servicio de notificaciones de tu navegador, solo si activas los avisos push.</li>
       </ul>
       <p>
