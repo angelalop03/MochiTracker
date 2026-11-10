@@ -1,7 +1,8 @@
+import { Bell, Mail, Repeat, Smartphone } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import { disablePush, enablePush, pushSupport } from "../services/push"
 import { updateProfile, type Profile, type ProfilePatch } from "../services/data"
+import { Segmented, SettingsGroup, SettingsRow, Switch } from "./settings"
 
 interface Props {
   profile: Profile
@@ -44,68 +45,66 @@ export default function NotificationSettings({ profile, onSaved }: Props) {
   }
 
   return (
-    <div className="form">
-      <label className="check">
-        <input
-          type="checkbox"
-          checked={profile.notify_email}
-          disabled={busy}
-          onChange={(e) => void patch({ notify_email: e.target.checked })}
-        />
-        <span>Avisos por email</span>
-      </label>
+    <SettingsGroup
+      title="Avisos"
+      footer={
+        error ? (
+          <span className="form-error" role="alert">
+            {error}
+          </span>
+        ) : (
+          "Llegan por la mañana. Los títulos no mencionan tu ciclo, por si se ven en la pantalla de bloqueo."
+        )
+      }
+    >
+      <SettingsRow
+        icon={Mail}
+        label="Por email"
+        control={
+          <Switch
+            label="Avisos por email"
+            checked={profile.notify_email}
+            disabled={busy}
+            onChange={(on) => void patch({ notify_email: on })}
+          />
+        }
+      />
 
       {support === "ready" && (
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={profile.notify_push}
-            disabled={busy}
-            onChange={(e) => togglePush(e.target.checked)}
-          />
-          <span>Notificaciones en este dispositivo</span>
-        </label>
+        <SettingsRow
+          icon={Bell}
+          label="Notificaciones"
+          hint="En este dispositivo"
+          control={
+            <Switch label="Notificaciones en este dispositivo" checked={profile.notify_push} disabled={busy} onChange={togglePush} />
+          }
+        />
       )}
       {support === "needs_install" && (
-        <p className="notice">
-          En iPhone las notificaciones solo funcionan con la app instalada.{" "}
-          <Link to="/instalar">Mira cómo instalarla</Link>.
-        </p>
+        <SettingsRow icon={Bell} label="Notificaciones" hint="En iPhone necesitas instalar la app" to="/instalar" />
       )}
-      {support === "unsupported" && <p className="form-hint">Este navegador no admite notificaciones.</p>}
+      {support === "unsupported" && <SettingsRow icon={Bell} label="Notificaciones" value="No disponible" />}
 
-      <fieldset className="consent">
-        <legend>¿Cada cuánto?</legend>
-        <label className="check">
-          <input
-            type="radio"
-            name="frequency"
-            checked={profile.notify_frequency === "phase_change"}
+      <div className="settings-row settings-row-stack">
+        <span className="settings-icon">
+          <Repeat size={18} strokeWidth={1.75} aria-hidden="true" />
+        </span>
+        <span className="settings-label">
+          <span>Frecuencia</span>
+          <Segmented
+            label="Frecuencia de los avisos"
+            value={profile.notify_frequency}
             disabled={busy}
-            onChange={() => void patch({ notify_frequency: "phase_change" })}
+            onChange={(value) => void patch({ notify_frequency: value })}
+            options={[
+              { value: "phase_change", label: "Al cambiar de estación" },
+              { value: "daily", label: "Cada día" },
+            ]}
           />
-          <span>Solo cuando cambie de estación</span>
-        </label>
-        <label className="check">
-          <input
-            type="radio"
-            name="frequency"
-            checked={profile.notify_frequency === "daily"}
-            disabled={busy}
-            onChange={() => void patch({ notify_frequency: "daily" })}
-          />
-          <span>Un consejo cada día</span>
-        </label>
-      </fieldset>
+        </span>
+      </div>
 
-      <p className="form-hint">
-        Se envían por la mañana. Los títulos no mencionan tu ciclo, por si se ven en la pantalla de bloqueo.
-      </p>
-      {error && (
-        <p className="form-error" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
+      <SettingsRow icon={Smartphone} label="Instalar en el móvil" to="/instalar" />
+    </SettingsGroup>
   )
 }

@@ -955,6 +955,368 @@ a:hover {
   cursor: pointer;
 }
 
+/* ---------- Aviso de vista simulada y herramientas ---------- */
+.sim-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  padding: 12px 14px 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.button-small {
+  min-height: 38px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+}
+
+.button-danger {
+  background: var(--danger);
+}
+
+.button-danger:hover {
+  background: #8a2533;
+}
+
+.dev-tools > summary {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.dev-tools[open] > summary {
+  margin-bottom: 8px;
+}
+
+/* ---------- Ajustes ---------- */
+.settings-page {
+  gap: 26px;
+}
+
+.profile-card {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.profile-text {
+  display: grid;
+  min-width: 0;
+}
+
+.profile-text strong {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.profile-text span {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-edit {
+  display: contents;
+}
+
+.profile-edit > summary {
+  align-self: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.profile-edit > summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-form {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.profile-form .form-ok,
+.profile-form .form-error {
+  grid-column: 1 / -1;
+}
+
+.settings-group {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-group > .eyebrow {
+  padding-left: 4px;
+}
+
+.settings-card {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.settings-card > * + * {
+  border-top: 1px solid var(--line);
+}
+
+.settings-footer {
+  padding: 0 4px;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 16px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.settings-row.is-action {
+  cursor: pointer;
+}
+
+.settings-row.is-action:hover {
+  background: #fdfbf9;
+  color: var(--ink);
+}
+
+.settings-row:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.settings-row-stack {
+  align-items: flex-start;
+  padding-block: 14px;
+}
+
+.settings-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--line-soft);
+  color: var(--ink);
+}
+
+.settings-icon.is-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.is-danger {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.settings-label {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.settings-label small {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.settings-row-stack .settings-label {
+  gap: 10px;
+}
+
+.settings-value {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.settings-chevron {
+  flex: none;
+  color: #b9aeb5;
+}
+
+.switch {
+  position: relative;
+  flex: none;
+  width: 50px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #d9d0ca;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.switch span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(46, 36, 48, 0.3);
+  transition: transform 0.2s;
+}
+
+.switch[aria-checked="true"] {
+  background: var(--ink);
+}
+
+.switch[aria-checked="true"] span {
+  transform: translateX(20px);
+}
+
+.switch:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.stepper {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--line-soft);
+}
+
+.stepper button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(46, 36, 48, 0.12);
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stepper output {
+  min-width: 62px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.stepper output small {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--line-soft);
+}
+
+.segmented button {
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.segmented button[aria-checked="true"] {
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(46, 36, 48, 0.14);
+}
+
+.settings-danger > summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 10px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.settings-danger > summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-danger > form {
+  padding: 0 16px 16px 64px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch span {
+    transition: none;
+  }
+}
+
 /* ---------- IA ---------- */
 .ai-panel {
   display: grid;

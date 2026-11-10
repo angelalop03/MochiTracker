@@ -1,3 +1,4 @@
+import { Undo2 } from "lucide-react"
 import { useState } from "react"
 import BottomNav from "../components/BottomNav"
 import ConsultCard from "../components/ConsultCard"
@@ -35,6 +36,16 @@ export default function Guide() {
             </button>
           ))}
         </div>
+
+        {current && phase !== current && (
+          <div className="sim-banner" role="status">
+            <span>Estás leyendo otra fase. La tuya hoy es la {PHASE_CONTENT[current].name.toLowerCase()}.</span>
+            <button type="button" className="button button-small" onClick={() => setPicked(null)}>
+              <Undo2 size={16} aria-hidden="true" />
+              Volver a tu fase
+            </button>
+          </div>
+        )}
 
         <div className="sky-panel guide-sky">
           <StaticIsland phase={phase} />

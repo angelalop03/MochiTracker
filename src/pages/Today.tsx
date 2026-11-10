@@ -1,3 +1,4 @@
+import { Undo2 } from "lucide-react"
 import { useState, type FormEvent } from "react"
 import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
@@ -100,21 +101,39 @@ function PeriodForm({ today, onSaved }: { today: string; onSaved: () => Promise<
   )
 }
 
-/** Solo en desarrollo: salta a cualquier fase para ver las 4 estaciones */
+/** Solo en desarrollo, plegado: salta a cualquier fase para ver las 4 estaciones */
 function DevPhaseBar({ state, onJump }: { state: KnownState; onJump: (offset: number) => void }) {
   const jumpTo = (phase: Phase) => {
     const range = state.ranges.find((r) => r.phase === phase)
     if (range) onJump(Math.floor((range.startDay + range.endDay) / 2) - 1)
   }
   return (
-    <div className="dev-bar">
-      {PHASES.map((p) => (
-        <button key={p} type="button" onClick={() => jumpTo(p)}>
-          {PHASE_CONTENT[p].season}
+    <details className="dev-tools">
+      <summary>Solo en desarrollo: ver otras estaciones</summary>
+      <div className="dev-bar">
+        {PHASES.map((p) => (
+          <button key={p} type="button" onClick={() => jumpTo(p)}>
+            {PHASE_CONTENT[p].season}
+          </button>
+        ))}
+        <button type="button" onClick={() => onJump(state.estimate.cycleLength + 4)}>
+          Retraso
         </button>
-      ))}
-      <button type="button" onClick={() => onJump(state.estimate.cycleLength + 4)}>
-        Retraso
+      </div>
+    </details>
+  )
+}
+
+/** Aviso cuando se está viendo otro día que no es el de hoy */
+function SimulationBanner({ day, season, onReset }: { day: number; season: string; onReset: () => void }) {
+  return (
+    <div className="sim-banner" role="status">
+      <span>
+        Estás viendo el día {day} ({season.toLowerCase()}), no el de hoy.
+      </span>
+      <button type="button" className="button button-small" onClick={onReset}>
+        <Undo2 size={16} aria-hidden="true" />
+        Volver a hoy
       </button>
     </div>
   )
@@ -181,6 +200,9 @@ export default function Today() {
     <>
       <main className="today" data-phase={state.phase}>
         <div className="today-scene">
+          {import.meta.env.DEV && devDay !== null && (
+            <SimulationBanner day={state.cycleDay} season={content.season} onReset={() => setDevDay(null)} />
+          )}
           <header className="today-head">
             <p className="eyebrow">
               Fase {content.name.toLowerCase()} · {content.season}
