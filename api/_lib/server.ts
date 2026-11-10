@@ -143,7 +143,11 @@ export function realSenders(db: SupabaseClient): Senders {
         headers: { "api-key": env("BREVO_API_KEY"), "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(brevoPayload(sender, data.user.email, mail, unsubscribeUrl)),
       })
-      if (!response.ok) throw new Error(`Brevo respondió ${response.status}`)
+      if (!response.ok) {
+        // Brevo explica el motivo (clave, IP no autorizada, remitente…) sin incluir datos sensibles
+        const reason = (await response.json().catch(() => ({}))) as { code?: string; message?: string }
+        throw new Error(`Brevo respondió ${response.status}: ${reason.code ?? ""} ${reason.message ?? ""}`.trim())
+      }
     },
 
     async push(target, payload) {

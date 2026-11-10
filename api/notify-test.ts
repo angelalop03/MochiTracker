@@ -16,7 +16,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: "No autorizado" })
   }
 
-  const email = String((req.body as { email?: unknown } | undefined)?.email ?? "").toLowerCase()
+  const body = (req.body ?? {}) as { email?: unknown; only?: unknown }
+  const email = String(body.email ?? "").toLowerCase()
+  // "email" o "push" para probar solo un canal
+  const only = body.only === "email" || body.only === "push" ? body.only : null
   if (!email) return res.status(400).json({ error: "Falta el email" })
 
   try {
@@ -42,11 +45,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const notice = { ...planned, title: `Prueba: ${planned.title}` }
 
     const senders = realSenders(db)
-    const result = { email: false, pushes: 0, pushFailed: 0 }
-    await senders.email(recipient, notice)
-    result.email = true
+    const result: { email: boolean; emailError?: string; pushes: number; pushFailed: number } = {
+      email: false,
+      pushes: 0,
+      pushFailed: 0,
+    }
+    if (only !== "push") try {
+      await senders.email(recipient, notice)
+      result.email = true
+    } catch (e) {
+      result.emailError = (e as Error).message
+    }
 
-    for (const target of await store.pushTargets(user.id)) {
+    for (const target of only === "email" ? [] : await store.pushTargets(user.id)) {
       try {
         await senders.push(target, { title: notice.title, body: notice.pushBody, url: "/hoy" })
         result.pushes++
