@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react"
-import AdviceBlocks from "../components/AdviceBlocks"
+import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
 import BottomNav from "../components/BottomNav"
 import ConsultCard from "../components/ConsultCard"
-import CycleBar from "../components/CycleBar"
+import CycleTimeline from "../components/CycleTimeline"
 import DialogBox from "../components/DialogBox"
+import Glance from "../components/Glance"
 import Loading from "../components/Loading"
 import QuickLog from "../components/QuickLog"
 import SkyPanel from "../components/SkyPanel"
@@ -14,24 +15,22 @@ import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
 import {
   addDays,
-  diffDays,
   getCycleState,
   PHASES,
   todayInTimeZone,
   type CycleState,
   type Phase,
 } from "../lib/cycle"
-import { daySeed, formatDay, formatInDays } from "../lib/format"
+import { daySeed, formatInDays } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
 import { addPeriod } from "../services/data"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
 
-function nextLine(state: KnownState) {
+function nextChip(state: KnownState) {
   if (!state.nextPhase) return null
-  const next = PHASE_CONTENT[state.nextPhase.phase]
-  return `${next.season} (fase ${next.name.toLowerCase()}) llega ${formatInDays(state.nextPhase.inDays)}, el ${formatDay(state.nextPhase.date)}.`
+  return `${PHASE_CONTENT[state.nextPhase.phase].season} ${formatInDays(state.nextPhase.inDays)}`
 }
 
 function Notices({ state }: { state: KnownState }) {
@@ -135,8 +134,9 @@ function PersonalAdvice({
   const { status, progress, advice, activate } = useAiAdvice(input, aiKey)
   return (
     <>
-      <AdviceBlocks key={input.phase} phase={input.phase} seed={seed} tips={tips} aiAdvice={advice} />
+      <FeaturedTip phase={input.phase} seed={seed} tips={tips} aiAdvice={advice} />
       <AiPanel status={status} progress={progress} onActivate={activate} />
+      <AdviceList key={input.phase} phase={input.phase} seed={seed} tips={tips} aiAdvice={advice} />
     </>
   )
 }
@@ -176,27 +176,28 @@ export default function Today() {
     .map(({ date, symptoms, mood, energy }) => ({ date, symptoms, mood, energy }))
   const aiInput: AiInput = { phase: state.phase, cycleDay: state.cycleDay, seed, days: recentLogs, alarm }
   const aiKey = JSON.stringify([today, aiInput])
-  const loggedDays = new Set(
-    logs.filter((l) => l.date >= state.cycleStart).map((l) => diffDays(state.cycleStart, l.date) + 1)
-  )
 
   return (
     <>
       <main className="today" data-phase={state.phase}>
         <div className="today-scene">
           <header className="today-head">
-            <h1 className="page-title">Día {state.cycleDay}</h1>
-            <p className="phase-chip">
+            <p className="eyebrow">
               Fase {content.name.toLowerCase()} · {content.season}
             </p>
+            <h1 className="day-title">
+              Día {state.cycleDay} <span>de {state.estimate.cycleLength}</span>
+            </h1>
           </header>
 
-          <SkyPanel phase={state.phase} />
+          <SkyPanel phase={state.phase}>
+            {nextChip(state) && <span className="sky-chip">{nextChip(state)}</span>}
+          </SkyPanel>
 
-          <DialogBox speaker="Mochi">
+          <blockquote className="mochi-quote">
             <p>{pickVariant(content.greetings, seed)}</p>
-            {nextLine(state) && <p>{nextLine(state)}</p>}
-          </DialogBox>
+            <cite>Mochi</cite>
+          </blockquote>
         </div>
 
         <div className="today-info">
@@ -210,16 +211,25 @@ export default function Today() {
           )}
           <Notices state={state} />
 
-          <p className="cycle-caption">{content.summary}</p>
-
-          <PersonalAdvice input={aiInput} aiKey={aiKey} seed={seed} tips={tips} />
-
-          <CycleBar
+          <CycleTimeline
             ranges={state.ranges}
             cycleDay={state.cycleDay}
             cycleLength={state.estimate.cycleLength}
-            loggedDays={loggedDays}
+            next={state.nextPhase}
           />
+
+          <Glance phase={state.phase} />
+
+          <PersonalAdvice input={aiInput} aiKey={aiKey} seed={seed} tips={tips} />
+
+          <section className="explainer" aria-labelledby="explainer-title">
+            <h2 id="explainer-title" className="eyebrow">
+              Qué está pasando
+            </h2>
+            <p>{content.summary}</p>
+          </section>
+
+          <h2 className="eyebrow">Tu día</h2>
 
           <details className="period-form">
             <summary>Cuéntame cómo estás para afinar tus consejos</summary>

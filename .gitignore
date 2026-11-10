@@ -20,3 +20,6 @@ clue-export*
 
 # Archivos temporales de la CLI de Supabase
 supabase/.temp
+
+# El modo demo sí se versiona: no lleva claves
+!.env.demo
