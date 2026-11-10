@@ -50,11 +50,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       pushes: 0,
       pushFailed: 0,
     }
-    if (only !== "push") try {
-      await senders.email(recipient, notice)
-      result.email = true
-    } catch (e) {
-      result.emailError = (e as Error).message
+    if (only !== "push") {
+      try {
+        await senders.email(recipient, notice)
+        result.email = true
+      } catch (e) {
+        result.emailError = (e as Error).message
+      }
     }
 
     for (const target of only === "email" ? [] : await store.pushTargets(user.id)) {
