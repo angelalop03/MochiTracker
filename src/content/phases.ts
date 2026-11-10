@@ -4,11 +4,13 @@
 
 import type { Phase } from "../lib/cycle.js"
 
-export type BlockId = "emociones" | "cuerpo" | "comida" | "movimiento"
+export type BlockId = "emociones" | "energia" | "cuerpo" | "piel" | "comida" | "movimiento"
 
 export const BLOCKS: readonly { id: BlockId; title: string }[] = [
   { id: "emociones", title: "Emociones" },
+  { id: "energia", title: "Energía" },
   { id: "cuerpo", title: "Cuerpo" },
+  { id: "piel", title: "Piel y pelo" },
   { id: "comida", title: "Comida" },
   { id: "movimiento", title: "Movimiento" },
 ]
@@ -55,6 +57,16 @@ export const PHASE_CONTENT: Record<Phase, PhaseContent> = {
         "Hoy encaja una movilidad suave de 10 minutos para soltar la zona lumbar y las caderas.",
         "Si te apetece entrenar, baja la intensidad y escucha a tu cuerpo. No hay nada que compensar.",
       ],
+      energia: [
+        "La energía suele estar en su punto más bajo los primeros días. Si puedes, deja lo más exigente para más adelante y guarda ratos para descansar.",
+        "Es normal necesitar dormir más estos días. Acostarte un poco antes puede ayudarte a recuperarte.",
+        "Según avanzan los días de regla, la energía suele ir volviendo poco a poco.",
+      ],
+      piel: [
+        "La piel puede estar más seca, apagada o sensible. Una limpieza suave y una buena hidratación suelen sentarle bien.",
+        "Si te salieron granitos antes de la regla, suelen ir mejorando estos días. Evita tocarlos o apretarlos para que no dejen marca.",
+        "El pelo puede verse con menos volumen. No hace falta cambiar tu rutina: lavarlo como siempre suele bastar.",
+      ],
     },
   },
   folicular: {
@@ -87,6 +99,16 @@ export const PHASE_CONTENT: Record<Phase, PhaseContent> = {
         "Tu cuerpo suele responder bien a retos: prueba a subir un poco la intensidad o a aprender algo nuevo.",
         "Encaja muy bien el entrenamiento de fuerza. Sube cargas poco a poco y con buena técnica.",
         "Es buen momento para probar esa clase que te da curiosidad: baile, escalada, natación…",
+      ],
+      energia: [
+        "La energía suele ir subiendo día a día. Es buen momento para tareas que piden concentración o para empezar algo nuevo.",
+        "Mucha gente nota más ganas de hacer cosas y de ver gente. Aprovéchalo sin llenar la agenda de más.",
+        "Si aún te notas cansada, es normal: cada cuerpo lleva su ritmo.",
+      ],
+      piel: [
+        "Con la subida de estrógenos, la piel suele estar más hidratada y luminosa, y con menos granitos.",
+        "Es un buen momento para probar un producto nuevo, porque la piel suele estar menos reactiva.",
+        "El pelo suele verse más brillante y con más cuerpo estos días.",
       ],
     },
   },
@@ -121,6 +143,16 @@ export const PHASE_CONTENT: Record<Phase, PhaseContent> = {
         "Aprovecha para hacer ejercicio con más gente. Una clase en grupo o un partido encajan muy bien.",
         "Calienta bien antes de los esfuerzos fuertes y disfruta de la energía sin pasarte.",
       ],
+      energia: [
+        "Suele ser el momento de más energía del ciclo. Buen día para lo que más te exige, física o mentalmente.",
+        "Si te notas con mucha energía, disfrútala, pero no te olvides de descansar bien.",
+        "Puedes sentirte más sociable y con ganas de planes.",
+      ],
+      piel: [
+        "La piel suele estar en su mejor momento, con buen aspecto y luminosa.",
+        "Alrededor de la ovulación algunas personas notan la piel algo más grasa. Una limpieza suave por la noche ayuda a mantenerla a raya.",
+        "El pelo suele verse sano y con brillo. Si vas a estar al sol, usa protección solar en la piel.",
+      ],
     },
   },
   lutea: {
@@ -153,6 +185,16 @@ export const PHASE_CONTENT: Record<Phase, PhaseContent> = {
         "Al principio de esta fase aún puedes entrenar con ganas. Según se acerque la regla, baja la intensidad.",
         "Encajan el pilates, el yoga, caminar o la fuerza con cargas moderadas.",
         "Si estás cansada, un paseo tranquilo cuenta. Moverte un poco suele mejorar el ánimo.",
+      ],
+      energia: [
+        "La energía va bajando poco a poco, sobre todo al final de la fase. Organízate para no acumular lo más exigente en los últimos días.",
+        "Puedes dormir peor o despertarte más cansada. Mantener horarios de sueño regulares ayuda.",
+        "Si notas bajones a media tarde, comer a horas regulares y moverte un poco pueden darte un empujón.",
+      ],
+      piel: [
+        "La progesterona puede hacer que la piel produzca más grasa, y es habitual que salgan granitos, sobre todo en la barbilla y la mandíbula.",
+        "Si tienes la piel más grasa, límpiala con suavidad por la mañana y por la noche, usa productos que no obstruyan los poros y evita apretar los granitos.",
+        "El pelo puede ensuciarse antes y verse más graso. Es normal que estos días necesites lavarlo más a menudo.",
       ],
     },
   },

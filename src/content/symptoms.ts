@@ -8,6 +8,7 @@ export const SYMPTOMS = [
   { id: "hinchazon", label: "Hinchazón" },
   { id: "pecho_sensible", label: "Pecho sensible" },
   { id: "granitos", label: "Granitos" },
+  { id: "piel_grasa", label: "Piel grasa" },
   { id: "antojos", label: "Antojos" },
   { id: "insomnio", label: "Dormir mal" },
   { id: "nauseas", label: "Náuseas" },

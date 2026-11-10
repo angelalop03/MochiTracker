@@ -77,7 +77,13 @@ export default function Landing() {
                 <strong>Emociones.</strong> Cómo puedes sentirte y qué te puede ayudar.
               </li>
               <li>
+                <strong>Energía.</strong> Cuándo suele subir y bajar, para organizarte mejor.
+              </li>
+              <li>
                 <strong>Cuerpo.</strong> Los síntomas físicos habituales de cada fase.
+              </li>
+              <li>
+                <strong>Piel y pelo.</strong> Por qué cambian con el ciclo y cómo cuidarlos.
               </li>
               <li>
                 <strong>Comida.</strong> Qué te puede sentar mejor.

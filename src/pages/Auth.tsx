@@ -64,34 +64,36 @@ export default function Auth({ mode }: { mode: "signin" | "signup" }) {
         <>
           <h1 className="page-title">Mira tu correo</h1>
           <DialogBox speaker="Mochi">
-            Te he enviado un enlace a <strong>{email}</strong>. Si usas la app instalada en el móvil, escribe aquí
-            el código que viene en el correo.
+            Te he enviado un enlace a <strong>{email}</strong>. Ábrelo desde este mismo dispositivo para entrar.
           </DialogBox>
-          <form className="form" onSubmit={handleVerify}>
-            <label className="field">
-              <span>Código</span>
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="[0-9]{6,10}"
-                title="El código numérico del correo"
-                required
-              />
-            </label>
-            {error && (
-              <p className="form-error" role="alert">
-                {error}
-              </p>
-            )}
-            <button className="button" disabled={busy}>
-              {busy ? "Comprobando…" : "Entrar"}
-            </button>
-            <button type="button" className="button-link" onClick={() => setSent(false)}>
-              Usar otro email
-            </button>
-          </form>
+          <details className="period-form">
+            <summary>¿Tu correo trae un código?</summary>
+            <form className="form" onSubmit={handleVerify}>
+              <label className="field">
+                <span>Código</span>
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]{6,10}"
+                  title="El código numérico del correo"
+                  required
+                />
+              </label>
+              {error && (
+                <p className="form-error" role="alert">
+                  {error}
+                </p>
+              )}
+              <button className="button" disabled={busy}>
+                {busy ? "Comprobando…" : "Entrar"}
+              </button>
+            </form>
+          </details>
+          <button type="button" className="button-link" onClick={() => setSent(false)}>
+            Usar otro email
+          </button>
         </>
       ) : (
         <>

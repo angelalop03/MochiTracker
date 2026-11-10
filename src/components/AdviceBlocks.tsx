@@ -4,7 +4,7 @@ import type { Phase } from "../lib/cycle"
 import type { AiAdvice } from "../lib/ai/advice"
 import type { PersonalTip } from "../lib/personalize"
 
-/** Los 4 bloques de consejos de la fase. Se abre uno cada vez para no saturar el móvil */
+/** Los bloques de consejos de la fase. Se abre uno cada vez para no saturar el móvil */
 interface Props {
   phase: Phase
   seed: number

@@ -202,3 +202,10 @@ describe("summarizeImport", () => {
     expect(() => summarizeImport({ periods: [], logs: [] })).toThrow(ClueImportError)
   })
 })
+
+describe("piel en Clue", () => {
+  it("la piel grasa de Clue se guarda como síntoma", () => {
+    const { logs } = parseClueExport([period("2026-02-01"), list("2026-02-10", "skin", "oily", "good")])
+    expect(logs).toEqual([{ date: "2026-02-10", symptoms: ["piel_grasa"] }])
+  })
+})

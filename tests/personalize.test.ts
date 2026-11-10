@@ -122,3 +122,20 @@ describe("patrones de ciclos anteriores", () => {
     expect(tips[0]?.text).toContain("granitos")
   })
 })
+
+describe("piel y energía", () => {
+  it("granitos o piel grasa en lútea dan el consejo de piel de esa fase", () => {
+    const { tips } = run([
+      log("2026-10-21", { symptoms: ["granitos"] }),
+      log("2026-10-22", { symptoms: ["piel_grasa"] }),
+    ])
+    const skin = tips.find((t) => t.block === "piel")
+    expect(skin?.source).toBe("piel_granitos")
+    expect(skin?.text).toMatch(/En esta fase es muy habitual/)
+  })
+
+  it("la energía baja también da un consejo en el bloque Energía", () => {
+    const { tips } = run([log("2026-10-21", { energy: 1 }), log("2026-10-22", { energy: 2 })])
+    expect(tips.find((t) => t.block === "energia")?.source).toBe("energia_baja")
+  })
+})

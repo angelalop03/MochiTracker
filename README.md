@@ -64,7 +64,7 @@ Cada fase es una estación de la isla, y Mochi cambia con ella: más tranquilo y
 
 1. **Le dices dónde estás.** Indicas tu última regla y tus duraciones medias, o importas tu historial de Clue. El archivo se procesa en tu dispositivo y solo se guardan fechas de regla y síntomas.
 2. **Mochi calcula tu fase.** Estima en qué día y fase estás, y avisa si tus ciclos son irregulares o si hay retraso.
-3. **Lees cómo te puedes sentir.** Cuatro bloques con información y consejos: emociones, cuerpo, comida y movimiento. En la Guía tienes las 4 fases para leerlas con calma.
+3. **Lees cómo te puedes sentir.** Seis bloques con información y consejos: emociones, energía, cuerpo, piel y pelo, comida y movimiento. En la Guía tienes las 4 fases para leerlas con calma.
 4. **Si quieres, afinas los consejos.** Puedes contar cómo estás, y es opcional. Si algo se repite, aparece un consejo «Para ti». Si un síntoma vuelve en la misma fase de varios ciclos, Mochi te lo avisa.
 5. **Recibes avisos, si los activas.** Por email o notificación, cada día o solo al cambiar de estación. Los títulos no mencionan tu ciclo, por si se ven en la pantalla de bloqueo.
 

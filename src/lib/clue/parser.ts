@@ -25,7 +25,7 @@ const SYMPTOM_MAP: Record<string, Record<string, SymptomId>> = {
   energy: { tired: "cansancio", exhausted: "cansancio" },
   craving: { carbs: "antojos", salty: "antojos", sweet: "antojos", greasy: "antojos" },
   digestion: { bloated: "hinchazon", nauseous: "nauseas" },
-  skin: { acne: "granitos" },
+  skin: { acne: "granitos", oily: "piel_grasa" },
   period: { very_heavy: "sangrado_abundante" },
 }
 

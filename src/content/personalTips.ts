@@ -19,6 +19,8 @@ export type RuleId =
   | "hinchazon"
   | "insomnio"
   | "antojos"
+  | "energia_baja"
+  | "piel_granitos"
 
 export const PERSONAL_TIPS: Record<RuleId, TipSet> = {
   energia_movimiento: {
@@ -62,6 +64,22 @@ export const PERSONAL_TIPS: Record<RuleId, TipSet> = {
   insomnio: {
     block: "emociones",
     all: ["Si estás durmiendo mal, prueba a cenar más ligero, bajar la luz y dejar el móvil un rato antes de acostarte."],
+  },
+  energia_baja: {
+    block: "energia",
+    all: ["Llevas unos días con poca energía. Reparte las tareas, deja lo urgente y no te exijas lo mismo que otros días."],
+    byPhase: {
+      menstrual: ["Llevas unos días con poca energía, algo muy normal durante la regla. Prioriza descansar y deja lo exigente para cuando te encuentres mejor."],
+      lutea: ["Tu energía lleva unos días baja, algo habitual en esta fase. Organízate para hacer lo más exigente por la mañana y guarda ratos para parar."],
+    },
+  },
+  piel_granitos: {
+    block: "piel",
+    all: ["Si estos días tienes granitos o la piel más grasa, límpiala con suavidad, usa productos ligeros y evita tocarlos."],
+    byPhase: {
+      lutea: ["En esta fase es muy habitual que la piel esté más grasa y salgan granitos. Limpieza suave, productos ligeros y paciencia: suelen mejorar con la regla."],
+      ovulatoria: ["Alrededor de la ovulación la piel puede estar algo más grasa. Una limpieza suave por la noche suele bastar."],
+    },
   },
   antojos: {
     block: "comida",

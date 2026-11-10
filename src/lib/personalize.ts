@@ -60,6 +60,8 @@ const RULES: { id: RuleId; signal: Signal }[] = [
   { id: "hinchazon", signal: has("hinchazon") },
   { id: "insomnio", signal: has("insomnio") },
   { id: "antojos", signal: has("antojos") },
+  { id: "energia_baja", signal: lowEnergy },
+  { id: "piel_granitos", signal: has("granitos", "piel_grasa") },
 ]
 
 function logsBetween(logs: LogEntry[], from: string, to: string) {
