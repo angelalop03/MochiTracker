@@ -1,4 +1,4 @@
-import { diffDays } from "./cycle"
+import { diffDays } from "./cycle.js"
 
 const noon = (date: string) => new Date(`${date}T12:00:00`)
 

@@ -70,8 +70,11 @@ describe("planNotice", () => {
       { date: "2026-10-22", symptoms: ["cansancio"], mood: null, energy: null },
     ]
     const notice = plan("2026-10-22", {}, null, logs)
-    expect(notice?.blockTitle).toBe("Movimiento")
-    expect(notice?.tip).toMatch(/en esta fase es muy habitual/)
+    // El primero con consejo para ella va destacado, y los demás se marcan como suyos
+    expect(notice).toMatchObject({ blockTitle: "Energía", tipForYou: true })
+    const movement = notice?.blocks.find((b) => b.title === "Movimiento")
+    expect(movement?.forYou).toBe(true)
+    expect(movement?.text).toMatch(/en esta fase es muy habitual/)
   })
 
   it("va rotando el bloque de consejos", () => {
@@ -89,12 +92,33 @@ describe("planNotice", () => {
   })
 })
 
+describe("planNotice con todos los bloques", () => {
+  it("incluye el destacado y los otros 5 bloques, sin repetir", () => {
+    const notice = plan("2026-10-22")!
+    expect(notice.blocks).toHaveLength(5)
+    expect(notice.blocks.map((b) => b.title)).not.toContain(notice.blockTitle)
+    expect(notice.cycleDay).toBe(22)
+    expect(notice.next?.phase).toBe("menstrual")
+  })
+
+  it("con force envía aunque no toque", () => {
+    const onlyChanges = user({ notify_frequency: "phase_change" })
+    const input = { user: onlyChanges, periods, logs: [], lastPhase: null, now: at("2026-10-03") }
+    expect(planNotice(input)).toBeNull()
+    expect(planNotice({ ...input, force: true })?.kind).toBe("daily")
+  })
+})
+
 describe("renderEmail", () => {
   const context = { name: "Ana <b>", appUrl: "https://isla.test", unsubscribeUrl: "https://isla.test/api/unsubscribe?u=1&t=2" }
 
   it("lleva saludo, consejo, enlace a Hoy y enlace de baja, y escapa el nombre", () => {
     const mail = renderEmail(plan("2026-10-03")!, context)
     expect(mail.html).toContain("https://isla.test/hoy")
+    expect(mail.html).toContain("https://isla.test/email/invierno.jpg")
+    expect(mail.html).toContain("Día 3 · Fase menstrual · Invierno")
+    expect(mail.html).toContain("Qué está pasando")
+    expect(mail.html).toContain("Cambiar mis avisos")
     expect(mail.html).toContain("api/unsubscribe")
     expect(mail.html).toContain("Ana &lt;b&gt;")
     expect(mail.html).not.toContain("<b>")
