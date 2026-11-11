@@ -107,7 +107,7 @@ function ScrollRig({ children }: { children: ReactNode }) {
   return <group ref={rig}>{children}</group>
 }
 
-function World({ phase }: { phase: Phase }) {
+function World({ phase, avatar }: { phase: Phase; avatar?: string | null }) {
   const burst = useRef<BurstHandle>(null)
   const holder = useRef<THREE.Group>(null)
 
@@ -121,7 +121,7 @@ function World({ phase }: { phase: Phase }) {
       <group ref={holder} rotation={WORLD_TILT}>
         <Island phase={phase} />
         <group position={[-0.2, 2.02, 1.1]} quaternion={FACING_CAMERA} scale={1.6}>
-          <Mochi phase={phase} onPoke={handlePoke} />
+          <Mochi phase={phase} avatar={avatar} onPoke={handlePoke} />
         </group>
       </group>
       <Burst ref={burst} />
@@ -131,11 +131,13 @@ function World({ phase }: { phase: Phase }) {
 
 interface SceneProps {
   phase: Phase
+  /** El Mochi del perfil, para que lleve su accesorio */
+  avatar?: string | null
   /** "embedded" llena su contenedor. "scroll" va de fondo y acompaña a los huecos de la página */
   mode?: "embedded" | "scroll"
 }
 
-export default function Scene({ phase, mode = "embedded" }: SceneProps) {
+export default function Scene({ phase, avatar, mode = "embedded" }: SceneProps) {
   const wrapper = useRef<HTMLDivElement>(null)
   const visible = useVisible(wrapper)
   const [mobile] = useState(() => window.matchMedia("(max-width: 820px)").matches)
@@ -166,7 +168,7 @@ export default function Scene({ phase, mode = "embedded" }: SceneProps) {
         <directionalLight position={[5, 9, 7]} intensity={light.sun} color={light.sunColor} />
         <Floaters phase={phase} count={mobile ? 22 : 40} parallax={mode === "scroll"} />
         <Rig>
-          <World phase={phase} />
+          <World phase={phase} avatar={avatar} />
         </Rig>
       </Canvas>
     </div>

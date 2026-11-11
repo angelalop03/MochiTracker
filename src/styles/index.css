@@ -1438,8 +1438,7 @@ a:hover {
   padding: 0 18px 18px;
 }
 
-.legal-note,
-.landing-footer {
+.legal-note {
   display: grid;
   gap: 6px;
   color: var(--ink-soft);
@@ -2042,112 +2041,11 @@ a:hover {
   display: inline;
 }
 
-/* ---------- Landing ---------- */
-.landing {
-  position: relative;
-  min-height: 100dvh;
-  background: var(--deep);
-  transition: background-color 0.4s;
-}
-
-.landing main,
-.landing-footer {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 1040px);
-  margin: 0 auto;
-  padding-inline: 20px;
-}
-
-.landing-footer {
-  padding-block: 24px 32px;
-}
-
-.hero {
-  display: grid;
-  gap: 8px;
-  padding-top: 28px;
-}
-
-.hero-text {
-  display: grid;
-  gap: 16px;
-  justify-items: start;
-}
-
-.hero-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(2.4rem, 9vw, 3.8rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-}
-
-.hero-lead {
-  max-width: 34ch;
-  color: var(--ink-soft);
-  font-size: 1.1rem;
-}
-
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 6px;
-}
-
-.mochi-stage {
-  min-width: 0;
-  aspect-ratio: 1;
-  width: 100%;
-  max-height: 60dvh;
-}
-
-.landing-section {
-  display: grid;
-  gap: 16px;
-  padding-block: 44px;
-}
-
-.landing-section > div:first-child {
-  display: grid;
-  gap: 14px;
-  justify-items: start;
-  align-content: start;
-}
-
-.season-picker {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  width: 100%;
-}
-
-.season-picker button {
-  min-height: 44px;
-  padding: 4px 12px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: inset 0 0 0 1.5px var(--line);
-  cursor: pointer;
-}
-
-.season-picker button[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--on-ink);
-  font-weight: 700;
-  box-shadow: none;
-}
-
-.feature-list {
-  display: grid;
-  gap: 8px;
-  padding-left: 20px;
 }
 
 [data-reveal] {
@@ -2161,12 +2059,6 @@ a:hover {
 [data-reveal].is-visible {
   opacity: 1;
   transform: none;
-}
-
-@media (min-width: 480px) {
-  .season-picker {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 }
 
 /* ---------- Escritorio ---------- */
@@ -2205,26 +2097,9 @@ a:hover {
   .season-title {
     font-size: 3.2rem;
   }
-
-  .hero,
-  .landing-section {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: center;
-    gap: 40px;
-  }
-
-  .hero {
-    min-height: 88dvh;
-  }
-
-  .landing-section > div:only-child {
-    grid-column: 1 / -1;
-    max-width: 640px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing,
   .button,
   .advice-chevron,
   .switch,
@@ -3808,4 +3683,374 @@ a:hover {
   .chat-typing i {
     animation: none;
   }
+}
+
+/* ---------- Bienvenida a una estación nueva ---------- */
+.season-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  cursor: pointer;
+  animation: fade-in 0.4s ease-out;
+}
+
+:root[data-theme="dark"] .season-welcome {
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 32% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 90% 34%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 62%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 86% 70%, #fff 50%, transparent 51%),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
+
+.sw-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  max-width: 340px;
+  text-align: center;
+  cursor: default;
+  animation: sw-rise 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+.sw-mochi {
+  margin-bottom: 8px;
+  animation: sw-hop 2.4s ease-in-out 0.7s infinite;
+}
+
+.sw-mochi .mochi-avatar,
+.sw-mochi .mochi-face {
+  filter: drop-shadow(0 14px 18px rgba(46, 36, 48, 0.25));
+}
+
+.season-welcome h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 2.5rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.sw-phase {
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sw-greeting {
+  margin: 6px 0 14px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.sw-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sw-particles i {
+  position: absolute;
+  top: -20px;
+  display: block;
+  animation: sw-fall linear infinite;
+}
+
+/* Nieve en píxeles */
+.sw-flake {
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  box-shadow:
+    4px 0 #fff,
+    -4px 0 #fff,
+    0 4px #fff,
+    0 -4px #fff;
+}
+
+/* Pétalos */
+.sw-petal {
+  width: 12px;
+  height: 8px;
+  border-radius: 8px 0;
+  background: #f6a9bb;
+}
+
+/* Destellos de sol, que suben en vez de caer */
+.sw-particles .sw-spark {
+  top: auto;
+  bottom: -20px;
+  width: 4px;
+  height: 4px;
+  background: #f5c94a;
+  box-shadow:
+    4px 0 #f5c94a,
+    -4px 0 #f5c94a,
+    0 4px #f5c94a,
+    0 -4px #f5c94a;
+  animation-name: sw-rise-up;
+}
+
+/* Hojas que caen balanceándose */
+.sw-leaf {
+  width: 14px;
+  height: 9px;
+  border-radius: 0 10px;
+  background: #e07a4f;
+  animation-name: sw-sway !important;
+}
+
+@keyframes sw-fall {
+  from {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  to {
+    translate: 30px 110vh;
+    rotate: 200deg;
+  }
+}
+
+@keyframes sw-sway {
+  0% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  25% {
+    translate: 30px 27vh;
+    rotate: 60deg;
+  }
+  50% {
+    translate: -20px 55vh;
+    rotate: -30deg;
+  }
+  75% {
+    translate: 25px 82vh;
+    rotate: 80deg;
+  }
+  100% {
+    translate: -10px 110vh;
+    rotate: 10deg;
+  }
+}
+
+@keyframes sw-rise-up {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    translate: 0 -110vh;
+    opacity: 0;
+  }
+}
+
+@keyframes sw-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.92);
+  }
+}
+
+@keyframes sw-hop {
+  0%,
+  60%,
+  100% {
+    transform: none;
+  }
+  70% {
+    transform: translateY(-14px) scale(0.96, 1.05);
+  }
+  80% {
+    transform: translateY(0) scale(1.05, 0.95);
+  }
+  88% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .season-welcome,
+  .sw-content,
+  .sw-mochi {
+    animation: none;
+  }
+
+  .sw-particles {
+    display: none;
+  }
+}
+
+/* ---------- Portada ---------- */
+.landing-page .today-sheet {
+  gap: 34px;
+}
+
+.hero-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-link {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--glass);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+}
+
+.landing-head {
+  gap: 10px;
+}
+
+.landing-lead,
+.landing-text {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.landing-text svg {
+  vertical-align: -2px;
+  color: var(--accent);
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.landing-block {
+  display: grid;
+  gap: 14px;
+}
+
+.landing-season {
+  display: grid;
+  gap: 12px;
+  animation: guide-in 0.35s ease-out;
+}
+
+.landing-blocks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-blocks li {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.landing-blocks strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.landing-blocks small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.landing-card {
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.landing-chat {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-chat .is-me-bubble {
+  justify-self: end;
+  border-radius: 18px 18px 6px 18px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.landing-points {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-points li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.landing-final {
+  justify-items: center;
+  padding: 26px 18px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--tint), var(--card));
+  text-align: center;
+}
+
+.landing-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 260px;
+}
+
+.landing-avatars span {
+  animation: tut-float 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-season,
+  .landing-avatars span {
+    animation: none;
+  }
+}
+
+/* La portada no tiene barra de navegación abajo */
+.today.landing-page {
+  padding-bottom: 32px;
 }

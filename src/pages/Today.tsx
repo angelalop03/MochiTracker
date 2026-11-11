@@ -13,6 +13,7 @@ import MochiChat from "../components/MochiChat"
 import MochiFace from "../components/MochiFace"
 import Loading from "../components/Loading"
 import PeriodCard from "../components/PeriodCard"
+import SeasonWelcome from "../components/SeasonWelcome"
 import SkyPanel from "../components/SkyPanel"
 import ThemeToggle from "../components/ThemeToggle"
 import Tutorial from "../components/Tutorial"
@@ -31,6 +32,7 @@ import {
 import { daySeed, formatDay, formatInDays, formatLongDate } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
+import { isNewSeason, markSeasonSeen } from "../lib/seasonSeen"
 import { markTutorialSeen, shouldShowTutorial } from "../lib/tutorial"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
@@ -137,6 +139,7 @@ export default function Today() {
   const [devDay, setDevDay] = useState<number | null>(null)
   const [params, setParams] = useSearchParams()
   const [tutorialClosed, setTutorialClosed] = useState(false)
+  const [welcomeClosed, setWelcomeClosed] = useState<string | null>(null)
 
   if (!profile) return <Loading />
 
@@ -174,7 +177,14 @@ export default function Today() {
   const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
   // Sale sola a quien acaba de empezar, o desde Ajustes con ?tutorial
   const showTutorial = !tutorialClosed && (params.has("tutorial") || shouldShowTutorial(profile.onboarded_at))
+  // Bienvenida a la estación: la primera vez que se abre en una fase nueva, y nunca junto al tutorial
+  const showWelcome = !showTutorial && welcomeClosed !== state.phase && isNewSeason(state.phase)
+  const closeWelcome = () => {
+    markSeasonSeen(state.phase)
+    setWelcomeClosed(state.phase)
+  }
   const closeTutorial = () => {
+    markSeasonSeen(state.phase)
     markTutorialSeen()
     setTutorialClosed(true)
     if (params.has("tutorial")) setParams({}, { replace: true })
@@ -190,7 +200,7 @@ export default function Today() {
             <span className="wordmark">Isla Mochi</span>
             <ThemeToggle />
           </div>
-          <SkyPanel phase={state.phase}>
+          <SkyPanel phase={state.phase} avatar={profile.avatar}>
             <span className="sky-chip">{skyChip(state)}</span>
           </SkyPanel>
         </section>
@@ -290,6 +300,7 @@ export default function Today() {
       </main>
       <BottomNav />
       {showTutorial && <Tutorial profile={profile} onSaved={reload} onClose={closeTutorial} />}
+      {showWelcome && <SeasonWelcome phase={state.phase} avatar={profile.avatar} onClose={closeWelcome} />}
     </>
   )
 }

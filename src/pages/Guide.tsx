@@ -104,7 +104,7 @@ export default function Guide() {
           )}
 
           <section className="guide-scene" aria-label={`La isla en ${content.season.toLowerCase()}`}>
-            <SkyPanel phase={phase} />
+            <SkyPanel phase={phase} avatar={profile.avatar} />
             <figure className="guide-bubble">
               <MochiFace mood={MOCHI_MOOD[phase]} size={40} />
               <blockquote>

@@ -1,7 +1,9 @@
 import { useRef } from "react"
 import { useFrame, type ThreeEvent } from "@react-three/fiber"
 import * as THREE from "three"
+import { isAvatarId } from "../components/MochiAvatar"
 import type { Phase } from "../lib/cycle"
+import Accessory, { coversHead, FaceAccessory, replacesBow } from "./Accessory"
 import { SEASONS } from "./seasons"
 import { lambert, round, smooth } from "./shapes"
 
@@ -24,7 +26,9 @@ function Bow({ color }: { color: string }) {
   )
 }
 
-function Outfit({ phase }: { phase: Phase }) {
+/** Ropa de cada estación. Sin lo de la cabeza si el accesorio del avatar ya la ocupa */
+function Outfit({ phase, headFree }: { phase: Phase; headFree: boolean }) {
+  if (!headFree && (phase === "folicular" || phase === "ovulatoria")) return null
   switch (phase) {
     case "menstrual":
       // Mantita que le arropa por debajo de la cara
@@ -80,12 +84,15 @@ function Outfit({ phase }: { phase: Phase }) {
 
 interface Props {
   phase: Phase
+  /** El Mochi elegido como foto de perfil: lleva su accesorio */
+  avatar?: string | null
   onPoke?: (position: THREE.Vector3) => void
 }
 
 // Mochi: un espíritu redondo hecho solo con primitivas. Respira, parpadea, sigue al puntero
 // y da un brinco al tocarlo. Su energía cambia con la estación.
-export default function Mochi({ phase, onPoke }: Props) {
+export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
+  const avatar = isAvatarId(chosen) ? chosen : null
   const root = useRef<THREE.Group>(null)
   const face = useRef<THREE.Group>(null)
   const eyes = useRef<THREE.Group>(null)
@@ -186,10 +193,12 @@ export default function Mochi({ phase, onPoke }: Props) {
         <mesh geometry={round} material={smooth(BLUSH)} position={[-0.6, -0.12, 0.78]} scale={[0.19, 0.11, 0.05]} />
         <mesh geometry={round} material={smooth(BLUSH)} position={[0.6, -0.12, 0.78]} scale={[0.19, 0.11, 0.05]} />
         <mesh geometry={round} material={smooth("#D9798F")} position={[0, -0.1, 0.96]} scale={[0.07, 0.04, 0.03]} />
+        <FaceAccessory avatar={avatar} />
       </group>
 
-      {phase !== "ovulatoria" && <Bow color={season.bow} />}
-      <Outfit phase={phase} />
+      {phase !== "ovulatoria" && !replacesBow(avatar) && <Bow color={season.bow} />}
+      <Outfit phase={phase} headFree={!coversHead(avatar)} />
+      <Accessory avatar={avatar} />
 
       {/* Zona invisible para detectar el puntero sobre todo Mochi */}
       <mesh
