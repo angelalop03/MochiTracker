@@ -13,6 +13,8 @@ import {
   type ImportResult,
   type ImportSummary,
 } from "../lib/clue/types"
+import { markClueDone } from "../lib/clueReminder"
+import { todayInTimeZone } from "../lib/cycle"
 import { deviceTimeZone } from "../lib/format"
 import { saveImport, updateProfile } from "../services/data"
 
@@ -135,6 +137,7 @@ export default function ImportClue() {
     setError("")
     try {
       await saveImport(userId, result)
+      markClueDone(todayInTimeZone(deviceTimeZone()))
       if (!profile?.onboarded_at) {
         await updateProfile(userId, { timezone: deviceTimeZone(), onboarded_at: new Date().toISOString() })
       }

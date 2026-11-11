@@ -3,13 +3,13 @@ import { PHASE_GLANCE } from "../content/glance"
 import type { Phase } from "../lib/cycle"
 
 /** Tres indicadores para entender el día en un momento */
-export default function Glance({ phase }: { phase: Phase }) {
+export default function Glance({ phase, title = "Hoy, de un vistazo" }: { phase: Phase; title?: string }) {
   const g = PHASE_GLANCE[phase]
   return (
     <section className="glance" aria-labelledby="glance-title">
       <div className="section-head">
         <h2 id="glance-title" className="eyebrow">
-          Hoy, de un vistazo
+          {title}
         </h2>
         <span className="section-note">Lo habitual en esta fase</span>
       </div>

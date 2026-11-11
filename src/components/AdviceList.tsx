@@ -1,10 +1,11 @@
-import { ChevronDown, CircleAlert, Sparkles } from "lucide-react"
+import { ChevronDown, Sparkles } from "lucide-react"
 import { BLOCK_GUIDES } from "../content/guides"
 import { BLOCKS, PHASE_CONTENT, pickVariant, type BlockId } from "../content/phases"
 import type { AiAdvice } from "../lib/ai/advice"
 import type { Phase } from "../lib/cycle"
 import type { PersonalTip } from "../lib/personalize"
 import BlockIcon from "./BlockIcon"
+import GuideBody from "./GuideBody"
 
 interface Props {
   phase: Phase
@@ -81,29 +82,7 @@ export default function AdviceList({ phase, tips, aiAdvice }: Props) {
                     </p>
                   )}
 
-                  <div className="advice-why">
-                    <span className="advice-label">Por qué pasa</span>
-                    <p>{guide.why}</p>
-                  </div>
-
-                  <div>
-                    <span className="advice-label">Qué puedes hacer</span>
-                    <ol className="advice-tips">
-                      {guide.tips.map((tip) => (
-                        <li key={tip.title}>
-                          <strong>{tip.title}</strong>
-                          <span>{tip.text}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-
-                  {guide.watch && (
-                    <p className="advice-watch">
-                      <CircleAlert size={16} strokeWidth={2} aria-hidden="true" />
-                      <span>{guide.watch}</span>
-                    </p>
-                  )}
+                  <GuideBody guide={guide} />
                 </div>
               </details>
             </li>

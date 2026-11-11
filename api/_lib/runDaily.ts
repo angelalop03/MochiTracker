@@ -31,10 +31,27 @@ export interface Store {
   removePushTarget(endpoint: string): Promise<void>
 }
 
+export interface PushPayload {
+  title: string
+  body: string
+  url: string
+  /** Si es la pregunta de la regla: la notificación lleva los botones «Sí, hoy» y «Aún no» */
+  periodCheck?: { userId: string; date: string }
+}
+
 export interface Senders {
   email(user: Recipient, notice: Notice): Promise<void>
   /** Si falla, lanza un error con statusCode */
-  push(target: PushTarget, payload: { title: string; body: string; url: string }): Promise<void>
+  push(target: PushTarget, payload: PushPayload): Promise<void>
+}
+
+export function pushPayload(userId: string, notice: Notice): PushPayload {
+  return {
+    title: notice.title,
+    body: notice.pushBody,
+    url: "/hoy",
+    ...(notice.kind === "period_check" ? { periodCheck: { userId, date: notice.date } } : {}),
+  }
 }
 
 export interface Report {
@@ -72,8 +89,9 @@ export async function runDaily({ store, senders, now, emailCap = DAILY_EMAIL_CAP
     }
   }
 
-  // Si no llega para todas, primero los cambios de estación
-  plans.sort((a, b) => Number(b.notice.kind === "phase_change") - Number(a.notice.kind === "phase_change"))
+  // Si no llega para todas, primero la pregunta de la regla y los cambios de estación
+  const priority = (n: Notice) => (n.kind === "daily" ? 0 : 1)
+  plans.sort((a, b) => priority(b.notice) - priority(a.notice))
 
   for (const { user, notice } of plans) {
     const claim = (channel: Channel): Claim => ({
@@ -106,7 +124,7 @@ export async function runDaily({ store, senders, now, emailCap = DAILY_EMAIL_CAP
       let gone = 0
       for (const target of targets) {
         try {
-          await senders.push(target, { title: notice.title, body: notice.pushBody, url: "/hoy" })
+          await senders.push(target, pushPayload(user.id, notice))
           delivered++
         } catch (error) {
           const status = (error as { statusCode?: number }).statusCode

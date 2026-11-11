@@ -5,7 +5,7 @@ import { createHmac, timingSafeEqual } from "node:crypto"
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import webpush from "web-push"
 import { addDays } from "../../src/lib/cycle.js"
-import { renderEmail } from "./email.js"
+import { renderEmail, renderPeriodCheckEmail } from "./email.js"
 import type { Notice, Recipient } from "./notifications.js"
 import type { Senders, Store } from "./runDaily.js"
 
@@ -29,6 +29,11 @@ export function sameSecret(a: string, b: string) {
 
 export function unsubscribeToken(userId: string, secret: string) {
   return createHmac("sha256", secret).update(userId).digest("hex")
+}
+
+/** Firma la pregunta de la regla: solo sirve para esa usuaria y ese día */
+export function periodToken(userId: string, date: string, secret: string) {
+  return createHmac("sha256", secret).update(`period:${userId}:${date}`).digest("hex")
 }
 
 const LOG_DAYS = 220
@@ -136,7 +141,8 @@ export function realSenders(db: SupabaseClient): Senders {
       if (error || !data.user.email) throw new Error("No se ha encontrado el email")
 
       const unsubscribeUrl = `${appUrl}/api/unsubscribe?u=${user.id}&t=${unsubscribeToken(user.id, secret)}`
-      const mail = renderEmail(notice, { name: user.name, appUrl, unsubscribeUrl })
+      const context = { name: user.name, appUrl, unsubscribeUrl }
+      const mail = notice.kind === "period_check" ? renderPeriodCheckEmail(notice, context) : renderEmail(notice, context)
 
       const response = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
@@ -150,10 +156,14 @@ export function realSenders(db: SupabaseClient): Senders {
       }
     },
 
-    async push(target, payload) {
+    async push(target, { periodCheck, ...payload }) {
+      // El token permite apuntar la regla desde la notificación sin abrir la app
+      const check = periodCheck
+        ? { u: periodCheck.userId, d: periodCheck.date, t: periodToken(periodCheck.userId, periodCheck.date, secret) }
+        : undefined
       await webpush.sendNotification(
         { endpoint: target.endpoint, keys: { p256dh: target.p256dh, auth: target.auth } },
-        JSON.stringify(payload),
+        JSON.stringify({ ...payload, check }),
         { TTL: 60 * 60 * 12 }
       )
     },

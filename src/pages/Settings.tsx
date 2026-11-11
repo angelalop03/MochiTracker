@@ -1,4 +1,4 @@
-import { CalendarDays, Download, Droplets, FileText, LogOut, Palette, RefreshCw, Trash2, Upload } from "lucide-react"
+import { BellRing, CalendarDays, Download, Droplets, FileText, LogOut, Palette, RefreshCw, Trash2, Upload } from "lucide-react"
 import { useRef, useState, type FormEvent } from "react"
 import AiSettings from "../components/AiSettings"
 import BottomNav from "../components/BottomNav"
@@ -8,6 +8,7 @@ import { Segmented, SettingsGroup, SettingsRow, Stepper } from "../components/se
 import { DISCLAIMER } from "../content/phases"
 import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
+import { setClueEvery, useClueReminder, type ClueEvery } from "../lib/clueReminder"
 import { useTheme, type ThemePref } from "../lib/theme"
 import { deleteAccount, exportData } from "../services/account"
 import { signOut } from "../services/auth"
@@ -135,7 +136,35 @@ function CycleSettings({ profile, onSaved }: { profile: Profile; onSaved: () => 
       />
       <SettingsRow icon={CalendarDays} label="Mis fechas" hint="Ver y corregir tus reglas" to="/mis-fechas" />
       <SettingsRow icon={Upload} label="Importar desde Clue" to="/importar" />
+      <ClueReminderSetting />
     </SettingsGroup>
+  )
+}
+
+function ClueReminderSetting() {
+  const { every } = useClueReminder("", false)
+  return (
+    <div className="settings-row settings-row-stack">
+      <span className="settings-icon">
+        <BellRing size={18} strokeWidth={1.75} aria-hidden="true" />
+      </span>
+      <span className="settings-label">
+        <span className="settings-title">
+          <span>Recordarme actualizar desde Clue</span>
+          <small>Solo si has importado alguna vez</small>
+        </span>
+        <Segmented<ClueEvery>
+          label="Cada cuánto recordarlo"
+          value={every}
+          onChange={setClueEvery}
+          options={[
+            { value: "off", label: "Nunca" },
+            { value: "3", label: "3 meses" },
+            { value: "6", label: "6 meses" },
+          ]}
+        />
+      </span>
+    </div>
   )
 }
 

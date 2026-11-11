@@ -180,3 +180,69 @@ export function renderEmail(notice: Notice, { name, appUrl, unsubscribeUrl }: Co
 
   return { subject: notice.title, html }
 }
+
+/** La pregunta de la regla: un correo corto con un solo botón */
+export function renderPeriodCheckEmail(notice: Notice, { name, appUrl, unsubscribeUrl }: Context) {
+  const palette = PALETTE.menstrual
+  const hello = name ? `Hola, ${name}` : "Hola"
+  const e = escapeHtml
+  const late =
+    notice.daysLate > 1
+      ? `Según tu media, la esperábamos hace ${notice.daysLate - 1} ${notice.daysLate === 2 ? "día" : "días"}. Un retraso de unos días es frecuente: el estrés, los viajes o los cambios de rutina pueden moverla.`
+      : "Según tu media, tu regla podría llegar hoy."
+
+  const html = `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>${e(notice.title)}</title>
+</head>
+<body style="margin:0;padding:0;background:#FFF7F3;font-family:${FONT};color:${INK}">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Si ya ha llegado, apúntalo con un toque.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFF7F3">
+<tr><td align="center" style="padding:24px 12px 32px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+
+  <tr><td style="padding:0 6px 14px">
+    <a href="${e(appUrl)}" style="font-size:20px;font-weight:bold;color:${ROSE};text-decoration:none">Isla Mochi</a>
+  </td></tr>
+
+  <tr><td style="background:#FFFFFF;border-radius:26px;overflow:hidden;box-shadow:0 12px 30px -20px rgba(122,74,110,0.5)">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="background:${palette.tint};border-radius:26px 26px 0 0;padding:0">
+      <img src="${e(`${appUrl}/email/${palette.image}.jpg`)}" width="560" alt="Mochi en su isla, en invierno" style="display:block;width:100%;max-width:560px;height:auto;border-radius:26px 26px 0 0">
+    </td></tr>
+    <tr><td style="background:${palette.tint};padding:18px 28px 22px">
+      <div style="font-size:26px;font-weight:bold;line-height:1.2;color:${INK}">${e(hello)}</div>
+      <div style="font-size:17px;line-height:1.5;color:${INK};padding-top:8px">¿Ha llegado ya el invierno a tu isla?</div>
+    </td></tr>
+    <tr><td style="padding:22px 28px 0;font-size:15px;line-height:1.6;color:${INK}">
+      ${e(late)}<br><br>
+      Si ya te ha venido, apúntalo en tu isla para que Mochi sepa en qué estación estás. Si aún no, no tienes que hacer nada: te lo volveremos a preguntar en unos días.
+    </td></tr>
+    <tr><td align="center" style="padding:26px 28px 30px">
+      <a href="${e(`${appUrl}/hoy`)}" style="display:inline-block;padding:14px 30px;border-radius:999px;background:${palette.accent};color:#FFFFFF;font-size:16px;font-weight:bold;text-decoration:none">Apuntarlo en mi isla</a>
+    </td></tr>
+  </table>
+  </td></tr>
+
+  <tr><td style="padding:22px 10px 0;font-size:13px;line-height:1.6;color:${SOFT}">
+    Si llevas tres meses o más sin regla, o un retraso con posibilidad de embarazo, consúltalo con un profesional sanitario.
+  </td></tr>
+  <tr><td style="padding:14px 10px 0;font-size:12px;line-height:1.6;color:${SOFT}">
+    ${e(DISCLAIMER)}<br>
+    Recibes este correo porque activaste los avisos en Isla Mochi.<br>
+    <a href="${e(`${appUrl}/ajustes`)}" style="color:${SOFT}">Cambiar mis avisos</a> &nbsp;·&nbsp;
+    <a href="${e(unsubscribeUrl)}" style="color:${SOFT}">Dejar de recibir estos correos</a>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`
+
+  return { subject: notice.title, html }
+}

@@ -3,6 +3,7 @@ import { useState } from "react"
 import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
 import BottomNav from "../components/BottomNav"
+import ClueReminder from "../components/ClueReminder"
 import ConsultCard from "../components/ConsultCard"
 import CycleDial from "../components/CycleDial"
 import DialogBox from "../components/DialogBox"
@@ -10,7 +11,6 @@ import Glance from "../components/Glance"
 import MochiFace from "../components/MochiFace"
 import Loading from "../components/Loading"
 import PeriodCard from "../components/PeriodCard"
-import QuickLog from "../components/QuickLog"
 import SkyPanel from "../components/SkyPanel"
 import ThemeToggle from "../components/ThemeToggle"
 import { CONTRACEPTION_NOTICE, DISCLAIMER, PHASE_CONTENT, pickVariant } from "../content/phases"
@@ -234,9 +234,8 @@ export default function Today() {
 
           <section className="your-day" aria-labelledby="your-day-title">
             <h2 id="your-day-title" className="eyebrow">
-              Tu día
+              Tu isla al día
             </h2>
-            <QuickLog key={realToday} date={realToday} log={logs.find((l) => l.date === realToday)} onSaved={reload} />
             <PeriodCard
               today={realToday}
               onSaved={reload}
@@ -245,6 +244,7 @@ export default function Today() {
               inDays={realState.nextPeriodDate ? diffDays(realToday, realState.nextPeriodDate) : null}
               daysLate={realState.daysLate}
             />
+            <ClueReminder today={realToday} usesClue={periods.some((p) => p.source === "clue")} />
             <ConsultCard open={alarm} />
           </section>
 

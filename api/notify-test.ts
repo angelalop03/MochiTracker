@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { planNotice, type Recipient } from "./_lib/notifications.js"
+import { pushPayload } from "./_lib/runDaily.js"
 import { adminClient, realSenders, sameSecret, supabaseStore } from "./_lib/server.js"
 import { todayInTimeZone } from "../src/lib/cycle.js"
 
@@ -16,10 +17,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: "No autorizado" })
   }
 
-  const body = (req.body ?? {}) as { email?: unknown; only?: unknown }
+  const body = (req.body ?? {}) as { email?: unknown; only?: unknown; check?: unknown }
   const email = String(body.email ?? "").toLowerCase()
   // "email" o "push" para probar solo un canal
   const only = body.only === "email" || body.only === "push" ? body.only : null
+  // check: true para probar la pregunta de la regla
+  const forceCheck = body.check === true
   if (!email) return res.status(400).json({ error: "Falta el email" })
 
   try {
@@ -40,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const now = new Date()
     const store = supabaseStore(db, todayInTimeZone("UTC", now))
     const history = await store.history(user.id)
-    const planned = planNotice({ user: recipient, ...history, lastPhase: null, now, force: true })
+    const planned = planNotice({ user: recipient, ...history, lastPhase: null, now, force: true, forceCheck })
     if (!planned) return res.status(409).json({ error: "Sin datos de ciclo suficientes" })
     const notice = { ...planned, title: `Prueba: ${planned.title}` }
 
@@ -61,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     for (const target of only === "email" ? [] : await store.pushTargets(user.id)) {
       try {
-        await senders.push(target, { title: notice.title, body: notice.pushBody, url: "/hoy" })
+        await senders.push(target, pushPayload(user.id, notice))
         result.pushes++
       } catch (e) {
         console.error("Push de prueba fallido:", (e as { statusCode?: number }).statusCode)

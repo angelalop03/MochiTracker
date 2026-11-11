@@ -19,6 +19,8 @@ export interface Profile {
 export interface PeriodRow {
   start_date: string
   end_date: string | null
+  /** De dónde viene: apuntada en la app o importada de Clue */
+  source?: "manual" | "clue"
 }
 
 export interface DailyLog {
@@ -73,7 +75,7 @@ export async function fetchPeriods(): Promise<PeriodRow[]> {
   // RLS ya limita la consulta a las filas de la usuaria
   const { data, error } = await db()
     .from("periods")
-    .select("start_date, end_date")
+    .select("start_date, end_date, source")
     .order("start_date", { ascending: true })
   if (error) throw error
   return data as PeriodRow[]
@@ -131,18 +133,6 @@ export async function fetchLogs(since: string): Promise<DailyLog[]> {
 }
 
 /** Guarda el registro de un día. Si ya existe, lo sustituye */
-export async function saveLog(userId: string, log: DailyLog): Promise<void> {
-  if (DEMO) {
-    const others = readDemo().logs.filter((l) => l.date !== log.date)
-    writeDemo({ logs: [...others, log].sort((a, b) => a.date.localeCompare(b.date)) })
-    return
-  }
-  const { error } = await db()
-    .from("daily_logs")
-    .upsert({ ...log, user_id: userId }, { onConflict: "user_id,date" })
-  if (error) throw error
-}
-
 /** Guarda lo importado sin pisar nada de lo que la usuaria ya tenía */
 export async function saveImport(userId: string, result: ImportResult): Promise<void> {
   if (DEMO) {

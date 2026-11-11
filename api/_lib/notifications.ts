@@ -17,7 +17,10 @@ export interface Recipient {
   timezone: string
 }
 
-export type Kind = "daily" | "phase_change"
+export type Kind = "daily" | "phase_change" | "period_check"
+
+/** Días de retraso en los que se pregunta si ha llegado la regla: el día previsto y dos recordatorios */
+export const PERIOD_CHECK_DAYS: readonly number[] = [1, 3, 7]
 
 export interface NoticeBlock {
   id: BlockId
@@ -59,6 +62,9 @@ const ARRIVAL: Record<Phase, string> = {
 }
 
 const DAILY_TITLE = "Mochi te ha dejado un consejo"
+// Sin mencionar el ciclo: se ve en la pantalla de bloqueo
+const CHECK_TITLE = "¿Ha llegado el invierno a tu isla?"
+const CHECK_BODY = "Si ya ha llegado, apúntalo con un toque."
 const PUSH_BODY = "Abre tu isla para verlo."
 
 function daySeed(date: string) {
@@ -74,10 +80,12 @@ interface Input {
   now: Date
   /** Para pruebas: envía aunque hoy no le tocara */
   force?: boolean
+  /** Para pruebas: fuerza la pregunta de la regla */
+  forceCheck?: boolean
 }
 
 /** El aviso de hoy, o null si no toca */
-export function planNotice({ user, periods, logs, lastPhase, now, force = false }: Input): Notice | null {
+export function planNotice({ user, periods, logs, lastPhase, now, force = false, forceCheck = false }: Input): Notice | null {
   const settings = { avgCycleLength: user.avg_cycle_length, avgPeriodLength: user.avg_period_length }
   const date = todayInTimeZone(user.timezone, now)
   const state = getCycleState(periods, settings, date)
@@ -88,7 +96,9 @@ export function planNotice({ user, periods, logs, lastPhase, now, force = false 
   const yesterday = getCycleState(periods, settings, addDays(date, -1))
   const before = lastPhase ?? (yesterday.status === "no_data" ? null : yesterday.phase)
   const changed = before !== null && before !== state.phase
-  if (!force && !changed && user.notify_frequency === "phase_change") return null
+  // Cuando la regla se esperaba y no está apuntada, se pregunta. Vale para cualquier frecuencia
+  const check = forceCheck || (state.status === "late" && PERIOD_CHECK_DAYS.includes(state.daysLate))
+  if (!force && !check && !changed && user.notify_frequency === "phase_change") return null
 
   const seed = daySeed(date)
   const content = PHASE_CONTENT[state.phase]
@@ -109,10 +119,10 @@ export function planNotice({ user, periods, logs, lastPhase, now, force = false 
 
   return {
     date,
-    kind: changed ? "phase_change" : "daily",
+    kind: check ? "period_check" : changed ? "phase_change" : "daily",
     phase: state.phase,
-    title: changed ? ARRIVAL[state.phase] : DAILY_TITLE,
-    pushBody: PUSH_BODY,
+    title: check ? CHECK_TITLE : changed ? ARRIVAL[state.phase] : DAILY_TITLE,
+    pushBody: check ? CHECK_BODY : PUSH_BODY,
     cycleDay: state.cycleDay,
     greeting: pickVariant(content.greetings, seed),
     summary: content.summary,
