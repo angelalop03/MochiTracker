@@ -1,3 +1,4 @@
+import { Laptop } from "lucide-react"
 import { useState, type FormEvent, type ReactNode } from "react"
 import { Link, Navigate } from "react-router-dom"
 import DialogBox from "../components/DialogBox"
@@ -39,7 +40,7 @@ const STEPS: { art: ReactNode; text: ReactNode }[] = [
         <rect x="20" y="36" width="24" height="4" rx="2" fill={INK} />
       </Art>
     ),
-    text: <>Abre Clue y pulsa el menú «=» arriba a la derecha de la vista del ciclo.</>,
+    text: <>En el móvil, abre Clue y pulsa el menú «=» arriba a la derecha de la vista del ciclo.</>,
   },
   {
     art: (
@@ -74,7 +75,7 @@ const STEPS: { art: ReactNode; text: ReactNode }[] = [
         <path d="M16 24 L32 36 L48 24" fill="none" stroke={ROSE} strokeWidth="4" strokeLinecap="round" />
       </Art>
     ),
-    text: <>Abre el email de Clue y descarga tus datos. El enlace caduca a las 72 horas.</>,
+    text: <>Abre el email de Clue en el ordenador y descarga tus datos. El enlace caduca a las 72 horas.</>,
   },
   {
     art: (
@@ -83,7 +84,12 @@ const STEPS: { art: ReactNode; text: ReactNode }[] = [
         <path d="M22 30 L32 18 L42 30" fill="none" stroke={INK} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       </Art>
     ),
-    text: <>Sube aquí el archivo ZIP y escribe la contraseña, o descomprímelo tú y sube el archivo JSON.</>,
+    text: (
+      <>
+        Entra en Isla Mochi desde el ordenador, ve a Ajustes → Importar desde Clue y sube el archivo ZIP con su
+        contraseña. También vale el archivo JSON si lo descomprimes tú.
+      </>
+    ),
   },
 ]
 
@@ -160,6 +166,14 @@ export default function ImportClue() {
 
       {step.name === "pick" && (
         <>
+          <div className="import-tip">
+            <Laptop size={22} strokeWidth={1.75} aria-hidden="true" />
+            <p>
+              <strong>Mejor desde el ordenador.</strong> La exportación se pide en la app de Clue, pero te llega por
+              correo como un archivo comprimido con contraseña. Descargarlo y subirlo es mucho más fácil en un
+              ordenador. Clue no deja que otras apps se conecten con tus datos, por eso se hace así.
+            </p>
+          </div>
           <ol className="guide">
             {STEPS.map((s, i) => (
               <li key={i}>

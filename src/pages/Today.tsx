@@ -1,5 +1,6 @@
 import { ArrowRight, Undo2 } from "lucide-react"
 import { useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
 import BottomNav from "../components/BottomNav"
@@ -13,6 +14,7 @@ import Loading from "../components/Loading"
 import PeriodCard from "../components/PeriodCard"
 import SkyPanel from "../components/SkyPanel"
 import ThemeToggle from "../components/ThemeToggle"
+import Tutorial from "../components/Tutorial"
 import { CONTRACEPTION_NOTICE, DISCLAIMER, PHASE_CONTENT, pickVariant } from "../content/phases"
 import { useAiAdvice } from "../hooks/useAiAdvice"
 import { useCycleData } from "../hooks/useCycleData"
@@ -28,6 +30,7 @@ import {
 import { daySeed, formatDay, formatInDays, formatLongDate } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
+import { markTutorialSeen, shouldShowTutorial } from "../lib/tutorial"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
 
@@ -130,6 +133,8 @@ function PersonalAdvice({
 export default function Today() {
   const { profile, periods, logs, reload } = useCycleData()
   const [devDay, setDevDay] = useState<number | null>(null)
+  const [params, setParams] = useSearchParams()
+  const [tutorialClosed, setTutorialClosed] = useState(false)
 
   if (!profile) return <Loading />
 
@@ -164,6 +169,13 @@ export default function Today() {
   const aiKey = JSON.stringify([today, aiInput])
 
   const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
+  // Sale sola a quien acaba de empezar, o desde Ajustes con ?tutorial
+  const showTutorial = !tutorialClosed && (params.has("tutorial") || shouldShowTutorial(profile.onboarded_at))
+  const closeTutorial = () => {
+    markTutorialSeen()
+    setTutorialClosed(true)
+    if (params.has("tutorial")) setParams({}, { replace: true })
+  }
   // La pregunta de la regla solo se destaca cuando toca: en otoño o si se retrasa
   const askPeriod = state.phase === "lutea" || state.daysLate > 0 || state.status === "stale"
 
@@ -274,6 +286,7 @@ export default function Today() {
         </div>
       </main>
       <BottomNav />
+      {showTutorial && <Tutorial profile={profile} onSaved={reload} onClose={closeTutorial} />}
     </>
   )
 }

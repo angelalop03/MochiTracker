@@ -97,7 +97,7 @@ export default function NotificationSettings({ profile, onSaved }: Props) {
             disabled={busy}
             onChange={(value) => void patch({ notify_frequency: value })}
             options={[
-              { value: "phase_change", label: "Al cambiar de estación" },
+              { value: "phase_change", label: "Cambio de estación" },
               { value: "daily", label: "Cada día" },
             ]}
           />

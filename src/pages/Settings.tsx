@@ -1,8 +1,23 @@
-import { BellRing, CalendarDays, Download, Droplets, FileText, LogOut, Palette, RefreshCw, Trash2, Upload } from "lucide-react"
+import {
+  BellRing,
+  CalendarDays,
+  Download,
+  Droplets,
+  FileText,
+  GraduationCap,
+  LogOut,
+  Palette,
+  Pencil,
+  RefreshCw,
+  Trash2,
+  Upload,
+} from "lucide-react"
 import { useRef, useState, type FormEvent } from "react"
 import AiSettings from "../components/AiSettings"
+import AvatarPicker from "../components/AvatarPicker"
 import BottomNav from "../components/BottomNav"
 import Loading from "../components/Loading"
+import MochiAvatar, { isAvatarId, type AvatarId } from "../components/MochiAvatar"
 import NotificationSettings from "../components/NotificationSettings"
 import { Segmented, SettingsGroup, SettingsRow, Stepper } from "../components/settings"
 import { DISCLAIMER } from "../content/phases"
@@ -20,7 +35,21 @@ function ProfileCard({ profile, email, onSaved }: { profile: Profile; email: str
   const [name, setName] = useState(profile.name ?? "")
   const [state, setState] = useState<SaveState>("idle")
   const [editing, setEditing] = useState(false)
+  const [picking, setPicking] = useState(false)
+  const [avatarError, setAvatarError] = useState(false)
   const initial = (profile.name?.trim()[0] ?? email[0] ?? "?").toUpperCase()
+  const avatar = isAvatarId(profile.avatar) ? profile.avatar : null
+
+  async function chooseAvatar(next: AvatarId | null) {
+    setAvatarError(false)
+    try {
+      await updateProfile(profile.id, { avatar: next })
+      await onSaved()
+    } catch (error) {
+      console.error(error)
+      setAvatarError(true)
+    }
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault()
@@ -38,9 +67,24 @@ function ProfileCard({ profile, email, onSaved }: { profile: Profile; email: str
 
   return (
     <section className="profile-card" aria-label="Tu perfil">
-      <span className="avatar" aria-hidden="true">
-        {initial}
-      </span>
+      <button
+        type="button"
+        className="avatar-button"
+        aria-expanded={picking}
+        aria-label={picking ? "Cerrar la elección de Mochi" : "Cambiar tu foto de perfil"}
+        onClick={() => setPicking(!picking)}
+      >
+        {avatar ? (
+          <MochiAvatar avatar={avatar} size={64} />
+        ) : (
+          <span className="avatar" aria-hidden="true">
+            {initial}
+          </span>
+        )}
+        <span className="avatar-badge" aria-hidden="true">
+          <Pencil size={12} strokeWidth={2.5} />
+        </span>
+      </button>
       <div className="profile-text">
         <strong>{profile.name || "Sin nombre"}</strong>
         <span>{email}</span>
@@ -78,6 +122,17 @@ function ProfileCard({ profile, email, onSaved }: { profile: Profile; email: str
             </span>
           )}
         </form>
+      )}
+      {picking && (
+        <div className="avatar-panel">
+          <p className="avatar-panel-title">Elige tu Mochi</p>
+          <AvatarPicker value={avatar} onChange={(next) => void chooseAvatar(next)} initial={initial} />
+          {avatarError && (
+            <p className="form-error" role="alert">
+              No se ha podido guardar. Vuelve a intentarlo.
+            </p>
+          )}
+        </div>
       )}
       {state === "saved" && !editing && (
         <span className="form-ok profile-saved" role="status">
@@ -158,7 +213,17 @@ function CycleSettings({ profile, onSaved }: { profile: Profile; onSaved: () => 
         }
       />
       <SettingsRow icon={CalendarDays} label="Mis fechas" hint="Ver y corregir tus reglas" to="/mis-fechas" />
-      <SettingsRow icon={Upload} label="Importar desde Clue" to="/importar" />
+    </SettingsGroup>
+  )
+}
+
+function ClueSettings() {
+  return (
+    <SettingsGroup
+      title="Clue"
+      footer="Clue no deja que otras apps lean tus datos, así que se traen con su exportación. Es mucho más cómodo hacerlo desde el ordenador: pides la exportación en Clue, te llega un correo con el archivo y lo subes aquí."
+    >
+      <SettingsRow icon={Upload} label="Importar desde Clue" hint="Mejor desde el ordenador" to="/importar" />
       <ClueReminderSetting />
     </SettingsGroup>
   )
@@ -174,7 +239,7 @@ function ClueReminderSetting() {
       <span className="settings-label">
         <span className="settings-title">
           <span>Recordarme actualizar desde Clue</span>
-          <small>Solo si has importado alguna vez</small>
+          <small>Te lo sugerimos en Hoy, solo si ya has importado</small>
         </span>
         <Segmented<ClueEvery>
           label="Cada cuánto recordarlo"
@@ -213,6 +278,14 @@ function Appearance() {
           />
         </span>
       </div>
+    </SettingsGroup>
+  )
+}
+
+function Help() {
+  return (
+    <SettingsGroup title="Ayuda">
+      <SettingsRow icon={GraduationCap} label="Ver el tutorial" hint="Mochi te explica la app en un minuto" to="/hoy?tutorial" />
     </SettingsGroup>
   )
 }
@@ -294,8 +367,10 @@ export default function Settings() {
         <h1 className="page-title">Ajustes</h1>
         <ProfileCard profile={profile} email={session.user.email} onSaved={reload} />
         <CycleSettings profile={profile} onSaved={reload} />
+        <ClueSettings />
         <NotificationSettings profile={profile} onSaved={reload} />
         <Appearance />
+        <Help />
         <AiSettings />
         <AccountSettings userId={session.user.id} email={session.user.email} />
         <p className="legal-note">{DISCLAIMER}</p>

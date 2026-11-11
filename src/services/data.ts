@@ -14,6 +14,8 @@ export interface Profile {
   health_consent_at: string | null
   privacy_version: string | null
   onboarded_at: string | null
+  /** Uno de los Mochis predeterminados, o null para usar la inicial */
+  avatar?: string | null
 }
 
 export interface PeriodRow {
@@ -46,6 +48,7 @@ export function emptyProfile(id: string): Profile {
     health_consent_at: null,
     privacy_version: null,
     onboarded_at: null,
+    avatar: null,
   }
 }
 
