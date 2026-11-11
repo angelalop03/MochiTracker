@@ -1090,7 +1090,8 @@ a:hover {
   box-shadow: var(--shadow);
 }
 
-.settings-card > * + * {
+.settings-card > :not(:first-child) {
+  /* Más específico que .settings-row, que quita los bordes */
   border-top: 1px solid var(--line);
 }
 
