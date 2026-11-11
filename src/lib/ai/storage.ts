@@ -4,7 +4,6 @@
 import type { AiAdvice } from "./advice"
 import type { ChatTurn } from "./cloud"
 
-const ENABLED = "isla-mochi-ia"
 const CACHE = "isla-mochi-ia-consejos"
 const CHAT = "isla-mochi-chat"
 /** Mensajes que se guardan en el dispositivo */
@@ -25,13 +24,6 @@ function write(key: string, value: string | null) {
   } catch {
     // Sin almacenamiento, la IA sigue funcionando pero no recuerda nada
   }
-}
-
-export const isAiEnabled = () => read(ENABLED) === "1"
-
-export function setAiEnabled(on: boolean) {
-  write(ENABLED, on ? "1" : null)
-  if (!on) clearAiAdvice()
 }
 
 /** Consejos ya generados para esta misma situación: evita cargar el modelo otra vez */

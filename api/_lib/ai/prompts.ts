@@ -2,7 +2,7 @@
 
 import { BLOCK_GUIDES } from "../../../src/content/guides.js"
 import { BLOCKS, type BlockId } from "../../../src/content/phases.js"
-import { cleanReply, validateReply, type AiAdvice } from "../../../src/lib/ai/advice.js"
+import { validateReply, type AiAdvice } from "../../../src/lib/ai/advice.js"
 import type { AiContext } from "./context.js"
 import { describeContext } from "./context.js"
 import type { AiMessage } from "./provider.js"
@@ -38,7 +38,8 @@ Pautas revisadas para su fase, de las que tienes que partir:
 ${guides}
 
 Escribe un consejo para cada tema (${BLOCKS.map((b) => b.id).join(", ")}), adaptado a cómo está ella.
-Cada consejo: una o dos frases, entre 60 y 200 caracteres, concreto y práctico. No saludes ni repitas su día del ciclo.
+Cada consejo: una o dos frases, entre 60 y 200 caracteres, concreto y práctico, con calidez, como se lo diría una amiga.
+Cuando venga al caso, conéctalo con lo que ha registrado (por ejemplo: «con el cansancio que llevas…»). No saludes ni repitas su día del ciclo.
 Si está cansada o con poca energía, nunca le propongas esfuerzos intensos.
 Responde solo con un JSON con esas seis claves.`,
     },
@@ -96,7 +97,10 @@ export function chatMessages(ctx: AiContext | null, history: ChatTurn[], message
       role: "system",
       content: `${RULES}
 Respondes preguntas sobre el ciclo, cómo se siente, comida, descanso, movimiento, piel y bienestar.
-Si te preguntan algo que no tiene que ver, redirige con amabilidad. Respuestas breves: como mucho 120 palabras, sin listas largas.
+Si te preguntan algo que no tiene que ver, redirige con amabilidad. Respuestas breves: como mucho 120 palabras.
+No saludes ni te despidas en cada mensaje: es una conversación seguida, ve al grano con cariño.
+Responde en prosa, en 2 a 4 frases cálidas. Usa una lista solo si te pide varias ideas (como mucho 4 puntos, cada uno en su línea empezando por «- »). Sin títulos ni negritas.
+Para explicar por qué se siente así, apóyate en lo que dice la descripción de su fase. No afirmes datos fisiológicos de los que no estés segura.
 ${about}`,
     },
     ...history.slice(-CHAT_HISTORY).map((t) => ({ role: t.role, content: t.content.slice(0, 1000) })),
@@ -108,9 +112,22 @@ const DOSAGE = /\d+\s?(mg|ml|gr?)\b|\bcada \d+ horas\b/i
 const CHAT_FALLBACK =
   "Prefiero no responder a eso sin que lo vea un profesional sanitario. Si te preocupa, consúltalo con tu médica o en tu centro de salud."
 
+/** Quita lo que añade el modelo, conservando los saltos de línea de las listas */
+function cleanChat(text: string) {
+  return text
+    .replace(/<think>[\s\S]*?<\/think>/g, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/^#+\s*/gm, "")
+    .replace(/^\s*[*•]\s+/gm, "- ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+}
+
 /** Limpia la respuesta del chat y la cambia por una prudente si da dosis o se va de largo */
 export function checkChatReply(text: string) {
-  const clean = cleanReply(text)
+  const clean = cleanChat(text)
   if (!clean) return null
   if (DOSAGE.test(clean)) return CHAT_FALLBACK
   return clean.length > 1200 ? `${clean.slice(0, 1200).replace(/\s+\S*$/, "")}…` : clean

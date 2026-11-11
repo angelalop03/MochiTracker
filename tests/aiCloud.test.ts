@@ -65,6 +65,7 @@ describe("validación de lo que escribe la IA", () => {
   it("en el chat cambia las dosis por una respuesta prudente", () => {
     expect(checkChatReply("Toma 600 mg cada 8 horas")).toMatch(/profesional sanitario/)
     expect(checkChatReply("<think>x</think> Descansa un poco más hoy.")).toBe("Descansa un poco más hoy.")
+    expect(checkChatReply("Ideas:\n* **Caldo** caliente\n*  Paseo corto")).toBe("Ideas:\n- Caldo caliente\n- Paseo corto")
   })
 
   it("el chat solo envía los últimos mensajes y el contexto, sin notas", () => {

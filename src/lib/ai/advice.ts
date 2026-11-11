@@ -1,15 +1,8 @@
-// Prompt y validación de la IA. Módulo puro: no carga el modelo.
-//
-// Se eligió tras probar 5 modelos reales en español. Los que caben en un móvil daban
-// consejos incoherentes o peligrosos, así que el modelo no inventa: adapta un consejo ya
-// revisado, bloque a bloque, y todo lo que escribe se valida antes de mostrarlo.
+// Tipos y validación de lo que escribe la IA. Lo usa el servidor antes de devolver nada:
+// todo consejo se comprueba antes de mostrarse, y si no pasa se quedan los de las reglas.
 
-import { PHASE_CONTENT, pickVariant, type BlockId } from "../../content/phases.js"
-import { MOODS, symptomLabel } from "../../content/symptoms.js"
+import type { BlockId } from "../../content/phases.js"
 import type { Phase } from "../cycle.js"
-
-export const MODEL_ID = "Qwen3-4B-q4f16_1-MLC"
-export const MODEL_DOWNLOAD_LABEL = "2,3 GB"
 
 export type AiAdvice = Partial<Record<BlockId, string>>
 
@@ -28,53 +21,6 @@ export interface AiInput {
   days: AiDay[]
   /** true si las reglas han detectado señales de alarma */
   alarm: boolean
-}
-
-const SYSTEM_PROMPT = `Eres Mochi, una amiga cercana y cálida. Escribes en español de España, en femenino y tuteando.
-Adaptas un consejo a cómo está ella hoy, en una sola frase de menos de 25 palabras.
-Usa solo lo que dice el consejo y lo que ella ha registrado. No añadas ideas, no saludes y no repitas números.
-Es contenido orientativo: nunca diagnostiques ni nombres enfermedades o medicamentos.
-Si aparecen señales de alarma, recomienda consultar con un profesional sanitario.
-
-Ejemplo 1
-Cómo está: cansancio; energía: 2 de 5
-Consejo: Encajan el pilates, el yoga, caminar o la fuerza con cargas moderadas.
-Respuesta: Con el cansancio que llevas, hoy te puede sentar bien algo suave, como caminar o hacer yoga.
-
-Ejemplo 2
-Cómo está: ánimo: genial
-Consejo: Puedes sentirte con más seguridad. Buen momento para conversaciones importantes.
-Respuesta: Con ese ánimo tan bueno, aprovecha hoy para esa conversación que tenías pendiente.`
-
-/** Resume lo registrado en una línea. Vacío si no hay nada que adaptar */
-export function describeSituation(days: AiDay[]) {
-  const symptoms = [...new Set(days.flatMap((d) => d.symptoms))].map((s) => symptomLabel(s).toLowerCase())
-  const mood = days.map((d) => d.mood).filter(Boolean).at(-1)
-  const energy = days.map((d) => d.energy).filter(Boolean).at(-1)
-  return [
-    symptoms.length ? `síntomas: ${symptoms.join(", ")}` : null,
-    mood ? `ánimo: ${MOODS.find((m) => m.id === mood)?.label.toLowerCase() ?? mood}` : null,
-    energy ? `energía: ${energy} de 5` : null,
-  ]
-    .filter(Boolean)
-    .join("; ")
-}
-
-/** Sin datos no hay nada que personalizar, y las señales de alarma las gestionan las reglas */
-export function shouldUseAi(input: AiInput) {
-  return !input.alarm && describeSituation(input.days) !== ""
-}
-
-export function buildMessages(input: AiInput, block: BlockId) {
-  // Adapta otra variante, para no repetir el consejo base que ya se ve en pantalla
-  const tip = pickVariant(PHASE_CONTENT[input.phase].blocks[block], input.seed + 1)
-  return [
-    { role: "system" as const, content: SYSTEM_PROMPT },
-    {
-      role: "user" as const,
-      content: `Cómo está: ${describeSituation(input.days)}\nConsejo: ${tip}\nRespuesta:`,
-    },
-  ]
 }
 
 /** Quita lo que el modelo añade alrededor del consejo */

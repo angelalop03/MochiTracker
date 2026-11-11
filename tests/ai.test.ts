@@ -1,16 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  buildMessages,
-  cleanReply,
-  describeSituation,
-  fitsSituation,
-  isSafeAdvice,
-  shouldUseAi,
-  validateReply,
-  type AiDay,
-  type AiInput,
-} from "../src/lib/ai/advice"
-import { PHASE_CONTENT, pickVariant } from "../src/content/phases"
+import { cleanReply, fitsSituation, isSafeAdvice, validateReply, type AiDay } from "../src/lib/ai/advice"
 
 const day = (patch: Partial<AiDay> = {}): AiDay => ({
   date: "2026-11-04",
@@ -18,70 +7,6 @@ const day = (patch: Partial<AiDay> = {}): AiDay => ({
   mood: null,
   energy: null,
   ...patch,
-})
-
-const input: AiInput = {
-  phase: "lutea",
-  cycleDay: 22,
-  seed: 0,
-  alarm: false,
-  days: [day({ symptoms: ["cansancio", "hinchazon"], mood: "sensible", energy: 2 })],
-}
-
-describe("buildMessages", () => {
-  const [system, user] = buildMessages(input, "movimiento")
-
-  it("describe lo registrado en lenguaje natural", () => {
-    expect(user?.content).toContain("cansancio, hinchazón")
-    expect(user?.content).toContain("ánimo: sensible")
-    expect(user?.content).toContain("energía: 2 de 5")
-  })
-
-  it("adapta un consejo revisado, distinto del que ya se ve en pantalla", () => {
-    const variants = PHASE_CONTENT.lutea.blocks.movimiento
-    expect(user?.content).toContain(pickVariant(variants, 1))
-    expect(user?.content).not.toContain(pickVariant(variants, 0))
-  })
-
-  it("el prompt de sistema es orientativo y pide consultar ante señales de alarma", () => {
-    expect(system?.content).toMatch(/orientativo/)
-    expect(system?.content).toMatch(/nunca diagnostiques/)
-    expect(system?.content).toMatch(/consultar con un profesional/)
-  })
-
-  it("nunca envía las notas personales", () => {
-    const withNotes = { ...input, days: [{ ...input.days[0]!, notes: "secreto-personal" }] }
-    expect(JSON.stringify(buildMessages(withNotes, "cuerpo"))).not.toContain("secreto-personal")
-  })
-})
-
-describe("describeSituation", () => {
-  it("une los días sin repetir y usa el último ánimo y energía", () => {
-    const text = describeSituation([
-      day({ symptoms: ["cansancio"], mood: "triste", energy: 1 }),
-      day({ symptoms: ["cansancio", "antojos"], mood: "bien", energy: 3 }),
-    ])
-    expect(text).toBe("síntomas: cansancio, antojos; ánimo: bien; energía: 3 de 5")
-  })
-
-  it("sin datos queda vacío", () => {
-    expect(describeSituation([day()])).toBe("")
-  })
-})
-
-describe("shouldUseAi", () => {
-  it("se usa si hay algo que personalizar", () => {
-    expect(shouldUseAi(input)).toBe(true)
-  })
-
-  it("no gasta el modelo sin datos", () => {
-    expect(shouldUseAi({ ...input, days: [] })).toBe(false)
-    expect(shouldUseAi({ ...input, days: [day()] })).toBe(false)
-  })
-
-  it("con señal de alarma mandan las reglas", () => {
-    expect(shouldUseAi({ ...input, alarm: true })).toBe(false)
-  })
 })
 
 describe("cleanReply", () => {
