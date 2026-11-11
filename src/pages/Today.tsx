@@ -4,12 +4,14 @@ import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
 import BottomNav from "../components/BottomNav"
 import ConsultCard from "../components/ConsultCard"
-import CycleTimeline from "../components/CycleTimeline"
+import CycleDial from "../components/CycleDial"
 import DialogBox from "../components/DialogBox"
 import Glance from "../components/Glance"
+import MochiFace from "../components/MochiFace"
 import Loading from "../components/Loading"
 import QuickLog from "../components/QuickLog"
 import SkyPanel from "../components/SkyPanel"
+import ThemeToggle from "../components/ThemeToggle"
 import { CONTRACEPTION_NOTICE, DISCLAIMER, PHASE_CONTENT, pickVariant } from "../content/phases"
 import { useAiAdvice } from "../hooks/useAiAdvice"
 import { useCycleData } from "../hooks/useCycleData"
@@ -22,12 +24,20 @@ import {
   type CycleState,
   type Phase,
 } from "../lib/cycle"
-import { daySeed, formatInDays } from "../lib/format"
+import { daySeed, formatDay, formatInDays, formatLongDate } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
 import { addPeriod } from "../services/data"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
+
+/** La cara de Mochi que acompaña a cada estación */
+const MOCHI_MOOD: Record<Phase, string> = {
+  menstrual: "sensible",
+  folicular: "bien",
+  ovulatoria: "genial",
+  lutea: "normal",
+}
 
 function nextChip(state: KnownState) {
   if (!state.nextPhase) return null
@@ -196,34 +206,32 @@ export default function Today() {
   const aiInput: AiInput = { phase: state.phase, cycleDay: state.cycleDay, seed, days: recentLogs, alarm }
   const aiKey = JSON.stringify([today, aiInput])
 
+  const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
+
   return (
     <>
       <main className="today" data-phase={state.phase}>
-        <div className="today-scene">
-          {import.meta.env.DEV && devDay !== null && (
-            <SimulationBanner day={state.cycleDay} season={content.season} onReset={() => setDevDay(null)} />
-          )}
-          <header className="today-head">
-            <p className="eyebrow">
-              Fase {content.name.toLowerCase()} · {content.season}
-            </p>
-            <h1 className="day-title">
-              Día {state.cycleDay} <span>de {state.estimate.cycleLength}</span>
-            </h1>
-          </header>
-
+        <section className="today-hero" aria-label="Tu isla hoy">
+          <div className="hero-bar">
+            <span className="wordmark">Isla Mochi</span>
+            <ThemeToggle />
+          </div>
           <SkyPanel phase={state.phase}>
             {nextChip(state) && <span className="sky-chip">{nextChip(state)}</span>}
           </SkyPanel>
+        </section>
 
-          <blockquote className="mochi-quote">
-            <p>{pickVariant(content.greetings, seed)}</p>
-            <cite>Mochi</cite>
-          </blockquote>
-        </div>
+        <div className="today-sheet">
+          {import.meta.env.DEV && devDay !== null && (
+            <SimulationBanner day={state.cycleDay} season={content.season} onReset={() => setDevDay(null)} />
+          )}
 
-        <div className="today-info">
-          {import.meta.env.DEV && <DevPhaseBar state={realState} onJump={setDevDay} />}
+          <header className="today-head">
+            <p className="eyebrow">{formatLongDate(today)}</p>
+            <h1 className="season-title">
+              {content.season} <span>en tu isla</span>
+            </h1>
+          </header>
 
           {alarm && (
             <p className="notice notice-alert" role="alert">
@@ -233,38 +241,52 @@ export default function Today() {
           )}
           <Notices state={state} />
 
-          <CycleTimeline
-            ranges={state.ranges}
-            cycleDay={state.cycleDay}
-            cycleLength={state.estimate.cycleLength}
-            next={state.nextPhase}
-          />
+          <section className="dial-card" aria-label="Tu ciclo hoy">
+            <CycleDial ranges={state.ranges} cycleDay={state.cycleDay} cycleLength={state.estimate.cycleLength} />
+            <div className="dial-text">
+              <span className="phase-pill">Fase {content.name.toLowerCase()}</span>
+              {next && state.nextPhase ? (
+                <p className="dial-next">
+                  <strong>
+                    {next.season} {formatInDays(state.nextPhase.inDays)}
+                  </strong>
+                  <span>
+                    Fase {next.name.toLowerCase()}, el {formatDay(state.nextPhase.date)}
+                  </span>
+                </p>
+              ) : (
+                <p className="dial-next">
+                  <strong>Pendiente de tu regla</strong>
+                </p>
+              )}
+              <p className="dial-summary">{content.summary}</p>
+            </div>
+          </section>
+
+          <figure className="mochi-quote">
+            <MochiFace mood={MOCHI_MOOD[state.phase]} size={48} />
+            <blockquote>
+              <p>{pickVariant(content.greetings, seed)}</p>
+              <figcaption>Mochi</figcaption>
+            </blockquote>
+          </figure>
 
           <Glance phase={state.phase} />
 
           <PersonalAdvice input={aiInput} aiKey={aiKey} seed={seed} tips={tips} />
 
-          <section className="explainer" aria-labelledby="explainer-title">
-            <h2 id="explainer-title" className="eyebrow">
-              Qué está pasando
+          <section className="your-day" aria-labelledby="your-day-title">
+            <h2 id="your-day-title" className="eyebrow">
+              Tu día
             </h2>
-            <p>{content.summary}</p>
+            <QuickLog key={realToday} date={realToday} log={logs.find((l) => l.date === realToday)} onSaved={reload} />
+            <div className="action-stack">
+              <PeriodForm today={realToday} onSaved={reload} />
+              <ConsultCard open={alarm} />
+            </div>
           </section>
 
-          <h2 className="eyebrow">Tu día</h2>
-
-          <details className="period-form">
-            <summary>Cuéntame cómo estás para afinar tus consejos</summary>
-            <QuickLog
-              key={realToday}
-              date={realToday}
-              log={logs.find((l) => l.date === realToday)}
-              onSaved={reload}
-            />
-          </details>
-
-          <PeriodForm today={realToday} onSaved={reload} />
-          <ConsultCard open={alarm} />
+          {import.meta.env.DEV && <DevPhaseBar state={realState} onJump={setDevDay} />}
 
           <footer className="legal-note">
             <p>{DISCLAIMER}</p>

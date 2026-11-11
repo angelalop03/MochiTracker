@@ -7,6 +7,12 @@ export function formatDay(date: string) {
   return noon(date).toLocaleDateString("es-ES", { day: "numeric", month: "long" })
 }
 
+/** "martes, 11 de noviembre" */
+export function formatLongDate(date: string) {
+  const text = noon(date).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 /** "marzo de 2024" */
 export function formatMonth(date: string) {
   return noon(date).toLocaleDateString("es-ES", { month: "long", year: "numeric" })

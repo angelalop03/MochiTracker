@@ -1,13 +1,14 @@
-import { CalendarDays, Download, Droplets, FileText, LogOut, RefreshCw, Trash2, Upload } from "lucide-react"
+import { CalendarDays, Download, Droplets, FileText, LogOut, Palette, RefreshCw, Trash2, Upload } from "lucide-react"
 import { useRef, useState, type FormEvent } from "react"
 import AiSettings from "../components/AiSettings"
 import BottomNav from "../components/BottomNav"
 import Loading from "../components/Loading"
 import NotificationSettings from "../components/NotificationSettings"
-import { SettingsGroup, SettingsRow, Stepper } from "../components/settings"
+import { Segmented, SettingsGroup, SettingsRow, Stepper } from "../components/settings"
 import { DISCLAIMER } from "../content/phases"
 import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
+import { useTheme, type ThemePref } from "../lib/theme"
 import { deleteAccount, exportData } from "../services/account"
 import { signOut } from "../services/auth"
 import { updateProfile, type Profile } from "../services/data"
@@ -138,6 +139,32 @@ function CycleSettings({ profile, onSaved }: { profile: Profile; onSaved: () => 
   )
 }
 
+function Appearance() {
+  const { pref, setPref } = useTheme()
+  return (
+    <SettingsGroup title="Apariencia" footer="En automático, la isla se hace de noche cuando tu móvil está en modo oscuro.">
+      <div className="settings-row settings-row-stack">
+        <span className="settings-icon">
+          <Palette size={18} strokeWidth={1.75} aria-hidden="true" />
+        </span>
+        <span className="settings-label">
+          <span>Tema</span>
+          <Segmented<ThemePref>
+            label="Tema de la app"
+            value={pref}
+            onChange={setPref}
+            options={[
+              { value: "auto", label: "Automático" },
+              { value: "light", label: "Día" },
+              { value: "dark", label: "Noche" },
+            ]}
+          />
+        </span>
+      </div>
+    </SettingsGroup>
+  )
+}
+
 function AccountSettings({ userId, email }: { userId: string; email: string }) {
   const [confirm, setConfirm] = useState("")
   const [busy, setBusy] = useState(false)
@@ -216,6 +243,7 @@ export default function Settings() {
         <ProfileCard profile={profile} email={session.user.email} onSaved={reload} />
         <CycleSettings profile={profile} onSaved={reload} />
         <NotificationSettings profile={profile} onSaved={reload} />
+        <Appearance />
         <AiSettings />
         <AccountSettings userId={session.user.id} email={session.user.email} />
         <p className="legal-note">{DISCLAIMER}</p>

@@ -1,19 +1,33 @@
 /* ============================================================
-   Isla Mochi · base visual
-   Fondo cálido casi blanco, tinta oscura y un único acento por estación.
-   Fraunces para titulares y citas; DM Sans para todo lo demás.
+   Isla Mochi · identidad visual
+   - Cada estación tiene su cielo, y la app empieza en él.
+   - Detalles en píxeles que conectan la interfaz con la isla.
+   - Fraunces para la voz (titulares y Mochi), DM Sans para leer.
+   - Día y noche: el modo oscuro es la isla bajo las estrellas.
    ============================================================ */
 
 :root {
+  color-scheme: light;
   --bg: #faf7f4;
   --card: #ffffff;
+  --card-2: #f6f1ec;
   --ink: #2e2430;
   --ink-soft: #6b5e66;
+  --on-ink: #ffffff;
   --line: #e9e2dc;
   --line-soft: #f1ece7;
+  --hover: #fbf8f5;
+  --glass: rgba(255, 255, 255, 0.86);
   --brand: #a63c6a;
   --danger: #a32d3d;
   --danger-bg: #fbe6e3;
+  --danger-ink: #6e1d2a;
+  --mochi-body: #fff9f2;
+  --mochi-ink: #2e2430;
+  --mochi-blush: #f6a9bb;
+  --featured-bg: #2e2430;
+  --featured-fg: #ffffff;
+  --face-edge: rgba(46, 36, 48, 0.22);
 
   /* Estación: la sobrescribe [data-phase] */
   --accent: #a63c6a;
@@ -22,47 +36,105 @@
   --sky-top: #f8e9ef;
   --sky-bottom: #faf7f4;
 
-  /* Colores de cada fase en la línea del ciclo */
-  --menstrual: #c9b8ea;
-  --folicular: #b9dcc1;
-  --ovulatoria: #f2d48c;
-  --lutea: #eeac94;
+  /* Colores de cada fase en la rueda */
+  --menstrual: #b9a6e6;
+  --folicular: #9fd2ad;
+  --ovulatoria: #f0c76a;
+  --lutea: #ec9f84;
 
-  --radius: 20px;
-  --radius-sm: 12px;
-  --shadow: 0 1px 2px rgba(46, 36, 48, 0.04), 0 8px 24px -16px rgba(46, 36, 48, 0.18);
+  --radius: 22px;
+  --radius-sm: 14px;
+  --shadow:
+    0 1px 2px rgba(46, 36, 48, 0.04), 0 10px 28px -18px rgba(46, 36, 48, 0.22);
   --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
   --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --nav-height: 64px;
+  --nav-gap: 14px;
 }
 
 [data-phase="menstrual"] {
   --accent: #6e56a8;
   --tint: #efeaf8;
   --deep: #f6f3fb;
-  --sky-top: #d9cfef;
-  --sky-bottom: #f4eef8;
+  --sky-top: #cfc3ee;
+  --sky-bottom: #f3ecf8;
 }
 [data-phase="folicular"] {
   --accent: #33704a;
   --tint: #e5f1e7;
   --deep: #f2f8f3;
-  --sky-top: #cfeae2;
-  --sky-bottom: #f7f4e6;
+  --sky-top: #bfe6db;
+  --sky-bottom: #f6f2df;
 }
 [data-phase="ovulatoria"] {
   --accent: #94600c;
   --tint: #fbf0d9;
   --deep: #fdf8ee;
-  --sky-top: #c9e5f3;
-  --sky-bottom: #fcefdc;
+  --sky-top: #b9def2;
+  --sky-bottom: #fdeed6;
 }
 [data-phase="lutea"] {
   --accent: #a9492f;
   --tint: #f9e7dd;
   --deep: #fcf4ef;
-  --sky-top: #f8dccd;
-  --sky-bottom: #f1c6bd;
+  --sky-top: #f6d2c0;
+  --sky-bottom: #eeb9b2;
+}
+
+/* ---------- Noche en la isla ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #16111a;
+  --card: #211a26;
+  --card-2: #2a2230;
+  --ink: #f4ecf0;
+  --ink-soft: #b8a9b2;
+  --on-ink: #1b1520;
+  --line: #3a3040;
+  --line-soft: #2e2634;
+  --hover: #29212f;
+  --glass: rgba(33, 26, 38, 0.82);
+  --brand: #ee9dbf;
+  --danger: #ff9aa8;
+  --danger-bg: #3b1e24;
+  --danger-ink: #ffc5cd;
+  --mochi-body: #fff4e8;
+  --mochi-ink: #2e2430;
+  --featured-bg: #f4ecf0;
+  --featured-fg: #1b1520;
+  --face-edge: transparent;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -18px rgba(0, 0, 0, 0.7);
+  --accent: #ee9dbf;
+  --tint: #3a2230;
+  --deep: #16111a;
+}
+:root[data-theme="dark"] [data-phase="menstrual"] {
+  --accent: #b9a6f2;
+  --tint: #2a2340;
+  --deep: #17132a;
+  --sky-top: #141030;
+  --sky-bottom: #2d2552;
+}
+:root[data-theme="dark"] [data-phase="folicular"] {
+  --accent: #8fd4a3;
+  --tint: #1c3026;
+  --deep: #10201c;
+  --sky-top: #0b1f2b;
+  --sky-bottom: #1d3b38;
+}
+:root[data-theme="dark"] [data-phase="ovulatoria"] {
+  --accent: #f0c462;
+  --tint: #33290f;
+  --deep: #121a30;
+  --sky-top: #0f1a3a;
+  --sky-bottom: #3a3050;
+}
+:root[data-theme="dark"] [data-phase="lutea"] {
+  --accent: #f4a285;
+  --tint: #3a2119;
+  --deep: #1e1220;
+  --sky-top: #1d1028;
+  --sky-bottom: #4a2532;
 }
 
 * {
@@ -140,7 +212,11 @@ a:hover {
   line-height: 1.2;
 }
 
+/* Etiqueta con un destello de píxeles, como los de la isla */
 .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-body);
   font-size: 0.75rem;
   font-weight: 700;
@@ -148,6 +224,20 @@ a:hover {
   line-height: 1.4;
   text-transform: uppercase;
   color: var(--accent);
+}
+
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: 3px;
+  height: 3px;
+  margin: 3px;
+  background: currentColor;
+  box-shadow:
+    3px 0 currentColor,
+    -3px 0 currentColor,
+    0 3px currentColor,
+    0 -3px currentColor;
 }
 
 .section-head {
@@ -163,7 +253,8 @@ a:hover {
   font-size: 0.8rem;
 }
 
-.brand {
+.brand,
+.wordmark {
   display: inline-block;
   font-family: var(--font-display);
   font-weight: 600;
@@ -187,7 +278,6 @@ a:hover {
   margin-bottom: 4px;
 }
 
-/* Voz de Mochi en el resto de pantallas */
 .dialog-box {
   position: relative;
   padding: 18px 20px 18px 22px;
@@ -221,7 +311,7 @@ a:hover {
 
 .notice-alert {
   background: var(--danger-bg);
-  color: #6e1d2a;
+  color: var(--danger-ink);
   font-weight: 700;
 }
 
@@ -236,20 +326,20 @@ a:hover {
   border: 0;
   border-radius: 999px;
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
   cursor: pointer;
   transition:
-    background-color 0.2s,
+    opacity 0.2s,
     transform 0.1s;
 }
 
 .button:hover {
-  background: #45364a;
-  color: #fff;
+  opacity: 0.88;
+  color: var(--on-ink);
 }
 
 .button:active {
@@ -257,7 +347,7 @@ a:hover {
 }
 
 .button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: progress;
 }
 
@@ -270,7 +360,18 @@ a:hover {
 .button-quiet:hover {
   background: var(--card);
   color: var(--ink);
-  box-shadow: inset 0 0 0 1.5px var(--ink-soft);
+  opacity: 1;
+}
+
+.button-small {
+  min-height: 38px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+}
+
+.button-danger {
+  background: var(--danger);
+  color: var(--card);
 }
 
 .button-link {
@@ -284,6 +385,20 @@ a:hover {
   text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
   text-underline-offset: 3px;
   cursor: pointer;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--glass);
+  color: var(--ink);
+  box-shadow: 0 2px 10px -4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
 }
 
 /* ---------- Formularios ---------- */
@@ -321,16 +436,11 @@ a:hover {
   transition: border-color 0.2s;
 }
 
-.field input:hover,
-.field textarea:hover {
-  border-color: #d6ccc4;
-}
-
 .field input:focus-visible,
 .field textarea:focus-visible {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .field textarea {
@@ -363,7 +473,7 @@ a:hover {
   width: 20px;
   height: 20px;
   margin: 2px 0 0;
-  accent-color: var(--ink);
+  accent-color: var(--accent);
 }
 
 .form-error {
@@ -376,6 +486,7 @@ a:hover {
 
 .form-ok {
   color: var(--ink-soft);
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -410,24 +521,11 @@ a:hover {
   cursor: pointer;
 }
 
-.chip:hover {
-  box-shadow: inset 0 0 0 1.5px #d6ccc4;
-}
-
 .chip[aria-pressed="true"] {
-  background: var(--ink);
-  color: #fff;
+  background: var(--accent);
+  color: var(--card);
+  font-weight: 700;
   box-shadow: none;
-}
-
-.energy {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-}
-
-.energy .chip {
-  padding-inline: 0;
 }
 
 /* ---------- Páginas ---------- */
@@ -450,7 +548,7 @@ a:hover {
 }
 
 .with-nav {
-  padding-bottom: calc(var(--nav-height) + 32px);
+  padding-bottom: calc(var(--nav-height) + var(--nav-gap) * 2 + 24px);
 }
 
 .prose h2 {
@@ -490,15 +588,16 @@ a:hover {
 
 .sky-chip {
   position: absolute;
-  left: 14px;
-  bottom: 14px;
-  padding: 5px 12px;
+  left: 16px;
+  bottom: 16px;
+  padding: 6px 13px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--glass);
   color: var(--ink);
   font-size: 0.8rem;
   font-weight: 700;
-  box-shadow: 0 2px 10px -4px rgba(46, 36, 48, 0.3);
+  box-shadow: 0 2px 10px -4px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
 }
 
 .static-island {
@@ -507,49 +606,228 @@ a:hover {
   height: 100%;
 }
 
-/* ---------- Hoy ---------- */
+/* ---------- Hoy: cielo arriba, hoja de contenido encima ---------- */
 .today {
-  display: grid;
-  gap: 24px;
-  width: min(100%, 520px);
   min-height: 100dvh;
-  margin: 0 auto;
-  padding: 20px 20px calc(var(--nav-height) + 36px);
+  padding-bottom: calc(var(--nav-height) + var(--nav-gap) * 2 + 24px);
 }
 
-.today-scene,
-.today-info {
+.today-hero {
+  position: relative;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
+
+:root[data-theme="dark"] .today-hero,
+:root[data-theme="dark"] .sky-panel {
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 32% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 90% 34%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 40%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 68% 44%, #fff 50%, transparent 51%),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
+
+.hero-bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(14px + env(safe-area-inset-top)) 20px 0;
+}
+
+.hero-bar .wordmark {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--glass);
+  font-size: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.today-hero .sky-panel {
+  aspect-ratio: auto;
+  height: min(56vh, 440px);
+  border-radius: 0;
+  background: transparent;
+}
+
+.today-hero .sky-chip {
+  bottom: 44px;
+}
+
+.today-sheet {
+  position: relative;
+  z-index: 1;
   display: grid;
-  gap: 20px;
-  align-content: start;
-  min-width: 0;
-}
-
-.today-info {
-  gap: 28px;
+  gap: 26px;
+  width: 100%;
+  margin: -28px auto 0;
+  padding: 26px 20px 0;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg);
 }
 
 .today-head {
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 
-.day-title {
+.season-title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 3rem;
-  line-height: 1;
+  font-size: 2.6rem;
+  line-height: 1.02;
   letter-spacing: -0.02em;
 }
 
-.day-title span {
+.season-title span {
+  display: block;
   color: var(--ink-soft);
-  font-size: 1.2rem;
+  font-size: 1.35rem;
+  font-style: italic;
   letter-spacing: 0;
 }
 
+/* Rueda de estaciones */
+.dial-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.cycle-dial {
+  display: block;
+  width: 132px;
+  height: 132px;
+}
+
+.dial-track {
+  fill: none;
+  stroke: var(--line-soft);
+  stroke-width: 14;
+}
+
+.dial-arc {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.dial-arc[data-segment="menstrual"] {
+  stroke: var(--menstrual);
+}
+.dial-arc[data-segment="folicular"] {
+  stroke: var(--folicular);
+}
+.dial-arc[data-segment="ovulatoria"] {
+  stroke: var(--ovulatoria);
+}
+.dial-arc[data-segment="lutea"] {
+  stroke: var(--lutea);
+}
+
+.dial-marker {
+  fill: var(--ink);
+  stroke: var(--card);
+  stroke-width: 4;
+}
+
+.cycle-dial text {
+  fill: var(--ink);
+  text-anchor: middle;
+}
+
+.cycle-dial .dial-small {
+  fill: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+.dial-day {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+}
+
+.dial-text {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.phase-pill {
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dial-next {
+  display: grid;
+  line-height: 1.3;
+}
+
+.dial-next strong {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.2rem;
+}
+
+.dial-next span {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.dial-summary {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* La voz de Mochi */
 .mochi-quote {
-  padding: 0 4px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.mochi-face {
+  display: block;
+  flex: none;
+}
+
+.mf-body {
+  fill: var(--mochi-body);
+}
+.mf-ink {
+  fill: var(--mochi-ink);
+}
+.mf-blush {
+  fill: var(--mochi-blush);
+}
+.mf-tear {
+  fill: #8cc8ee;
+}
+
+.mochi-quote .mochi-face {
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--tint);
+  width: 48px;
+  height: 48px;
 }
 
 .mochi-quote p {
@@ -559,71 +837,14 @@ a:hover {
   line-height: 1.35;
 }
 
-.mochi-quote p::before {
-  content: "«";
-}
-
-.mochi-quote p::after {
-  content: "»";
-}
-
-.mochi-quote cite {
-  display: block;
+.mochi-quote figcaption {
   margin-top: 6px;
   color: var(--ink-soft);
-  font-size: 0.85rem;
-  font-style: normal;
+  font-size: 0.82rem;
 }
 
-.mochi-quote cite::before {
+.mochi-quote figcaption::before {
   content: "— ";
-}
-
-/* Línea del ciclo */
-.timeline {
-  display: grid;
-  gap: 8px;
-}
-
-.timeline-track {
-  position: relative;
-  display: flex;
-  gap: 3px;
-  height: 10px;
-}
-
-.timeline-track > [data-segment] {
-  border-radius: 999px;
-}
-
-[data-segment="menstrual"] { background: var(--menstrual); }
-[data-segment="folicular"] { background: var(--folicular); }
-[data-segment="ovulatoria"] { background: var(--ovulatoria); }
-[data-segment="lutea"] { background: var(--lutea); }
-
-.timeline-today {
-  position: absolute;
-  top: 50%;
-  width: 18px;
-  height: 18px;
-  border: 3px solid var(--card);
-  border-radius: 50%;
-  background: var(--ink);
-  box-shadow: 0 1px 6px rgba(46, 36, 48, 0.3);
-  transform: translate(-50%, -50%);
-}
-
-.timeline-labels {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-}
-
-.timeline-now {
-  color: var(--ink);
-  font-weight: 700;
 }
 
 /* Indicadores */
@@ -643,7 +864,7 @@ a:hover {
   gap: 6px;
   align-content: start;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 18px;
   background: var(--card);
   box-shadow: var(--shadow);
   color: var(--accent);
@@ -669,14 +890,21 @@ a:hover {
 
 .energy-meter i {
   width: 6px;
-  border-radius: 3px;
   background: var(--line);
 }
 
-.energy-meter i:nth-child(1) { height: 6px; }
-.energy-meter i:nth-child(2) { height: 10px; }
-.energy-meter i:nth-child(3) { height: 14px; }
-.energy-meter i:nth-child(4) { height: 18px; }
+.energy-meter i:nth-child(1) {
+  height: 6px;
+}
+.energy-meter i:nth-child(2) {
+  height: 10px;
+}
+.energy-meter i:nth-child(3) {
+  height: 14px;
+}
+.energy-meter i:nth-child(4) {
+  height: 18px;
+}
 
 .energy-meter i.is-on {
   background: var(--accent);
@@ -684,19 +912,37 @@ a:hover {
 
 /* Consejo destacado */
 .featured {
+  position: relative;
   display: grid;
   gap: 8px;
-  padding: 20px 22px;
+  overflow: hidden;
+  padding: 22px;
   border-radius: var(--radius);
-  background: var(--ink);
-  color: #fff;
+  background: var(--featured-bg);
+  color: var(--featured-fg);
+}
+
+.featured::after {
+  /* Un rincón de píxeles con el color de la estación */
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 30px;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  box-shadow:
+    8px 0 var(--accent),
+    0 8px var(--accent),
+    8px 8px color-mix(in srgb, var(--accent) 40%, transparent),
+    16px 0 color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .featured-label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--tint);
+  color: color-mix(in srgb, var(--featured-fg) 70%, var(--accent));
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -705,14 +951,14 @@ a:hover {
 
 .featured p {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.22rem;
   line-height: 1.4;
 }
 
 /* Lista de bloques */
 .advice-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .advice-list ul {
@@ -744,7 +990,7 @@ a:hover {
 }
 
 .advice-list summary:hover {
-  background: #fdfbf9;
+  background: var(--hover);
 }
 
 .advice-icon {
@@ -798,9 +1044,8 @@ a:hover {
 }
 
 .for-you-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 7px;
+  height: 7px;
   background: var(--accent);
 }
 
@@ -818,51 +1063,222 @@ a:hover {
   text-transform: uppercase;
 }
 
-.explainer {
-  display: grid;
-  gap: 8px;
-}
-
-.explainer p {
-  font-size: 1rem;
-  color: var(--ink);
-}
-
 .cycle-caption {
   color: var(--ink-soft);
   font-size: 0.92rem;
 }
 
-/* Acciones plegables */
-.quick-log {
+/* ---------- Tu día ---------- */
+.your-day {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
-.quick-log fieldset {
+.checkin {
   display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.quick-log legend {
-  margin-bottom: 8px;
-  padding: 0;
-  font-weight: 700;
-}
-
-.period-form,
-.consult {
+  gap: 20px;
+  padding: 22px 20px;
   border-radius: var(--radius);
   background: var(--card);
   box-shadow: var(--shadow);
 }
 
-.today-info .period-form + .period-form,
-.today-info .period-form + .consult {
-  margin-top: -18px;
+.checkin-head h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.checkin-head p {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.checkin-block {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.checkin-block legend {
+  margin-bottom: 10px;
+  padding: 0;
+  font-weight: 700;
+}
+
+.checkin-value {
+  color: var(--accent);
+}
+
+.mood-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* Contorno suave para que la cara blanca se vea sobre el fondo claro */
+.mood-option .mochi-face {
+  filter: drop-shadow(1px 0 0 var(--face-edge))
+    drop-shadow(-1px 0 0 var(--face-edge)) drop-shadow(0 1px 0 var(--face-edge))
+    drop-shadow(0 -1px 0 var(--face-edge));
+}
+
+.mood-option {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--card-2);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    background-color 0.15s;
+}
+
+.mood-option:hover {
+  transform: translateY(-2px);
+}
+
+.mood-option[aria-pressed="true"] {
+  background: var(--tint);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* La energía como una pila de píxeles */
+.battery {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-right: 10px;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+
+.battery button {
+  height: 34px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--card-2);
+  cursor: pointer;
+}
+
+.battery button.is-filled {
+  background: var(--accent);
+}
+
+.battery-tip {
+  position: absolute;
+  top: 50%;
+  right: -9px;
+  width: 6px;
+  height: 16px;
+  border-radius: 0 3px 3px 0;
+  background: var(--line);
+  transform: translateY(-50%);
+}
+
+.battery-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-right: 10px;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.checkin-more {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 14px;
+}
+
+.checkin-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.checkin-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.checkin-more > summary::after {
+  content: "";
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--ink-soft);
+  border-bottom: 1.5px solid var(--ink-soft);
+  transform: rotate(45deg) translateY(-3px);
+  transition: transform 0.2s;
+}
+
+.checkin-more[open] > summary::after {
+  transform: rotate(225deg) translateY(-3px);
+}
+
+.checkin-more[open] > summary {
+  margin-bottom: 12px;
+}
+
+.count {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--card);
+  font-size: 0.75rem;
+}
+
+.checkin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-stack {
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.action-stack > * + * {
+  border-top: 1px solid var(--line-soft);
+}
+
+.action-stack .period-form,
+.action-stack .consult {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Acciones plegables */
+.period-form,
+.consult {
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
 
 .period-form > summary,
@@ -871,7 +1287,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 56px;
+  min-height: 58px;
   padding: 14px 18px;
   font-weight: 700;
   cursor: pointer;
@@ -934,6 +1350,31 @@ a:hover {
   font-size: 0.8rem;
 }
 
+/* ---------- Aviso de vista simulada y desarrollo ---------- */
+.sim-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  padding: 12px 14px 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dev-tools > summary {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.dev-tools[open] > summary {
+  margin-bottom: 8px;
+}
+
 .dev-bar {
   display: flex;
   flex-wrap: wrap;
@@ -955,43 +1396,25 @@ a:hover {
   cursor: pointer;
 }
 
-/* ---------- Aviso de vista simulada y herramientas ---------- */
-.sim-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px 14px;
-  padding: 12px 14px 12px 16px;
-  border-radius: var(--radius-sm);
-  background: var(--tint);
-  color: var(--ink);
-  font-size: 0.9rem;
-  font-weight: 500;
+/* ---------- IA ---------- */
+.ai-panel {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
 }
 
-.button-small {
-  min-height: 38px;
-  padding: 6px 14px;
-  font-size: 0.88rem;
+.progress {
+  overflow: hidden;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line-soft);
 }
 
-.button-danger {
-  background: var(--danger);
-}
-
-.button-danger:hover {
-  background: #8a2533;
-}
-
-.dev-tools > summary {
-  color: var(--ink-soft);
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.dev-tools[open] > summary {
-  margin-bottom: 8px;
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
 }
 
 /* ---------- Ajustes ---------- */
@@ -1017,7 +1440,7 @@ a:hover {
   height: 56px;
   border-radius: 50%;
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
   font-family: var(--font-display);
   font-size: 1.5rem;
 }
@@ -1122,7 +1545,7 @@ a:hover {
 }
 
 .settings-row.is-action:hover {
-  background: #fdfbf9;
+  background: var(--hover);
   color: var(--ink);
 }
 
@@ -1183,7 +1606,8 @@ a:hover {
 
 .settings-chevron {
   flex: none;
-  color: #b9aeb5;
+  color: var(--ink-soft);
+  opacity: 0.6;
 }
 
 .switch {
@@ -1194,7 +1618,7 @@ a:hover {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: #d9d0ca;
+  background: var(--line);
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -1207,12 +1631,12 @@ a:hover {
   height: 24px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(46, 36, 48, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
 }
 
 .switch[aria-checked="true"] {
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .switch[aria-checked="true"] span {
@@ -1243,7 +1667,7 @@ a:hover {
   border-radius: 50%;
   background: var(--card);
   color: var(--ink);
-  box-shadow: 0 1px 2px rgba(46, 36, 48, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   cursor: pointer;
 }
 
@@ -1290,7 +1714,7 @@ a:hover {
   background: var(--card);
   color: var(--ink);
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(46, 36, 48, 0.14);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
 }
 
 .settings-danger > summary {
@@ -1309,34 +1733,6 @@ a:hover {
 
 .settings-danger > form {
   padding: 0 16px 16px 64px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .switch,
-  .switch span {
-    transition: none;
-  }
-}
-
-/* ---------- IA ---------- */
-.ai-panel {
-  display: grid;
-  gap: 10px;
-  justify-items: start;
-}
-
-.progress {
-  overflow: hidden;
-  width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--line-soft);
-}
-
-.progress span {
-  display: block;
-  height: 100%;
-  background: var(--accent);
 }
 
 /* ---------- Mis fechas ---------- */
@@ -1380,10 +1776,18 @@ a:hover {
   opacity: 0.45;
 }
 
-.cycle-cell[data-cell-phase="menstrual"] { background: var(--menstrual); }
-.cycle-cell[data-cell-phase="folicular"] { background: var(--folicular); }
-.cycle-cell[data-cell-phase="ovulatoria"] { background: var(--ovulatoria); }
-.cycle-cell[data-cell-phase="lutea"] { background: var(--lutea); }
+.cycle-cell[data-cell-phase="menstrual"] {
+  background: var(--menstrual);
+}
+.cycle-cell[data-cell-phase="folicular"] {
+  background: var(--folicular);
+}
+.cycle-cell[data-cell-phase="ovulatoria"] {
+  background: var(--ovulatoria);
+}
+.cycle-cell[data-cell-phase="lutea"] {
+  background: var(--lutea);
+}
 
 .cycle-cell.has-log {
   opacity: 0.85;
@@ -1490,54 +1894,61 @@ a:hover {
   border: 0;
   border-radius: 999px;
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
-/* ---------- Navegación inferior ---------- */
+/* ---------- Navegación flotante ---------- */
 .bottom-nav {
   position: fixed;
-  inset: auto 0 0;
-  z-index: 5;
+  left: 50%;
+  bottom: calc(var(--nav-gap) + env(safe-area-inset-bottom));
+  z-index: 10;
   display: flex;
-  justify-content: center;
   gap: 4px;
-  height: calc(var(--nav-height) + env(safe-area-inset-bottom));
-  padding: 6px 16px env(safe-area-inset-bottom);
-  background: rgba(255, 255, 255, 0.94);
-  border-top: 1px solid var(--line);
-  backdrop-filter: blur(10px);
+  width: min(calc(100% - 32px), 380px);
+  height: var(--nav-height);
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--glass);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 14px 34px -14px rgba(0, 0, 0, 0.35);
+  transform: translateX(-50%);
+  backdrop-filter: blur(14px);
 }
 
 .bottom-nav a {
-  position: relative;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 2px;
+  display: flex;
   flex: 1;
-  max-width: 140px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
   color: var(--ink-soft);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 500;
   text-decoration: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.bottom-nav a span {
+  display: none;
 }
 
 .bottom-nav a.active {
-  color: var(--ink);
+  flex: 1.6;
+  background: var(--ink);
+  color: var(--on-ink);
   font-weight: 700;
 }
 
-.bottom-nav a.active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 24px;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background: var(--accent);
+.bottom-nav a.active span {
+  display: inline;
 }
 
 /* ---------- Landing ---------- */
@@ -1637,7 +2048,7 @@ a:hover {
 
 .season-picker button[aria-pressed="true"] {
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
   font-weight: 700;
   box-shadow: none;
 }
@@ -1670,20 +2081,38 @@ a:hover {
 /* ---------- Escritorio ---------- */
 @media (min-width: 900px) {
   .today {
+    display: grid;
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    width: min(100%, 1080px);
     align-items: start;
     gap: 48px;
-    padding-top: 36px;
+    width: min(100%, 1120px);
+    margin: 0 auto;
+    padding: 32px 24px calc(var(--nav-height) + var(--nav-gap) * 2 + 24px);
   }
 
-  .today-scene {
+  .today-hero {
     position: sticky;
-    top: 36px;
+    top: 32px;
+    overflow: hidden;
+    border-radius: 32px;
   }
 
-  .day-title {
-    font-size: 3.5rem;
+  .today-hero .sky-panel {
+    height: min(78vh, 640px);
+  }
+
+  .today-hero .sky-chip {
+    bottom: 18px;
+  }
+
+  .today-sheet {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .season-title {
+    font-size: 3.2rem;
   }
 
   .hero,
@@ -1707,9 +2136,18 @@ a:hover {
   .landing,
   .button,
   .advice-chevron,
+  .mood-option,
+  .switch,
+  .switch span,
+  .bottom-nav a,
+  .checkin-more > summary::after,
   .period-form > summary::after,
   .consult > summary::after {
     transition: none;
+  }
+
+  .mood-option:hover {
+    transform: none;
   }
 
   [data-reveal] {
@@ -1717,4 +2155,9 @@ a:hover {
     transform: none;
     transition: none;
   }
+}
+
+/* La isla sin 3D también se hace de noche */
+:root[data-theme="dark"] .static-island {
+  filter: brightness(0.78) saturate(0.9);
 }
