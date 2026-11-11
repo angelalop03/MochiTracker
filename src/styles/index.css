@@ -1034,15 +1034,102 @@ a:hover {
   transform: rotate(180deg);
 }
 
+.advice-list details[open] > summary {
+  background: color-mix(in srgb, var(--tint) 45%, var(--card));
+}
+
 .advice-list details[open] .advice-preview {
-  display: none;
+  color: var(--accent);
+  font-weight: 500;
+  white-space: normal;
 }
 
 .advice-body {
   display: grid;
-  gap: 10px;
-  padding: 0 16px 16px 68px;
+  gap: 18px;
+  padding: 16px 16px 20px;
+  background: color-mix(in srgb, var(--tint) 45%, var(--card));
   font-size: 0.95rem;
+}
+
+.advice-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.advice-why p {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.advice-tips {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: tip;
+}
+
+.advice-tips li {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px 12px 50px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  counter-increment: tip;
+  line-height: 1.45;
+}
+
+.advice-tips li::before {
+  /* Número en una baldosa, como los bloques de la isla */
+  content: counter(tip);
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.advice-tips strong {
+  font-size: 0.95rem;
+}
+
+.advice-tips span {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.advice-watch {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.advice-watch svg {
+  margin-top: 2px;
+  color: var(--danger);
 }
 
 .for-you-dot {
@@ -1052,13 +1139,19 @@ a:hover {
 }
 
 .for-you {
-  padding-left: 12px;
-  border-left: 2px solid var(--accent);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--featured-bg);
+  color: var(--featured-fg);
+  line-height: 1.5;
 }
 
 .for-you-label {
-  display: block;
-  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--featured-fg) 70%, var(--accent));
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -1200,17 +1293,19 @@ a:hover {
   font-size: 0.75rem;
 }
 
+/* Síntomas y nota: filas que resumen lo marcado sin tener que abrirlas */
 .checkin-more {
-  border-top: 1px solid var(--line-soft);
-  padding-top: 14px;
+  margin-inline: -8px;
+  border-radius: 18px;
+  background: var(--card-2);
 }
 
 .checkin-more > summary {
-  display: flex;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 18px;
+  gap: 12px;
   align-items: center;
-  gap: 8px;
-  min-height: 32px;
-  font-weight: 700;
+  padding: 12px 14px 12px 12px;
   cursor: pointer;
   list-style: none;
 }
@@ -1219,35 +1314,197 @@ a:hover {
   display: none;
 }
 
-.checkin-more > summary::after {
-  content: "";
-  margin-left: auto;
-  width: 8px;
-  height: 8px;
-  border-right: 1.5px solid var(--ink-soft);
-  border-bottom: 1.5px solid var(--ink-soft);
-  transform: rotate(45deg) translateY(-3px);
+.more-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--accent);
+}
+
+.more-text {
+  display: grid;
+  min-width: 0;
+}
+
+.more-text strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.more-text > span {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more-chevron {
+  color: var(--ink-soft);
   transition: transform 0.2s;
 }
 
-.checkin-more[open] > summary::after {
-  transform: rotate(225deg) translateY(-3px);
-}
-
-.checkin-more[open] > summary {
-  margin-bottom: 12px;
+.checkin-more[open] .more-chevron {
+  transform: rotate(180deg);
 }
 
 .count {
   display: grid;
   place-items: center;
-  min-width: 22px;
-  height: 22px;
+  min-width: 20px;
+  height: 20px;
   padding: 0 6px;
   border-radius: 999px;
   background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.72rem;
+}
+
+.symptom-groups {
+  display: grid;
+  gap: 14px;
+  padding: 4px 14px 16px;
+}
+
+.symptom-group {
+  display: grid;
+  gap: 8px;
+}
+
+.symptom-group-title {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.symptom-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.symptom-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 6px 14px 6px 11px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    transform 0.1s;
+}
+
+.symptom-chip svg {
+  color: var(--accent);
+}
+
+.symptom-chip:active {
+  transform: scale(0.97);
+}
+
+.symptom-chip[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.symptom-chip[aria-pressed="true"] svg {
+  color: currentColor;
+}
+
+.symptom-group[data-important] .symptom-chip svg {
+  color: var(--danger);
+}
+
+.symptom-group[data-important] .symptom-chip[aria-pressed="true"] {
+  background: var(--danger);
   color: var(--card);
-  font-size: 0.75rem;
+}
+
+.symptom-group[data-important] .symptom-chip[aria-pressed="true"] svg {
+  color: currentColor;
+}
+
+.symptom-alert {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  font-size: 0.85rem;
+}
+
+/* La nota como una hoja de libreta */
+.note-paper {
+  display: block;
+  margin: 4px 14px 0;
+}
+
+.note-paper textarea {
+  display: block;
+  width: 100%;
+  min-height: 150px;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 12px;
+  background-color: var(--card);
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 27px,
+    var(--line) 27px,
+    var(--line) 28px
+  );
+  background-attachment: local;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 28px;
+  resize: vertical;
+}
+
+.note-paper textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.note-paper textarea::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+.note-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px 14px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.note-foot > span:first-child {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.note-foot svg {
+  flex: none;
+  margin-top: 2px;
 }
 
 .checkin-actions {
@@ -2306,7 +2563,8 @@ a:hover {
   .switch,
   .switch span,
   .bottom-nav a,
-  .checkin-more > summary::after,
+  .more-chevron,
+  .symptom-chip,
   .period-form > summary::after,
   .consult-chevron {
     transition: none;

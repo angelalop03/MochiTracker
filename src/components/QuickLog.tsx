@@ -1,5 +1,25 @@
+import {
+  Balloon,
+  BatteryLow,
+  Bone,
+  Brain,
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Cookie,
+  Droplets,
+  Heart,
+  Lock,
+  MoonStar,
+  NotebookPen,
+  Sparkle,
+  Stethoscope,
+  Waves,
+  Zap,
+  type LucideIcon,
+} from "lucide-react"
 import { useState, type FormEvent } from "react"
-import { ENERGY_LEVELS, MOODS, SYMPTOMS } from "../content/symptoms"
+import { ALARM_SYMPTOMS, ENERGY_LEVELS, MOODS, SYMPTOMS, symptomLabel, type SymptomId } from "../content/symptoms"
 import { useSession } from "../hooks/useSession"
 import { saveLog, type DailyLog } from "../services/data"
 import MochiFace from "./MochiFace"
@@ -8,6 +28,40 @@ interface Props {
   date: string
   log: DailyLog | undefined
   onSaved: () => Promise<void>
+}
+
+const NOTE_MAX = 1000
+
+const SYMPTOM_ICONS: Record<SymptomId, LucideIcon> = {
+  cansancio: BatteryLow,
+  calambres: Zap,
+  dolor_lumbar: Bone,
+  dolor_cabeza: Brain,
+  hinchazon: Balloon,
+  pecho_sensible: Heart,
+  granitos: Sparkle,
+  piel_grasa: Droplets,
+  antojos: Cookie,
+  insomnio: MoonStar,
+  nauseas: Waves,
+  dolor_fuerte: CircleAlert,
+  sangrado_abundante: CircleAlert,
+}
+
+const SYMPTOM_GROUPS: { title: string; ids: SymptomId[] }[] = [
+  { title: "Dolor y molestias", ids: ["calambres", "dolor_lumbar", "dolor_cabeza", "pecho_sensible"] },
+  { title: "Digestión y apetito", ids: ["hinchazon", "nauseas", "antojos"] },
+  { title: "Descanso", ids: ["cansancio", "insomnio"] },
+  { title: "Piel", ids: ["granitos", "piel_grasa"] },
+  { title: "Importante", ids: ["dolor_fuerte", "sangrado_abundante"] },
+]
+
+function listSummary(ids: string[]) {
+  if (ids.length === 0) return "Nada marcado"
+  const names = ids.map((id) => symptomLabel(id).toLowerCase())
+  const text = names.slice(0, 3).join(", ")
+  const more = names.length > 3 ? ` y ${names.length - 3} más` : ""
+  return text.charAt(0).toUpperCase() + text.slice(1) + more
 }
 
 /** «Tu día»: un check-in visual. Todo es opcional y se puede cambiar cuando quieras */
@@ -41,6 +95,9 @@ export default function QuickLog({ date, log, onSaved }: Props) {
   }
 
   const energyLabel = ENERGY_LEVELS.find((l) => l.value === energy)?.label
+  const ordered = SYMPTOMS.map((s) => s.id).filter((id) => symptoms.includes(id))
+  const hasAlarm = symptoms.some((s) => ALARM_SYMPTOMS.includes(s))
+  const note = notes.trim()
 
   return (
     <form className="checkin" onSubmit={(e) => void save(e)} aria-labelledby="checkin-title">
@@ -98,39 +155,85 @@ export default function QuickLog({ date, log, onSaved }: Props) {
 
       <details className="checkin-more">
         <summary>
-          Síntomas
-          {symptoms.length > 0 && <span className="count">{symptoms.length}</span>}
+          <span className="more-icon">
+            <Stethoscope size={18} strokeWidth={1.75} aria-hidden="true" />
+          </span>
+          <span className="more-text">
+            <strong>
+              Síntomas
+              {symptoms.length > 0 && <span className="count">{symptoms.length}</span>}
+            </strong>
+            <span>{listSummary(ordered)}</span>
+          </span>
+          <ChevronDown className="more-chevron" size={18} aria-hidden="true" />
         </summary>
-        <div className="chips">
-          {SYMPTOMS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className="chip"
-              aria-pressed={symptoms.includes(s.id)}
-              onClick={() => toggleSymptom(s.id)}
-            >
-              {s.label}
-            </button>
+        <div className="symptom-groups">
+          {SYMPTOM_GROUPS.map((group) => (
+            <div key={group.title} className="symptom-group" data-important={group.title === "Importante" || undefined}>
+              <span className="symptom-group-title">{group.title}</span>
+              <div className="symptom-chips">
+                {group.ids.map((id) => {
+                  const Icon = symptoms.includes(id) ? Check : SYMPTOM_ICONS[id]
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      className="symptom-chip"
+                      aria-pressed={symptoms.includes(id)}
+                      onClick={() => toggleSymptom(id)}
+                    >
+                      <Icon size={16} strokeWidth={2} aria-hidden="true" />
+                      {symptomLabel(id)}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           ))}
+          {hasAlarm && (
+            <p className="symptom-alert" role="status">
+              Al guardar, Mochi te mostrará cuándo conviene consultarlo con un profesional.
+            </p>
+          )}
         </div>
       </details>
 
       <details className="checkin-more">
-        <summary>Una nota para ti{notes.trim() && <span className="count">1</span>}</summary>
-        <label className="field">
+        <summary>
+          <span className="more-icon">
+            <NotebookPen size={18} strokeWidth={1.75} aria-hidden="true" />
+          </span>
+          <span className="more-text">
+            <strong>
+              Una nota para ti
+              {note && <span className="count">1</span>}
+            </strong>
+            <span>{note ? note : "Lo que quieras recordar de hoy"}</span>
+          </span>
+          <ChevronDown className="more-chevron" size={18} aria-hidden="true" />
+        </summary>
+        <label className="note-paper">
           <span className="sr-only">Nota</span>
           <textarea
             value={notes}
-            maxLength={1000}
-            placeholder="Lo que quieras recordar de hoy"
+            maxLength={NOTE_MAX}
+            rows={5}
+            placeholder="Cómo te has sentido, qué te ha ayudado, algo que no quieras olvidar…"
             onChange={(e) => {
               touch()
               setNotes(e.target.value)
             }}
           />
-          <small>Solo para ti. Nunca aparece en los avisos ni la usa la IA.</small>
         </label>
+        <div className="note-foot">
+          <span>
+            <Lock size={14} strokeWidth={2} aria-hidden="true" />
+            Solo para ti. Nunca aparece en los avisos ni la usa la IA.
+          </span>
+          <span aria-hidden="true">
+            {notes.length}/{NOTE_MAX}
+          </span>
+        </div>
       </details>
 
       {status === "error" && (

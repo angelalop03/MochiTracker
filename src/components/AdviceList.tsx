@@ -1,4 +1,5 @@
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, CircleAlert, Sparkles } from "lucide-react"
+import { BLOCK_GUIDES } from "../content/guides"
 import { BLOCKS, PHASE_CONTENT, pickVariant, type BlockId } from "../content/phases"
 import type { AiAdvice } from "../lib/ai/advice"
 import type { Phase } from "../lib/cycle"
@@ -34,17 +35,20 @@ export function FeaturedTip({ phase, seed, tips, aiAdvice }: Props) {
   )
 }
 
-/** Los seis bloques como lista: se lee el resumen y se abre el que interesa */
-export default function AdviceList({ phase, seed, tips, aiAdvice }: Props) {
-  const content = PHASE_CONTENT[phase]
+/** Los seis bloques como guía: qué suele pasar, por qué y qué hacer */
+export default function AdviceList({ phase, tips, aiAdvice }: Props) {
+  const guides = BLOCK_GUIDES[phase]
   return (
     <section className="advice-list" aria-labelledby="advice-title">
-      <h2 id="advice-title" className="eyebrow">
-        Cómo te puedes sentir
-      </h2>
+      <div className="section-head">
+        <h2 id="advice-title" className="eyebrow">
+          Cómo te puedes sentir
+        </h2>
+        <span className="section-note">Toca para ver consejos</span>
+      </div>
       <ul>
         {BLOCKS.map((block) => {
-          const base = pickVariant(content.blocks[block.id], seed)
+          const guide = guides[block.id]
           const personal = personalFor(block.id, tips, aiAdvice)
           return (
             <li key={block.id}>
@@ -62,16 +66,42 @@ export default function AdviceList({ phase, seed, tips, aiAdvice }: Props) {
                         </span>
                       )}
                     </span>
-                    <span className="advice-preview">{base}</span>
+                    <span className="advice-preview">{guide.headline}</span>
                   </span>
                   <ChevronDown className="advice-chevron" size={18} strokeWidth={1.75} aria-hidden="true" />
                 </summary>
                 <div className="advice-body">
-                  <p>{base}</p>
                   {personal && (
                     <p className="for-you">
-                      <span className="for-you-label">Para ti</span>
+                      <span className="for-you-label">
+                        <Sparkles size={14} aria-hidden="true" />
+                        Para ti
+                      </span>
                       {personal}
+                    </p>
+                  )}
+
+                  <div className="advice-why">
+                    <span className="advice-label">Por qué pasa</span>
+                    <p>{guide.why}</p>
+                  </div>
+
+                  <div>
+                    <span className="advice-label">Qué puedes hacer</span>
+                    <ol className="advice-tips">
+                      {guide.tips.map((tip) => (
+                        <li key={tip.title}>
+                          <strong>{tip.title}</strong>
+                          <span>{tip.text}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  {guide.watch && (
+                    <p className="advice-watch">
+                      <CircleAlert size={16} strokeWidth={2} aria-hidden="true" />
+                      <span>{guide.watch}</span>
                     </p>
                   )}
                 </div>
