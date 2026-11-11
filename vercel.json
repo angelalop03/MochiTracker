@@ -13,5 +13,10 @@
   ],
   "regions": [
     "fra1"
-  ]
+  ],
+  "functions": {
+    "api/ai/*.ts": {
+      "maxDuration": 30
+    }
+  }
 }

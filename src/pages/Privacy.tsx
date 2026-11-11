@@ -39,19 +39,26 @@ export default function Privacy() {
         <li>Vercel: alojamiento de la web y envío programado de avisos.</li>
         <li>Brevo: envío de los correos de acceso y, si los activas, de los avisos por email.</li>
         <li>El servicio de notificaciones de tu navegador, solo si activas los avisos push.</li>
+        <li>Groq: el servicio de IA en la nube, solo si activas los consejos y el chat con IA.</li>
       </ul>
       <p>
         Actúan como encargados del tratamiento. Algunos pueden tratar datos fuera de la Unión Europea, con las
         garantías que exige el RGPD.
       </p>
 
-      <h2>Consejos con IA</h2>
+      <h2>Consejos y chat con IA</h2>
       <p>
-        Si activas esta opción, el modelo se ejecuta en tu propio dispositivo y tus datos no se envían a ningún
-        servicio de IA externo. El modelo se descarga una vez desde Hugging Face y GitHub. Esa descarga no incluye tus
-        datos. La preferencia y los últimos consejos generados se guardan solo en este dispositivo.
+        Es opcional y necesita tu permiso expreso, que puedes retirar en Ajustes cuando quieras. Si lo activas, para
+        escribirte consejos o responder tus preguntas enviamos a Groq (un servicio de IA en la nube, con servidores en
+        Estados Unidos) solo lo necesario: tu fase, el día del ciclo, la duración media de tu ciclo y lo que hayas
+        registrado los últimos días (síntomas, ánimo y energía), además de tus mensajes del chat. Nunca enviamos tu
+        nombre, tu email, tus notas ni identificadores de tu cuenta.
       </p>
-
+      <p>
+        El servicio está configurado para no conservar lo que le enviamos. Nosotros no guardamos las conversaciones:
+        se quedan solo en tu dispositivo, igual que los últimos consejos. En nuestra base de datos solo anotamos cuántas
+        consultas haces cada día, para aplicar el límite gratuito, y la fecha en que diste el permiso.
+      </p>
       <h2>Cuánto tiempo</h2>
       <p>Guardamos tus datos mientras tengas la cuenta. Al borrarla se eliminan todos.</p>
 

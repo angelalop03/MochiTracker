@@ -11,6 +11,7 @@ const BEA = "00000000-0000-0000-0000-00000000000b"
 const SUPABASE_STUB = `
   create role anon nologin;
   create role authenticated nologin;
+  create role service_role nologin;
   create schema auth;
   create table auth.users (
     id uuid primary key,

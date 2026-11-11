@@ -1,9 +1,14 @@
-// La preferencia y el último resultado se quedan en este dispositivo: nunca van a la nube.
+// Los últimos consejos y la conversación con Mochi se quedan en este dispositivo.
+// El servidor no guarda ninguna conversación.
 
 import type { AiAdvice } from "./advice"
+import type { ChatTurn } from "./cloud"
 
 const ENABLED = "isla-mochi-ia"
 const CACHE = "isla-mochi-ia-consejos"
+const CHAT = "isla-mochi-chat"
+/** Mensajes que se guardan en el dispositivo */
+const CHAT_KEEP = 40
 
 function read(key: string) {
   try {
@@ -43,6 +48,21 @@ export function cacheAdvice(key: string, advice: AiAdvice) {
   write(CACHE, JSON.stringify({ key, advice }))
 }
 
+/** Borra los consejos guardados y la conversación (al cerrar sesión o desactivar la IA) */
 export function clearAiAdvice() {
   write(CACHE, null)
+  write(CHAT, null)
+}
+
+export function loadChat(): ChatTurn[] {
+  try {
+    const saved = JSON.parse(read(CHAT) ?? "[]") as ChatTurn[]
+    return Array.isArray(saved) ? saved : []
+  } catch {
+    return []
+  }
+}
+
+export function saveChat(turns: ChatTurn[]) {
+  write(CHAT, turns.length ? JSON.stringify(turns.slice(-CHAT_KEEP)) : null)
 }

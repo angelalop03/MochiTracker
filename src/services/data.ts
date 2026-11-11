@@ -16,6 +16,8 @@ export interface Profile {
   onboarded_at: string | null
   /** Uno de los Mochis predeterminados, o null para usar la inicial */
   avatar?: string | null
+  /** Cuándo aceptó enviar sus datos al servicio de IA en la nube. null si no */
+  ai_consent_at?: string | null
 }
 
 export interface PeriodRow {

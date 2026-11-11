@@ -3615,3 +3615,197 @@ a:hover {
     animation: none;
   }
 }
+
+/* ---------- Pregúntale a Mochi ---------- */
+.mochi-chat {
+  display: grid;
+  gap: 12px;
+}
+
+.chat-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.chat-log {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+}
+
+.chat-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  animation: guide-in 0.3s ease-out;
+}
+
+.chat-row .mochi-face {
+  flex: none;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--tint);
+}
+
+.chat-row.is-me {
+  justify-content: flex-end;
+}
+
+.chat-bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 6px;
+  background: var(--card-2);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.is-me .chat-bubble {
+  border-radius: 18px 18px 6px 18px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.chat-typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.chat-typing i {
+  width: 6px;
+  height: 6px;
+  background: var(--ink-soft);
+  animation: ld-dot 1.2s ease-in-out infinite;
+}
+
+.chat-typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.chat-typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chat-suggestion {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-suggestion:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.chat-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 22px;
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+
+.chat-form:focus-within {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.chat-form textarea {
+  flex: 1;
+  min-height: 40px;
+  max-height: 140px;
+  padding: 9px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  resize: none;
+  field-sizing: content;
+}
+
+.chat-form textarea:focus-visible {
+  outline: none;
+}
+
+.chat-send {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+}
+
+.chat-send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.chat-error {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--tint);
+  font-size: 0.88rem;
+}
+
+.chat-off {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--card-2);
+  font-size: 0.92rem;
+}
+
+.chat-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.chat-foot .button-link {
+  min-height: 32px;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-row,
+  .chat-typing i {
+    animation: none;
+  }
+}

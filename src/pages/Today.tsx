@@ -9,6 +9,7 @@ import ConsultCard from "../components/ConsultCard"
 import CycleDial from "../components/CycleDial"
 import DialogBox from "../components/DialogBox"
 import Glance from "../components/Glance"
+import MochiChat from "../components/MochiChat"
 import MochiFace from "../components/MochiFace"
 import Loading from "../components/Loading"
 import PeriodCard from "../components/PeriodCard"
@@ -120,12 +121,13 @@ function PersonalAdvice({
   seed: number
   tips: PersonalTip[]
 }) {
-  const { status, progress, advice, activate } = useAiAdvice(input, aiKey)
+  const { status, quota, setQuota, advice, activate } = useAiAdvice(input, aiKey)
   return (
     <>
       <FeaturedTip phase={input.phase} seed={seed} tips={tips} aiAdvice={advice} />
-      <AiPanel status={status} progress={progress} onActivate={activate} />
+      <AiPanel status={status} quota={quota} onActivate={() => void activate()} />
       <AdviceList key={input.phase} phase={input.phase} seed={seed} tips={tips} aiAdvice={advice} />
+      <MochiChat status={status} quota={quota} onQuota={setQuota} onActivate={() => void activate()} />
     </>
   )
 }
@@ -166,7 +168,8 @@ export default function Today() {
     .filter((l) => l.date >= addDays(today, -6) && l.date <= today)
     .map(({ date, symptoms, mood, energy }) => ({ date, symptoms, mood, energy }))
   const aiInput: AiInput = { phase: state.phase, cycleDay: state.cycleDay, seed, days: recentLogs, alarm }
-  const aiKey = JSON.stringify([today, aiInput])
+  // Una tanda de consejos con IA al día: se guarda en el dispositivo hasta mañana
+  const aiKey = `nube:${realToday}`
 
   const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
   // Sale sola a quien acaba de empezar, o desde Ajustes con ?tutorial

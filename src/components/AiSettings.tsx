@@ -1,49 +1,77 @@
-import { Sparkles, Trash2 } from "lucide-react"
+import { Gauge, Sparkles } from "lucide-react"
 import { useEffect, useState } from "react"
-import { checkSupport, deleteModel, type AiSupport } from "../lib/ai/engine"
-import { isAiEnabled, setAiEnabled } from "../lib/ai/storage"
-import { SettingsGroup, SettingsRow } from "./settings"
+import { fetchAiStatus, setAiConsent, type AiStatus } from "../lib/ai/cloud"
+import { clearAiAdvice } from "../lib/ai/storage"
+import type { Profile } from "../services/data"
+import { SettingsGroup, SettingsRow, Switch } from "./settings"
 
-export default function AiSettings() {
-  const [support, setSupport] = useState<AiSupport | null>(null)
-  const [enabled, setEnabled] = useState(isAiEnabled)
-  const [message, setMessage] = useState("")
+interface Props {
+  profile: Profile
+  onSaved: () => Promise<void>
+}
+
+/** Activar o retirar el permiso para la IA en la nube, y cuántas consultas quedan hoy */
+export default function AiSettings({ profile, onSaved }: Props) {
+  const [status, setStatus] = useState<AiStatus | null>(null)
   const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState("")
+  const consent = Boolean(profile.ai_consent_at)
 
   useEffect(() => {
-    void checkSupport().then(setSupport)
-  }, [])
+    let cancelled = false
+    void fetchAiStatus()
+      .then((s) => !cancelled && setStatus(s))
+      .catch(() => !cancelled && setStatus(null))
+    return () => {
+      cancelled = true
+    }
+  }, [consent])
 
-  async function turnOff() {
+  async function toggle(on: boolean) {
     setBusy(true)
-    setAiEnabled(false)
-    setEnabled(false)
     setMessage("")
     try {
-      await deleteModel()
-      setMessage("IA desactivada y modelo borrado de este dispositivo.")
+      await setAiConsent(profile.id, on)
+      // Al retirarlo, se borran también los consejos y la conversación guardados aquí
+      if (!on) clearAiAdvice()
+      await onSaved()
+      setMessage(on ? "IA activada." : "IA desactivada. Hemos borrado los consejos y la conversación de este dispositivo.")
     } catch (error) {
       console.error(error)
-      setMessage("IA desactivada. No se ha podido borrar el modelo.")
+      setMessage("No se ha podido guardar. Vuelve a intentarlo.")
     } finally {
       setBusy(false)
     }
   }
 
-  const status = support === null ? "…" : support === "unsupported" ? "No disponible" : enabled ? "Activados" : "Desactivados"
+  const available = status?.available ?? false
   const footer =
     message ||
-    (support === "unsupported"
-      ? "La IA necesita un ordenador con tarjeta gráfica. En este dispositivo tus consejos se personalizan con reglas."
-      : enabled
-        ? "Funciona dentro de este dispositivo: lo que registras no se envía a ningún servicio de IA."
-        : "Puedes activarlos desde Hoy. Se descarga un modelo de unos 2,3 GB la primera vez.")
+    (status && !available
+      ? "La IA no está disponible ahora mismo. Tus consejos se personalizan con reglas."
+      : "Usa un servicio de IA en la nube (Groq), gratis y con un límite diario. Solo le enviamos tu fase, el día del ciclo y lo registrado estos días, nunca tu nombre, tu email ni tus notas. Las conversaciones se guardan solo en este dispositivo.")
 
   return (
-    <SettingsGroup title="Consejos con IA" footer={footer}>
-      <SettingsRow icon={Sparkles} label="Estado" value={status} />
-      {support === "ready" && enabled && (
-        <SettingsRow icon={Trash2} label="Desactivar y borrar el modelo" onClick={() => void turnOff()} disabled={busy} />
+    <SettingsGroup title="Consejos y chat con IA" footer={footer}>
+      <SettingsRow
+        icon={Sparkles}
+        label="Usar la IA"
+        hint={consent ? "Has dado tu permiso" : "Necesita tu permiso para enviar tus datos"}
+        control={
+          <Switch
+            label="Usar la IA"
+            checked={consent}
+            disabled={busy || (!available && !consent)}
+            onChange={(on) => void toggle(on)}
+          />
+        }
+      />
+      {consent && status && available && (
+        <SettingsRow
+          icon={Gauge}
+          label="Te quedan hoy"
+          hint={`${status.chat.remaining} de ${status.chat.limit} preguntas y ${status.advice.remaining} de ${status.advice.limit} tandas de consejos. Se renuevan a medianoche.`}
+        />
       )}
     </SettingsGroup>
   )

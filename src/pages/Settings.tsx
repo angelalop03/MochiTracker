@@ -371,7 +371,7 @@ export default function Settings() {
         <NotificationSettings profile={profile} onSaved={reload} />
         <Appearance />
         <Help />
-        <AiSettings />
+        <AiSettings profile={profile} onSaved={reload} />
         <AccountSettings userId={session.user.id} email={session.user.email} />
         <p className="legal-note">{DISCLAIMER}</p>
       </main>

@@ -4,9 +4,9 @@
 // consejos incoherentes o peligrosos, así que el modelo no inventa: adapta un consejo ya
 // revisado, bloque a bloque, y todo lo que escribe se valida antes de mostrarlo.
 
-import { PHASE_CONTENT, pickVariant, type BlockId } from "../../content/phases"
-import { MOODS, symptomLabel } from "../../content/symptoms"
-import type { Phase } from "../cycle"
+import { PHASE_CONTENT, pickVariant, type BlockId } from "../../content/phases.js"
+import { MOODS, symptomLabel } from "../../content/symptoms.js"
+import type { Phase } from "../cycle.js"
 
 export const MODEL_ID = "Qwen3-4B-q4f16_1-MLC"
 export const MODEL_DOWNLOAD_LABEL = "2,3 GB"
