@@ -28,6 +28,7 @@
   --featured-bg: #2e2430;
   --featured-fg: #ffffff;
   --face-edge: rgba(46, 36, 48, 0.22);
+  --on-accent: #ffffff;
 
   /* Estación: la sobrescribe [data-phase] */
   --accent: #a63c6a;
@@ -103,6 +104,7 @@
   --featured-bg: #f4ecf0;
   --featured-fg: #1b1520;
   --face-edge: transparent;
+  --on-accent: #1b1520;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -18px rgba(0, 0, 0, 0.7);
   --accent: #ee9dbf;
   --tint: #3a2230;
@@ -1255,34 +1257,222 @@ a:hover {
   gap: 12px;
 }
 
-.action-stack {
+/* Tarjetas de Tu día: la regla y cuándo consultar */
+.period-card,
+.consult-card {
+  position: relative;
   display: grid;
+  gap: 16px;
   overflow: hidden;
+  padding: 20px;
   border-radius: var(--radius);
   background: var(--card);
   box-shadow: var(--shadow);
 }
 
-.action-stack > * + * {
-  border-top: 1px solid var(--line-soft);
+.period-card {
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--accent) 16%, var(--card)) 0%,
+    var(--card) 62%
+  );
+  box-shadow:
+    var(--shadow),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
-.action-stack .period-form,
-.action-stack .consult {
-  border-radius: 0;
-  box-shadow: none;
+.period-card::after {
+  /* Lluvia de píxeles en la esquina, como la nieve del invierno de la isla */
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 34px;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  opacity: 0.55;
+  box-shadow:
+    12px 8px var(--accent),
+    -8px 16px var(--accent),
+    6px 26px color-mix(in srgb, var(--accent) 50%, transparent),
+    18px 32px color-mix(in srgb, var(--accent) 50%, transparent);
+  pointer-events: none;
+}
+
+.card-head {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding-right: 40px;
+}
+
+.card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--tint);
+  color: var(--accent);
+}
+
+.card-head-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.card-head-text h3,
+.card-head-text strong {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.card-head-text p,
+.card-head-text span {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-actions .button {
+  flex: 1 1 auto;
+}
+
+.period-card .button:not(.button-quiet) {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.period-card .button-quiet {
+  background: var(--card);
+}
+
+.period-other {
+  display: grid;
+  gap: 14px;
+}
+
+.consult-card {
+  gap: 0;
+  padding: 0;
+}
+
+.consult-card > summary {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  gap: 14px;
+  align-items: center;
+  padding: 18px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.consult-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.consult-card > summary:hover {
+  background: var(--hover);
+}
+
+.consult-card .card-icon {
+  background: var(--card-2);
+  color: var(--ink);
+}
+
+.consult-chevron {
+  color: var(--ink-soft);
+  transition: transform 0.2s;
+}
+
+.consult-card[open] .consult-chevron {
+  transform: rotate(180deg);
+}
+
+.consult-body {
+  display: grid;
+  gap: 14px;
+  padding: 0 20px 20px;
+  font-size: 0.92rem;
+}
+
+.consult-body ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-sm);
+  background: var(--card-2);
+}
+
+.consult-body li {
+  position: relative;
+  padding: 10px 14px 10px 32px;
+  line-height: 1.45;
+}
+
+.consult-body li + li {
+  border-top: 1px solid var(--line);
+}
+
+.consult-body li::before {
+  /* Un píxel como viñeta */
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 14px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+}
+
+.consult-urgent {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.consult-urgent svg {
+  margin-top: 2px;
+  color: var(--danger);
+}
+
+.consult-card.is-alert {
+  box-shadow:
+    var(--shadow),
+    inset 0 0 0 2px var(--danger);
+}
+
+.consult-card.is-alert .card-icon {
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 /* Acciones plegables */
-.period-form,
-.consult {
+.period-form {
   border-radius: var(--radius);
   background: var(--card);
   box-shadow: var(--shadow);
 }
 
-.period-form > summary,
-.consult > summary {
+.period-form > summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1294,13 +1484,11 @@ a:hover {
   list-style: none;
 }
 
-.period-form > summary::-webkit-details-marker,
-.consult > summary::-webkit-details-marker {
+.period-form > summary::-webkit-details-marker {
   display: none;
 }
 
-.period-form > summary::after,
-.consult > summary::after {
+.period-form > summary::after {
   content: "";
   flex: none;
   width: 8px;
@@ -1311,35 +1499,13 @@ a:hover {
   transition: transform 0.2s;
 }
 
-.period-form[open] > summary::after,
-.consult[open] > summary::after {
+.period-form[open] > summary::after {
   transform: rotate(225deg) translateY(-3px);
 }
 
 .period-form > form,
 .period-form > .quick-log {
   padding: 0 18px 18px;
-}
-
-.consult > :not(summary) {
-  margin-inline: 18px;
-}
-
-.consult[open] {
-  padding-bottom: 18px;
-}
-
-.consult ul {
-  display: grid;
-  gap: 6px;
-  margin-block: 10px;
-  padding-left: 20px;
-  font-size: 0.92rem;
-}
-
-.consult-urgent {
-  font-weight: 700;
-  font-size: 0.92rem;
 }
 
 .legal-note,
@@ -2142,7 +2308,7 @@ a:hover {
   .bottom-nav a,
   .checkin-more > summary::after,
   .period-form > summary::after,
-  .consult > summary::after {
+  .consult-chevron {
     transition: none;
   }
 

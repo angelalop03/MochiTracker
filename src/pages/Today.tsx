@@ -1,5 +1,5 @@
 import { Undo2 } from "lucide-react"
-import { useState, type FormEvent } from "react"
+import { useState } from "react"
 import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
 import BottomNav from "../components/BottomNav"
@@ -9,15 +9,16 @@ import DialogBox from "../components/DialogBox"
 import Glance from "../components/Glance"
 import MochiFace from "../components/MochiFace"
 import Loading from "../components/Loading"
+import PeriodCard from "../components/PeriodCard"
 import QuickLog from "../components/QuickLog"
 import SkyPanel from "../components/SkyPanel"
 import ThemeToggle from "../components/ThemeToggle"
 import { CONTRACEPTION_NOTICE, DISCLAIMER, PHASE_CONTENT, pickVariant } from "../content/phases"
 import { useAiAdvice } from "../hooks/useAiAdvice"
 import { useCycleData } from "../hooks/useCycleData"
-import { useSession } from "../hooks/useSession"
 import {
   addDays,
+  diffDays,
   getCycleState,
   PHASES,
   todayInTimeZone,
@@ -27,7 +28,6 @@ import {
 import { daySeed, formatDay, formatInDays, formatLongDate } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
-import { addPeriod } from "../services/data"
 
 type KnownState = Exclude<CycleState, { status: "no_data" }>
 
@@ -65,49 +65,6 @@ function Notices({ state }: { state: KnownState }) {
         </p>
       )}
     </>
-  )
-}
-
-function PeriodForm({ today, onSaved }: { today: string; onSaved: () => Promise<void> }) {
-  const session = useSession()
-  const [date, setDate] = useState(today)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState("")
-
-  async function save(e: FormEvent) {
-    e.preventDefault()
-    if (session.status !== "in") return
-    setBusy(true)
-    setError("")
-    try {
-      await addPeriod(session.user.id, date)
-      await onSaved()
-    } catch (err) {
-      console.error(err)
-      setError("No se ha podido guardar. Vuelve a intentarlo.")
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <details className="period-form">
-      <summary>¿Te ha venido la regla? Actualiza la fecha</summary>
-      <form className="form" onSubmit={(e) => void save(e)}>
-        <label className="field">
-          <span>¿Qué día empezó?</span>
-          <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} required />
-        </label>
-        {error && (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        )}
-        <button className="button" disabled={busy}>
-          {busy ? "Guardando…" : "Guardar"}
-        </button>
-      </form>
-    </details>
   )
 }
 
@@ -186,7 +143,7 @@ export default function Today() {
       <>
         <main className="today">
           <DialogBox speaker="Mochi">Aún no tengo ninguna regla tuya. Registra la última para empezar.</DialogBox>
-          <PeriodForm today={realToday} onSaved={reload} />
+          <PeriodCard today={realToday} onSaved={reload} />
         </main>
         <BottomNav />
       </>
@@ -280,10 +237,15 @@ export default function Today() {
               Tu día
             </h2>
             <QuickLog key={realToday} date={realToday} log={logs.find((l) => l.date === realToday)} onSaved={reload} />
-            <div className="action-stack">
-              <PeriodForm today={realToday} onSaved={reload} />
-              <ConsultCard open={alarm} />
-            </div>
+            <PeriodCard
+              today={realToday}
+              onSaved={reload}
+              lastStart={realState.cycleStart}
+              nextPeriodDate={realState.nextPeriodDate}
+              inDays={realState.nextPeriodDate ? diffDays(realToday, realState.nextPeriodDate) : null}
+              daysLate={realState.daysLate}
+            />
+            <ConsultCard open={alarm} />
           </section>
 
           {import.meta.env.DEV && <DevPhaseBar state={realState} onJump={setDevDay} />}
