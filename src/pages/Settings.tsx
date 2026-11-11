@@ -19,6 +19,7 @@ type SaveState = "idle" | "saving" | "saved" | "error"
 function ProfileCard({ profile, email, onSaved }: { profile: Profile; email: string; onSaved: () => Promise<void> }) {
   const [name, setName] = useState(profile.name ?? "")
   const [state, setState] = useState<SaveState>("idle")
+  const [editing, setEditing] = useState(false)
   const initial = (profile.name?.trim()[0] ?? email[0] ?? "?").toUpperCase()
 
   async function save(e: FormEvent) {
@@ -28,6 +29,7 @@ function ProfileCard({ profile, email, onSaved }: { profile: Profile; email: str
       await updateProfile(profile.id, { name: name.trim() || null })
       await onSaved()
       setState("saved")
+      setEditing(false)
     } catch (error) {
       console.error(error)
       setState("error")
@@ -43,24 +45,45 @@ function ProfileCard({ profile, email, onSaved }: { profile: Profile; email: str
         <strong>{profile.name || "Sin nombre"}</strong>
         <span>{email}</span>
       </div>
-      <details className="profile-edit">
-        <summary>Editar</summary>
+      <button
+        type="button"
+        className="profile-edit"
+        aria-expanded={editing}
+        onClick={() => {
+          setState("idle")
+          setName(profile.name ?? "")
+          setEditing(!editing)
+        }}
+      >
+        {editing ? "Cancelar" : "Editar"}
+      </button>
+      {editing && (
         <form className="profile-form" onSubmit={(e) => void save(e)}>
           <label className="field">
             <span>Tu nombre</span>
-            <input value={name} maxLength={80} onChange={(e) => setName(e.target.value)} autoComplete="given-name" />
+            <input
+              value={name}
+              maxLength={80}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="given-name"
+              autoFocus
+            />
           </label>
           <button className="button" disabled={state === "saving"}>
             {state === "saving" ? "Guardando…" : "Guardar"}
           </button>
-          {state === "saved" && <span className="form-ok">Guardado</span>}
           {state === "error" && (
             <span className="form-error" role="alert">
               No se ha podido guardar.
             </span>
           )}
         </form>
-      </details>
+      )}
+      {state === "saved" && !editing && (
+        <span className="form-ok profile-saved" role="status">
+          Nombre guardado
+        </span>
+      )}
     </section>
   )
 }

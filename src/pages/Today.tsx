@@ -1,4 +1,4 @@
-import { Undo2 } from "lucide-react"
+import { ArrowRight, Undo2 } from "lucide-react"
 import { useState } from "react"
 import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
@@ -39,9 +39,9 @@ const MOCHI_MOOD: Record<Phase, string> = {
   lutea: "normal",
 }
 
-function nextChip(state: KnownState) {
-  if (!state.nextPhase) return null
-  return `${PHASE_CONTENT[state.nextPhase.phase].season} ${formatInDays(state.nextPhase.inDays)}`
+/** La etiqueta sobre la isla: dónde estás hoy */
+function skyChip(state: KnownState) {
+  return `Día ${state.cycleDay} · Fase ${PHASE_CONTENT[state.phase].name.toLowerCase()}`
 }
 
 function Notices({ state }: { state: KnownState }) {
@@ -164,6 +164,8 @@ export default function Today() {
   const aiKey = JSON.stringify([today, aiInput])
 
   const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
+  // La pregunta de la regla solo se destaca cuando toca: en otoño o si se retrasa
+  const askPeriod = state.phase === "lutea" || state.daysLate > 0 || state.status === "stale"
 
   return (
     <>
@@ -174,7 +176,7 @@ export default function Today() {
             <ThemeToggle />
           </div>
           <SkyPanel phase={state.phase}>
-            {nextChip(state) && <span className="sky-chip">{nextChip(state)}</span>}
+            <span className="sky-chip">{skyChip(state)}</span>
           </SkyPanel>
         </section>
 
@@ -201,23 +203,25 @@ export default function Today() {
           <section className="dial-card" aria-label="Tu ciclo hoy">
             <CycleDial ranges={state.ranges} cycleDay={state.cycleDay} cycleLength={state.estimate.cycleLength} />
             <div className="dial-text">
-              <span className="phase-pill">Fase {content.name.toLowerCase()}</span>
-              {next && state.nextPhase ? (
-                <p className="dial-next">
-                  <strong>
-                    {next.season} {formatInDays(state.nextPhase.inDays)}
-                  </strong>
-                  <span>
-                    Fase {next.name.toLowerCase()}, el {formatDay(state.nextPhase.date)}
-                  </span>
-                </p>
-              ) : (
-                <p className="dial-next">
-                  <strong>Pendiente de tu regla</strong>
-                </p>
-              )}
+              <span className="phase-pill">Tu fase hoy</span>
+              <h2 className="dial-phase">Fase {content.name.toLowerCase()}</h2>
               <p className="dial-summary">{content.summary}</p>
             </div>
+            <p className="dial-next">
+              {next && state.nextPhase ? (
+                <>
+                  <ArrowRight size={16} aria-hidden="true" />
+                  <span>
+                    <strong>
+                      {next.season} {formatInDays(state.nextPhase.inDays)}
+                    </strong>{" "}
+                    · fase {next.name.toLowerCase()}, el {formatDay(state.nextPhase.date)}
+                  </span>
+                </>
+              ) : (
+                <span>Mochi espera tu regla para pasar al invierno.</span>
+              )}
+            </p>
           </section>
 
           <figure className="mochi-quote">
@@ -236,16 +240,29 @@ export default function Today() {
             <h2 id="your-day-title" className="eyebrow">
               Tu isla al día
             </h2>
-            <PeriodCard
+            {askPeriod && (
+              <PeriodCard
               today={realToday}
               onSaved={reload}
               lastStart={realState.cycleStart}
               nextPeriodDate={realState.nextPeriodDate}
               inDays={realState.nextPeriodDate ? diffDays(realToday, realState.nextPeriodDate) : null}
               daysLate={realState.daysLate}
-            />
+              />
+            )}
             <ClueReminder today={realToday} usesClue={periods.some((p) => p.source === "clue")} />
             <ConsultCard open={alarm} />
+            {!askPeriod && (
+              <PeriodCard
+                quiet
+                today={realToday}
+                onSaved={reload}
+                lastStart={realState.cycleStart}
+                nextPeriodDate={realState.nextPeriodDate}
+                inDays={realState.nextPeriodDate ? diffDays(realToday, realState.nextPeriodDate) : null}
+                daysLate={realState.daysLate}
+              />
+            )}
           </section>
 
           {import.meta.env.DEV && <DevPhaseBar state={realState} onJump={setDevDay} />}

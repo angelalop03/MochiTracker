@@ -779,25 +779,40 @@ a:hover {
   font-weight: 700;
 }
 
+.dial-phase {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.4rem;
+  line-height: 1.15;
+}
+
+/* Lo siguiente va abajo y en pequeño: lo importante es la fase de hoy */
 .dial-next {
-  display: grid;
-  line-height: 1.3;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.dial-next svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--accent);
 }
 
 .dial-next strong {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 1.2rem;
-}
-
-.dial-next span {
-  color: var(--ink-soft);
-  font-size: 0.85rem;
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .dial-summary {
-  color: var(--ink-soft);
-  font-size: 0.85rem;
+  color: var(--ink);
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -1547,22 +1562,21 @@ a:hover {
 }
 
 .profile-edit {
-  display: contents;
-}
-
-.profile-edit > summary {
   align-self: center;
   padding: 6px 14px;
+  border: 0;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1.5px var(--line);
+  background: none;
+  color: var(--ink);
+  font: inherit;
   font-size: 0.88rem;
   font-weight: 700;
+  box-shadow: inset 0 0 0 1.5px var(--line);
   cursor: pointer;
-  list-style: none;
 }
 
-.profile-edit > summary::-webkit-details-marker {
-  display: none;
+.profile-saved {
+  grid-column: 1 / -1;
 }
 
 .profile-form {
@@ -2259,7 +2273,7 @@ a:hover {
   gap: 24px;
   width: min(100%, 680px);
   margin: 0 auto;
-  padding: 16px 16px 0;
+  padding: 16px 16px calc(var(--nav-height) + var(--nav-gap) * 2 + 24px);
 }
 
 .guide-hero {
@@ -3040,4 +3054,55 @@ a:hover {
 .settings-title {
   display: grid;
   gap: 2px;
+}
+
+/* La regla fuera del otoño: plegada y discreta, por si hay que corregir algo */
+.period-quiet {
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+
+.period-quiet > summary {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 20px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.period-quiet > summary::-webkit-details-marker {
+  display: none;
+}
+
+.period-quiet .card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+}
+
+.period-quiet .card-head-text strong {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.period-quiet .card-head-text span {
+  font-size: 0.82rem;
+}
+
+.period-quiet[open] .consult-chevron {
+  transform: rotate(180deg);
+}
+
+.period-quiet-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.period-quiet .button:not(.button-quiet) {
+  background: var(--accent);
+  color: var(--on-accent);
 }
