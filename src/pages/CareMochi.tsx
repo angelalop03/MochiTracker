@@ -1,4 +1,4 @@
-import { Star } from "lucide-react"
+import { Coins, Star } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import BottomNav from "../components/BottomNav"
@@ -6,6 +6,7 @@ import Loading from "../components/Loading"
 import MochiFace from "../components/MochiFace"
 import PixelSprite from "../components/PixelSprite"
 import SkyPanel from "../components/SkyPanel"
+import GamesSection from "../games/GamesSection"
 import {
   CARE_ITEMS,
   CATEGORIES,
@@ -21,6 +22,7 @@ import { PHASE_CONTENT } from "../content/phases"
 import { useCycleData } from "../hooks/useCycleData"
 import { greeting, levelOf, NAP_MS, pokeLine, useCare, useNow } from "../lib/care"
 import { getCycleState, todayInTimeZone } from "../lib/cycle"
+import { claimDailyGift, missingFor, pantryOf, spend, updateWallet, useWallet, type Pantry } from "../lib/shop"
 import type { Reaction } from "../three/Mochi"
 
 type Say = { text: string; face: string }
@@ -45,6 +47,20 @@ const REACTION_FACE: Record<Reaction, string> = {
   jump: "genial",
   spin: "genial",
   dizzy: "ansiosa",
+}
+
+/** Lo que se ve en la esquina de cada cosa: cuántas quedan o cuánto cuesta */
+function PantryTag({ pantry }: { pantry: Pantry }) {
+  if (pantry.kind === "free") return null
+  if (pantry.kind === "owned") return <span className="care-tag is-owned">Tuya</span>
+  if (pantry.kind === "stock") return <span className="care-tag is-stock">×{pantry.left}</span>
+  return (
+    <span className="care-tag is-buy">
+      <Coins size={11} strokeWidth={2.5} aria-hidden="true" />
+      {pantry.price}
+      <span className="sr-only">{pantry.price === 1 ? " moneda" : " monedas"}</span>
+    </span>
+  )
 }
 
 const STAT_SHORT = Object.fromEntries(STATS.map((s) => [s.id, s.label])) as Record<Stat, string>
@@ -86,6 +102,21 @@ export default function CareMochi() {
   const [showing, setShowing] = useState<{ id: CareId; n: number } | null>(null)
   const [, refresh] = useState(0)
   const [calm, setCalm] = useState(0)
+  const [paid, setPaid] = useState<{ text: string; n: number } | null>(null)
+  const wallet = useWallet()
+
+  // Un regalo de monedas al día, al entrar
+  useEffect(() => {
+    if (!today) return
+    const gift = claimDailyGift(today)
+    if (gift) setSay({ text: `¡Regalo del día! Toma ${gift} monedas para mis cositas.`, face: "genial" })
+  }, [today])
+
+  useEffect(() => {
+    if (!paid) return
+    const id = setTimeout(() => setPaid(null), 2200)
+    return () => clearTimeout(id)
+  }, [paid])
 
   useEffect(() => {
     if (!showing) return
@@ -107,8 +138,21 @@ export default function CareMochi() {
   const line: Say = say ?? { text: greeting(phase, care.mood), face: FACE[care.mood] }
 
   function offer(id: CareId) {
+    const item = CARE_ITEMS[id]
+    const pantry = pantryOf(wallet, id)
+    const missing = missingFor(wallet, id)
+    if (pantry.kind === "buy" && missing > 0) {
+      setSay({
+        text: `${item.name}: cuesta ${pantry.price} y tienes ${wallet.coins}. Te faltan ${missing} ${missing === 1 ? "moneda" : "monedas"}; gánalas en los minijuegos de abajo.`,
+        face: "triste",
+      })
+      return
+    }
     const result = care.give(id)
     if (result.kind === "ok") {
+      // Solo se gasta o se paga si se lo ha tomado
+      updateWallet((w) => spend(w, id))
+      if (pantry.kind === "buy") setPaid({ text: pantry.forever ? `−${pantry.price} · ¡ya es tuya!` : `−${pantry.price}`, n: Date.now() })
       setCalm((n) => n + 1)
       setSay({ text: result.line, face: result.favorite ? "genial" : "bien" })
       if (CARE_ITEMS[id].show !== "wear") setShowing({ id, n: Date.now() })
@@ -137,6 +181,15 @@ export default function CareMochi() {
               <span className="care-level-bar" aria-hidden="true">
                 <span style={{ width: `${Math.round(level.progress * 100)}%` }} />
               </span>
+            </span>
+            <span className="care-coins" aria-live="polite">
+              <Coins size={14} strokeWidth={2.5} aria-hidden="true" />
+              <strong>{wallet.coins}</strong> {wallet.coins === 1 ? "moneda" : "monedas"}
+              {paid && (
+                <span key={paid.n} className="care-paid">
+                  {paid.text}
+                </span>
+              )}
             </span>
             {days > 0 && (
               <span className="care-days">
@@ -189,8 +242,18 @@ export default function CareMochi() {
               .map(([id, item]) => {
                 const favorite = phaseCare.favorites.includes(id)
                 const ups = (Object.entries(item.effect) as [Stat, number][]).filter(([, v]) => v > 0)
+                const pantry = pantryOf(wallet, id)
+                const short = pantry.kind === "buy" && pantry.price > wallet.coins
                 return (
-                  <button key={id} type="button" className="care-item" onClick={() => offer(id)}>
+                  <button
+                    key={id}
+                    type="button"
+                    className="care-item"
+                    data-pantry={pantry.kind}
+                    data-short={short || undefined}
+                    onClick={() => offer(id)}
+                  >
+                    <PantryTag pantry={pantry} />
                     {favorite && (
                       <span className="care-fav" title={`Le encanta en ${season.toLowerCase()}`}>
                         <Star size={12} strokeWidth={2.5} aria-hidden="true" />
@@ -215,6 +278,8 @@ export default function CareMochi() {
             </Link>
           </section>
         )}
+
+        <GamesSection />
 
         <p className="care-note">
           Es un juego: Mochi siente su estación como tú la tuya, y sus necesidades bajan con el tiempo. Se guarda en

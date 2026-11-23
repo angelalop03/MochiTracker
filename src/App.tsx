@@ -1,4 +1,6 @@
+import { lazy, Suspense } from "react"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import Loading from "./components/Loading"
 import RequireReady from "./components/RequireReady"
 import { CycleDataProvider } from "./hooks/useCycleData"
 import { SessionProvider } from "./hooks/useSession"
@@ -13,6 +15,10 @@ import Onboarding from "./pages/Onboarding"
 import Privacy from "./pages/Privacy"
 import Settings from "./pages/Settings"
 import Today from "./pages/Today"
+
+// Los minijuegos se cargan aparte: no pesan a quien no juega
+const StackIsland = lazy(() => import("./games/StackIsland"))
+const CloudJump = lazy(() => import("./games/CloudJump"))
 
 export default function App() {
   return (
@@ -31,6 +37,22 @@ export default function App() {
               <Route path="/hoy" element={<Today />} />
               <Route path="/guia" element={<Guide />} />
               <Route path="/mochi" element={<CareMochi />} />
+              <Route
+                path="/mochi/isla"
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <StackIsland />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/mochi/nubes"
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <CloudJump />
+                  </Suspense>
+                }
+              />
               <Route path="/mis-fechas" element={<MyCycle />} />
               <Route path="/ajustes" element={<Settings />} />
             </Route>

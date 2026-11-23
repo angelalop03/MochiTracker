@@ -4383,3 +4383,336 @@ a:hover {
     animation: none;
   }
 }
+
+/* ---------- Minijuegos ---------- */
+.games-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #b7861c;
+  font-weight: 700;
+}
+
+.games-list {
+  display: grid;
+  gap: 10px;
+}
+
+.game-tile {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 18px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--tint), var(--card) 70%);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 0.15s;
+}
+
+.game-tile:hover {
+  color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.game-icon {
+  width: 64px;
+  height: 48px;
+}
+
+.game-tile-text {
+  display: grid;
+  gap: 1px;
+}
+
+.game-tile-text strong {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.15rem;
+}
+
+.game-tile-text span,
+.game-tile-text small {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.game-page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+  gap: 10px;
+  background: var(--bg);
+}
+
+.game-bar {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.game-bar h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.3rem;
+}
+
+.game-score {
+  display: grid;
+  justify-items: end;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.game-score small {
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+}
+
+.game-stage {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  border-radius: 26px;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  touch-action: none;
+  user-select: none;
+}
+
+:root[data-theme="dark"] .game-stage {
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 90% 34%, #fff 50%, transparent 51%),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
+
+.game-canvas {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+.game-canvas canvas {
+  image-rendering: pixelated;
+}
+
+.pixel-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.game-toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--glass);
+  color: var(--accent);
+  font-weight: 700;
+  transform: translateX(-50%);
+  backdrop-filter: blur(8px);
+  animation: game-toast 1.2s ease-out both;
+  pointer-events: none;
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--bg) 35%, transparent);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.3s ease-out;
+}
+
+.game-card {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  width: min(100%, 320px);
+  padding: 24px 20px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-align: center;
+  animation: sw-rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+.game-card h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.6rem;
+}
+
+.game-howto {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.game-final {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+.game-final svg {
+  align-self: center;
+  color: #e9b949;
+}
+
+.game-final small {
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+
+.game-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #b7861c;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.game-card .button {
+  width: 100%;
+}
+
+@keyframes game-toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.05);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-tile,
+  .game-toast,
+  .game-overlay,
+  .game-card {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ---------- Monedas de Mochi ---------- */
+.care-coins {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f5c94a;
+  color: #5a3a1e;
+  font-size: 0.82rem;
+}
+
+.care-coins strong {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+}
+
+.care-paid {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  animation: care-paid 2.2s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes care-paid {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  15%,
+  70% {
+    opacity: 1;
+    transform: translateY(-12px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px);
+  }
+}
+
+.care-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.care-tag.is-buy {
+  background: #f5c94a;
+  color: #5a3a1e;
+}
+
+.care-tag.is-owned {
+  background: #9fd2ad;
+  color: #1f4a2c;
+}
+
+.care-item[data-short] {
+  opacity: 0.6;
+}
+
+.care-item[data-short] .care-tag {
+  background: var(--tint);
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .care-paid {
+    animation: none;
+  }
+}
