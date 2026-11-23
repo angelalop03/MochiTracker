@@ -32,6 +32,7 @@ import {
 import { daySeed, formatDay, formatInDays, formatLongDate } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
+import { pokeMood, useCare, useCareGameOn } from "../lib/care"
 import { isNewSeason, markSeasonSeen } from "../lib/seasonSeen"
 import { markTutorialSeen, shouldShowTutorial } from "../lib/tutorial"
 
@@ -140,6 +141,8 @@ export default function Today() {
   const [params, setParams] = useSearchParams()
   const [tutorialClosed, setTutorialClosed] = useState(false)
   const [welcomeClosed, setWelcomeClosed] = useState<string | null>(null)
+  const game = useCareGameOn()
+  const care = useCare(profile ? todayInTimeZone(profile.timezone) : "")
 
   if (!profile) return <Loading />
 
@@ -175,6 +178,8 @@ export default function Today() {
   const aiKey = `nube:${realToday}`
 
   const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
+  // Lo que le has dado hoy en «Cuida a Mochi» también se ve aquí
+  const careToday = care.state.phase === state.phase ? care : { state: { ...care.state, given: [] }, cared: false }
   // Sale sola a quien acaba de empezar, o desde Ajustes con ?tutorial
   const showTutorial = !tutorialClosed && (params.has("tutorial") || shouldShowTutorial(profile.onboarded_at))
   // Bienvenida a la estación: la primera vez que se abre en una fase nueva, y nunca junto al tutorial
@@ -200,7 +205,12 @@ export default function Today() {
             <span className="wordmark">Isla Mochi</span>
             <ThemeToggle />
           </div>
-          <SkyPanel phase={state.phase} avatar={profile.avatar}>
+          <SkyPanel
+            phase={state.phase}
+            avatar={profile.avatar}
+            mood={game ? pokeMood(state.phase, careToday.cared) : undefined}
+            items={game ? careToday.state.given : undefined}
+          >
             <span className="sky-chip">{skyChip(state)}</span>
           </SkyPanel>
         </section>

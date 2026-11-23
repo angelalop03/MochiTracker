@@ -4,6 +4,7 @@ import {
   Download,
   Droplets,
   FileText,
+  Gamepad2,
   GraduationCap,
   LogOut,
   Palette,
@@ -19,10 +20,11 @@ import BottomNav from "../components/BottomNav"
 import Loading from "../components/Loading"
 import MochiAvatar, { isAvatarId, type AvatarId } from "../components/MochiAvatar"
 import NotificationSettings from "../components/NotificationSettings"
-import { Segmented, SettingsGroup, SettingsRow, Stepper } from "../components/settings"
+import { Segmented, SettingsGroup, SettingsRow, Stepper, Switch } from "../components/settings"
 import { DISCLAIMER } from "../content/phases"
 import { useCycleData } from "../hooks/useCycleData"
 import { useSession } from "../hooks/useSession"
+import { setCareGameOn, useCareGameOn } from "../lib/care"
 import { setClueEvery, useClueReminder, type ClueEvery } from "../lib/clueReminder"
 import { useTheme, type ThemePref } from "../lib/theme"
 import { deleteAccount, exportData } from "../services/account"
@@ -282,6 +284,20 @@ function Appearance() {
   )
 }
 
+function Game() {
+  const on = useCareGameOn()
+  return (
+    <SettingsGroup title="Minijuego" footer="Una pestaña para cuidar a Mochi según su estación. Es opcional: si la quitas, no se pierde nada.">
+      <SettingsRow
+        icon={Gamepad2}
+        label="Cuida a Mochi"
+        hint={on ? "Visible en la barra de abajo" : "Oculto"}
+        control={<Switch label="Cuida a Mochi" checked={on} onChange={setCareGameOn} />}
+      />
+    </SettingsGroup>
+  )
+}
+
 function Help() {
   return (
     <SettingsGroup title="Ayuda">
@@ -370,6 +386,7 @@ export default function Settings() {
         <ClueSettings />
         <NotificationSettings profile={profile} onSaved={reload} />
         <Appearance />
+        <Game />
         <Help />
         <AiSettings profile={profile} onSaved={reload} />
         <AccountSettings userId={session.user.id} email={session.user.email} />

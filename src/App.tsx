@@ -3,6 +3,7 @@ import RequireReady from "./components/RequireReady"
 import { CycleDataProvider } from "./hooks/useCycleData"
 import { SessionProvider } from "./hooks/useSession"
 import Auth from "./pages/Auth"
+import CareMochi from "./pages/CareMochi"
 import Guide from "./pages/Guide"
 import ImportClue from "./pages/ImportClue"
 import Install from "./pages/Install"
@@ -29,6 +30,7 @@ export default function App() {
             <Route element={<RequireReady />}>
               <Route path="/hoy" element={<Today />} />
               <Route path="/guia" element={<Guide />} />
+              <Route path="/mochi" element={<CareMochi />} />
               <Route path="/mis-fechas" element={<MyCycle />} />
               <Route path="/ajustes" element={<Settings />} />
             </Route>

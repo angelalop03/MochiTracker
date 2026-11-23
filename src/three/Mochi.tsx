@@ -2,10 +2,13 @@ import { useRef } from "react"
 import { useFrame, type ThreeEvent } from "@react-three/fiber"
 import * as THREE from "three"
 import { isAvatarId } from "../components/MochiAvatar"
+import type { CareId, PokeMood } from "../content/care"
+import { pokeMood } from "../lib/care"
 import type { Phase } from "../lib/cycle"
 import Accessory, { coversHead, FaceAccessory, replacesBow } from "./Accessory"
+import CareItems from "./CareItems"
 import { SEASONS } from "./seasons"
-import { lambert, round, smooth } from "./shapes"
+import { box, lambert, round, smooth } from "./shapes"
 
 const INK = "#4A2F45"
 const BODY = "#FFF9F2"
@@ -27,8 +30,10 @@ function Bow({ color }: { color: string }) {
 }
 
 /** Ropa de cada estación. Sin lo de la cabeza si el accesorio del avatar ya la ocupa */
-function Outfit({ phase, headFree }: { phase: Phase; headFree: boolean }) {
+function Outfit({ phase, headFree, blanket }: { phase: Phase; headFree: boolean; blanket: boolean }) {
   if (!headFree && (phase === "folicular" || phase === "ovulatoria")) return null
+  // Si le han dado la manta de «Cuida a Mochi», esa sustituye a la suya
+  if (blanket && phase === "menstrual") return null
   switch (phase) {
     case "menstrual":
       // Mantita que le arropa por debajo de la cara
@@ -86,19 +91,26 @@ interface Props {
   phase: Phase
   /** El Mochi elegido como foto de perfil: lleva su accesorio */
   avatar?: string | null
-  onPoke?: (position: THREE.Vector3) => void
+  /** Cómo reacciona al tocarlo. Por defecto, el de su estación */
+  mood?: PokeMood
+  /** Lo que le han dado en «Cuida a Mochi» */
+  items?: readonly CareId[]
+  onPoke?: (position: THREE.Vector3, mood: PokeMood) => void
 }
 
 // Mochi: un espíritu redondo hecho solo con primitivas. Respira, parpadea, sigue al puntero
 // y da un brinco al tocarlo. Su energía cambia con la estación.
-export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
+export default function Mochi({ phase, avatar: chosen, mood, items = [], onPoke }: Props) {
   const avatar = isAvatarId(chosen) ? chosen : null
+  const reaction = mood ?? pokeMood(phase, false)
+  const brows = useRef<THREE.Group>(null)
+  const anger = useRef<THREE.Group>(null)
   const root = useRef<THREE.Group>(null)
   const face = useRef<THREE.Group>(null)
   const eyes = useRef<THREE.Group>(null)
   const armL = useRef<THREE.Mesh>(null)
   const armR = useRef<THREE.Mesh>(null)
-  const anim = useRef({ jump: 0, hover: false, hoverAmt: 0, blink: 2.5 })
+  const anim = useRef({ jump: 0, spins: 1, grumpy: 0, sleepy: 0, hover: false, hoverAmt: 0, blink: 2.5 })
   const season = SEASONS[phase]
   const style = season.mochi
 
@@ -110,7 +122,9 @@ export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
 
     a.hoverAmt = damp(a.hoverAmt, a.hover ? 1 : 0, 8, dt)
     a.jump = Math.max(0, a.jump - dt / 0.9)
-    const arc = a.jump > 0 ? Math.sin((1 - a.jump) * Math.PI) : 0
+    a.grumpy = Math.max(0, a.grumpy - dt / 1.4)
+    a.sleepy = Math.max(0, a.sleepy - dt / 2)
+    const arc = a.jump > 0 ? Math.sin((1 - a.jump) * Math.PI) * (a.spins > 1 ? 1.1 : 1) : 0
 
     // Saltitos propios de la estación
     let hop = 0
@@ -121,8 +135,15 @@ export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
 
     const breath = 1 + Math.sin(t * style.breath) * 0.035 + arc * 0.14 + hop * 0.1
     root.current.scale.set(1 / Math.sqrt(breath), breath, 1 / Math.sqrt(breath))
-    root.current.position.y = arc * 1.4 + hop
-    root.current.rotation.y = a.jump > 0 ? (1 - a.jump) * Math.PI * 2 : 0
+    root.current.position.y = arc * 1.4 + hop - a.sleepy * 0.12
+    root.current.rotation.y = a.jump > 0 ? (1 - a.jump) * Math.PI * 2 * a.spins : 0
+    // Enfadado: tiembla, frunce el ceño y le sale el símbolo de enfado
+    root.current.rotation.z = Math.sin(t * 42) * 0.1 * Math.min(1, a.grumpy * 2)
+    if (brows.current) brows.current.visible = a.grumpy > 0
+    if (anger.current) {
+      anger.current.visible = a.grumpy > 0
+      anger.current.scale.setScalar(0.9 + Math.sin(t * 12) * 0.15)
+    }
 
     // La cara sigue al puntero
     root.current.getWorldPosition(tmp)
@@ -145,7 +166,8 @@ export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
     a.blink -= dt
     if (a.blink < -0.14) a.blink = 2 + Math.random() * 3.5
     const open = Math.max(style.eyes, a.hoverAmt, arc)
-    eyes.current.scale.y = a.blink < 0 ? 0.12 : open
+    // Con sueño cierra los ojos un rato
+    eyes.current.scale.y = a.blink < 0 || a.sleepy > 0.15 ? 0.12 : open
 
     // Saludo
     const cycle = t % 6
@@ -168,10 +190,16 @@ export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
 
   function handleClick(e: ThreeEvent<MouseEvent>) {
     e.stopPropagation()
-    if (anim.current.jump > 0 || !root.current) return
-    anim.current.jump = 1
+    const a = anim.current
+    if (a.jump > 0 || a.grumpy > 0.3 || a.sleepy > 0.3 || !root.current) return
+    if (reaction === "grumpy") a.grumpy = 1
+    else if (reaction === "sleepy") a.sleepy = 1
+    else {
+      a.jump = 1
+      a.spins = reaction === "party" ? 2 : 1
+    }
     root.current.getWorldPosition(tmp)
-    onPoke?.(tmp.clone())
+    onPoke?.(tmp.clone(), reaction)
   }
 
   return (
@@ -194,10 +222,24 @@ export default function Mochi({ phase, avatar: chosen, onPoke }: Props) {
         <mesh geometry={round} material={smooth(BLUSH)} position={[0.6, -0.12, 0.78]} scale={[0.19, 0.11, 0.05]} />
         <mesh geometry={round} material={smooth("#D9798F")} position={[0, -0.1, 0.96]} scale={[0.07, 0.04, 0.03]} />
         <FaceAccessory avatar={avatar} />
+        {/* Ceño fruncido, solo cuando se enfada */}
+        <group ref={brows} visible={false} position={[0, 0.42, 0.9]}>
+          <mesh geometry={box} material={smooth(INK)} position={[-0.34, 0, 0]} rotation={[0, 0, -0.45]} scale={[0.28, 0.06, 0.05]} />
+          <mesh geometry={box} material={smooth(INK)} position={[0.34, 0, 0]} rotation={[0, 0, 0.45]} scale={[0.28, 0.06, 0.05]} />
+        </group>
       </group>
 
+      {/* Símbolo de enfado */}
+      <group ref={anger} visible={false} position={[0.82, 0.92, 0.35]}>
+        <mesh geometry={box} material={smooth("#E8546A")} position={[-0.07, 0.07, 0]} scale={[0.07, 0.2, 0.05]} />
+        <mesh geometry={box} material={smooth("#E8546A")} position={[0.07, -0.07, 0]} scale={[0.07, 0.2, 0.05]} />
+        <mesh geometry={box} material={smooth("#E8546A")} position={[0.07, 0.07, 0]} scale={[0.2, 0.07, 0.05]} />
+        <mesh geometry={box} material={smooth("#E8546A")} position={[-0.07, -0.07, 0]} scale={[0.2, 0.07, 0.05]} />
+      </group>
+      <CareItems items={items} />
+
       {phase !== "ovulatoria" && !replacesBow(avatar) && <Bow color={season.bow} />}
-      <Outfit phase={phase} headFree={!coversHead(avatar)} />
+      <Outfit phase={phase} headFree={!coversHead(avatar)} blanket={items.includes("manta")} />
       <Accessory avatar={avatar} />
 
       {/* Zona invisible para detectar el puntero sobre todo Mochi */}
