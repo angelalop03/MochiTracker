@@ -8,7 +8,7 @@ import Burst, { type BurstHandle } from "./Burst"
 import Floaters from "./Floaters"
 import Island from "./Island"
 import Mochi, { type Reaction } from "./Mochi"
-import type { CareId, Mood, Temperament } from "../content/care"
+import type { Activity, CareId, Mood, Temperament } from "../content/care"
 import { SEASONS } from "./seasons"
 import { CAMERA_Z, FOV, WORLD_SIZE, visibleHeight } from "./shapes"
 
@@ -115,10 +115,11 @@ interface WorldProps {
   expression?: Mood
   items?: readonly CareId[]
   calm?: number
+  activity?: Activity
   onMochiPoke?: (reaction: Reaction, step: number) => void
 }
 
-function World({ phase, avatar, temperament, expression, items, calm, onMochiPoke }: WorldProps) {
+function World({ phase, avatar, temperament, expression, items, calm, activity, onMochiPoke }: WorldProps) {
   const burst = useRef<BurstHandle>(null)
   const holder = useRef<THREE.Group>(null)
 
@@ -143,6 +144,7 @@ function World({ phase, avatar, temperament, expression, items, calm, onMochiPok
             expression={expression}
             items={items}
             calm={calm}
+            activity={activity}
             onPoke={handlePoke}
           />
         </group>
@@ -164,10 +166,11 @@ interface SceneProps {
   /** Lo que lleva en «Cuida a Mochi» */
   items?: readonly CareId[]
   calm?: number
+  activity?: Activity
   onMochiPoke?: (reaction: Reaction, step: number) => void
 }
 
-export default function Scene({ phase, avatar, mode = "embedded", temperament, expression, items, calm, onMochiPoke }: SceneProps) {
+export default function Scene({ phase, avatar, mode = "embedded", temperament, expression, items, calm, activity, onMochiPoke }: SceneProps) {
   const wrapper = useRef<HTMLDivElement>(null)
   const visible = useVisible(wrapper)
   const [mobile] = useState(() => window.matchMedia("(max-width: 820px)").matches)
@@ -205,6 +208,7 @@ export default function Scene({ phase, avatar, mode = "embedded", temperament, e
             expression={expression}
             items={items}
             calm={calm}
+            activity={activity}
             onMochiPoke={onMochiPoke}
           />
         </Rig>

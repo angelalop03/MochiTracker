@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import { useFrame, type ThreeEvent } from "@react-three/fiber"
 import * as THREE from "three"
 import { isAvatarId } from "../components/MochiAvatar"
-import { PHASE_CARE, type CareId, type Mood, type Temperament } from "../content/care"
+import { PHASE_CARE, type Activity, type CareId, type Mood, type Temperament } from "../content/care"
 import type { Phase } from "../lib/cycle"
 import Accessory, { coversHead, FaceAccessory, replacesBow } from "./Accessory"
 import CareItems from "./CareItems"
@@ -112,12 +112,14 @@ interface Props {
   items?: readonly CareId[]
   /** Cambia cada vez que le das algo: se le pasa el enfado y vuelve a mirarte */
   calm?: number
+  /** Lo que está haciendo: pasear, bailar, entrenar, yoga o respirar */
+  activity?: Activity
   onPoke?: (position: THREE.Vector3, reaction: Reaction, step: number) => void
 }
 
 // Mochi: un espíritu redondo hecho solo con primitivas. Respira, parpadea, sigue al puntero
 // y reacciona al tocarla según su estación y cómo se siente.
-export default function Mochi({ phase, avatar: chosen, temperament, expression = "bien", items = [], calm = 0, onPoke }: Props) {
+export default function Mochi({ phase, avatar: chosen, temperament, expression = "bien", items = [], calm = 0, activity, onPoke }: Props) {
   const avatar = isAvatarId(chosen) ? chosen : null
   const character = temperament ?? PHASE_CARE[phase].temperament
   const feels = PHASE_CARE[phase].feels
@@ -197,6 +199,26 @@ export default function Mochi({ phase, avatar: chosen, temperament, expression =
     root.current.rotation.z = shake + wobble + shiver
     root.current.position.x = Math.sin(t * 7) * 0.15 * a.dizzy
 
+    // Lo que está haciendo
+    if (activity && a.jump === 0 && a.turn === 0) {
+      if (activity === "walk") {
+        root.current.position.x += Math.sin(t * 1.4) * 0.6
+        root.current.position.y += Math.abs(Math.sin(t * 6)) * 0.12
+        root.current.rotation.z += Math.sin(t * 6) * 0.06
+        root.current.rotation.y = Math.cos(t * 1.4) > 0 ? 0.5 : -0.5
+      } else if (activity === "dance") {
+        root.current.rotation.y = t * 3
+        root.current.position.y += Math.abs(Math.sin(t * 8)) * 0.25
+      } else if (activity === "workout") {
+        root.current.position.y += Math.abs(Math.sin(t * 9)) * 0.28
+      } else if (activity === "yoga") {
+        const stretch = 1 + Math.sin(t * 1.2) * 0.1
+        root.current.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch))
+      } else if (activity === "breathe") {
+        root.current.scale.multiplyScalar(1 + Math.sin(t * 0.9) * 0.06)
+      }
+    }
+
     if (brows.current) brows.current.visible = a.warn > 0 || a.angry > 0 || a.turn > 0
     if (anger.current) {
       anger.current.visible = a.angry > 0
@@ -223,7 +245,7 @@ export default function Mochi({ phase, avatar: chosen, temperament, expression =
     if (a.blink < -0.14) a.blink = 2 + Math.random() * 3.5
     const tired = expression === "cansada" ? 0.45 : expression === "triste" ? 0.8 : style.eyes
     const open = Math.max(tired, a.hoverAmt * (expression === "cansada" ? 0.6 : 1), arc)
-    const closed = sleeping || a.blink < 0 || a.sleepy > 0.15 || a.asleep > 0.1
+    const closed = sleeping || activity === "breathe" || a.blink < 0 || a.sleepy > 0.15 || a.asleep > 0.1
     eyes.current.scale.y = closed ? 0.12 : open
 
     // Saludo (no si está de morros o dormida)
@@ -232,6 +254,13 @@ export default function Mochi({ phase, avatar: chosen, temperament, expression =
     const wave = Math.max(greet, arc, a.hoverAmt * 0.6)
     armR.current.position.y = -0.2 + wave * 0.75 + Math.sin(t * 11) * 0.07 * wave
     armL.current.position.y = -0.2 + arc * 0.75
+    // Brazos arriba en yoga; arriba y abajo al entrenar
+    if (activity === "yoga") {
+      armR.current.position.y = 0.5
+      armL.current.position.y = 0.5
+    } else if (activity === "workout") {
+      armR.current.position.y = -0.1 + Math.abs(Math.sin(t * 9)) * 0.5
+    }
   })
 
   function handleOver(e: ThreeEvent<PointerEvent>) {

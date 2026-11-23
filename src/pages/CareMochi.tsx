@@ -47,10 +47,11 @@ const REACTION_FACE: Record<Reaction, string> = {
   dizzy: "ansiosa",
 }
 
-const STAT_SHORT: Record<Stat, string> = { barriga: "Barriga", energia: "Energía", animo: "Ánimo", confort: "Comodidad" }
+const STAT_SHORT = Object.fromEntries(STATS.map((s) => [s.id, s.label])) as Record<Stat, string>
 
-/** Lo que se le ve en la mano un ratito al dárselo */
-const HOLD_MS = 6000
+/** Lo que sujeta se ve un ratito; lo que hace, un poco más */
+const HOLD_MS = 8000
+const DO_MS = 12_000
 
 function Meter({ stat, value }: { stat: Stat; value: number }) {
   const filled = Math.round(value / 10)
@@ -82,15 +83,17 @@ export default function CareMochi() {
   const care = useCare(phase, today, now)
   const [category, setCategory] = useState<Category>("comida")
   const [say, setSay] = useState<Say | null>(null)
-  const [held, setHeld] = useState<CareId | null>(null)
+  const [showing, setShowing] = useState<{ id: CareId; n: number } | null>(null)
   const [, refresh] = useState(0)
   const [calm, setCalm] = useState(0)
 
   useEffect(() => {
-    if (!held) return
-    const id = setTimeout(() => setHeld(null), HOLD_MS)
+    if (!showing) return
+    const item = CARE_ITEMS[showing.id]
+    const ms = showing.id === "dormir" ? NAP_MS : item.show === "do" ? DO_MS : HOLD_MS
+    const id = setTimeout(() => setShowing(null), ms)
     return () => clearTimeout(id)
-  }, [held])
+  }, [showing])
 
   if (!profile) return <Loading />
 
@@ -98,7 +101,9 @@ export default function CareMochi() {
   const season = PHASE_CONTENT[phase].season
   const level = levelOf(care.state.xp)
   const days = care.state.days.length
-  const items = held && !care.worn.includes(held) ? [...care.worn, held] : care.worn
+  const now_ = showing?.id
+  const items = now_ && !care.worn.includes(now_) ? [...care.worn, now_] : care.worn
+  const activity = now_ ? CARE_ITEMS[now_].activity : undefined
   const line: Say = say ?? { text: greeting(phase, care.mood), face: FACE[care.mood] }
 
   function offer(id: CareId) {
@@ -106,9 +111,9 @@ export default function CareMochi() {
     if (result.kind === "ok") {
       setCalm((n) => n + 1)
       setSay({ text: result.line, face: result.favorite ? "genial" : "bien" })
-      if (!CARE_ITEMS[id].wear) setHeld(id)
-      // Cuando se despierte de la siesta, se vuelve a pintar
-      if (id === "siesta") setTimeout(() => refresh((n) => n + 1), NAP_MS + 200)
+      if (CARE_ITEMS[id].show !== "wear") setShowing({ id, n: Date.now() })
+      // Cuando se despierte, se vuelve a pintar
+      if (id === "dormir") setTimeout(() => refresh((n) => n + 1), NAP_MS + 200)
     } else if (result.kind === "refused") {
       setSay({ text: result.line, face: "irritable" })
     } else {
@@ -149,6 +154,7 @@ export default function CareMochi() {
             expression={care.mood}
             items={items}
             calm={calm}
+            activity={activity}
             onMochiPoke={onPoke}
           />
           <span className="care-mood" data-mood={care.mood}>

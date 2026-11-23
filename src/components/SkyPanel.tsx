@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, type ReactNode } from "react"
-import type { CareId, Mood, Temperament } from "../content/care"
+import type { Activity, CareId, Mood, Temperament } from "../content/care"
 import type { Reaction } from "../three/Mochi"
 import type { Phase } from "../lib/cycle"
 import { canUse3D } from "../three/support"
@@ -16,6 +16,7 @@ export default function SkyPanel({
   expression,
   items,
   calm,
+  activity,
   onMochiPoke,
   children,
 }: {
@@ -27,6 +28,7 @@ export default function SkyPanel({
   expression?: Mood
   items?: readonly CareId[]
   calm?: number
+  activity?: Activity
   onMochiPoke?: (reaction: Reaction, step: number) => void
   children?: ReactNode
 }) {
@@ -42,6 +44,7 @@ export default function SkyPanel({
             expression={expression}
             items={items}
             calm={calm}
+            activity={activity}
             onMochiPoke={onMochiPoke}
           />
         </Suspense>

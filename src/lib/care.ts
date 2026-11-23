@@ -19,6 +19,8 @@ import type { Phase } from "./cycle"
 export type Stats = Record<Stat, number>
 
 export interface CareState {
+  /** La estación con la que se calcularon sus necesidades */
+  phase: Phase
   stats: Stats
   /** Momento del último cálculo, en milisegundos */
   updatedAt: number
@@ -39,20 +41,31 @@ const WEAR_MS = 3 * HOUR
 export const NAP_MS = 20_000
 const MIN_STAT = 5
 
-const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
+const clamp = (n: number, max = 100) => Math.max(0, Math.min(max, Math.round(n)))
 
-export function newCare(now: number): CareState {
-  return { stats: { barriga: 70, energia: 70, animo: 70, confort: 70 }, updatedAt: now, xp: 0, days: [], wearing: {}, sleepUntil: 0 }
+/** Empieza como está lo habitual en su fase */
+export function newCare(now: number, phase: Phase): CareState {
+  return { phase, stats: { ...PHASE_CARE[phase].start }, updatedAt: now, xp: 0, days: [], wearing: {}, sleepUntil: 0 }
 }
 
-/** Las necesidades bajan con el tiempo, a distinto ritmo según la estación. Nunca llegan a 0 */
+/**
+ * Las necesidades bajan con el tiempo, a distinto ritmo según la estación, y nunca pasan del
+ * techo de la fase. Al cambiar de estación se acercan a lo habitual en la nueva. Nunca llegan a 0.
+ */
 export function decay(state: CareState, phase: Phase, now: number): CareState {
+  const care = PHASE_CARE[phase]
+  let stats = { ...state.stats }
+  if (state.phase !== phase) {
+    for (const { id } of STATS) stats[id] = Math.round((stats[id] + care.start[id]) / 2)
+  }
   const hours = Math.min(MAX_HOURS, Math.max(0, (now - state.updatedAt) / HOUR))
-  if (hours === 0) return state
-  const rates = PHASE_CARE[phase].decay
-  const stats = { ...state.stats }
-  for (const { id } of STATS) stats[id] = Math.max(Math.min(stats[id], MIN_STAT), clamp(stats[id] - rates[id] * hours))
-  return { ...state, stats, updatedAt: now }
+  const next = { ...stats }
+  for (const { id } of STATS) {
+    const dropped = clamp(stats[id] - care.decay[id] * hours, care.cap[id])
+    next[id] = Math.max(Math.min(stats[id], MIN_STAT), dropped)
+  }
+  stats = next
+  return { ...state, phase, stats, updatedAt: Math.max(now, state.updatedAt) }
 }
 
 export type CareResult =
@@ -67,7 +80,7 @@ export function applyCare(state: CareState, phase: Phase, id: CareId, today: str
   const item = CARE_ITEMS[id]
   const current = decay(state, phase, now)
 
-  if (current.sleepUntil > now && id !== "siesta") return { state: current, result: { kind: "asleep", line: "Shh… está durmiendo." } }
+  if (current.sleepUntil > now && id !== "dormir") return { state: current, result: { kind: "asleep", line: "Shh… está durmiendo." } }
 
   const refusal = care.refuses[id]
   if (refusal) {
@@ -76,30 +89,27 @@ export function applyCare(state: CareState, phase: Phase, id: CareId, today: str
   }
 
   const gains = Object.entries(item.effect).filter(([, v]) => (v ?? 0) > 0) as [Stat, number][]
-  if (gains.length > 0 && gains.every(([stat]) => current.stats[stat] >= 95)) {
+  if (gains.length > 0 && gains.every(([stat]) => current.stats[stat] >= care.cap[stat] - 5)) {
     return { state: current, result: { kind: "full", line: "Ahora mismo no me hace falta, gracias." } }
   }
 
   const favorite = care.favorites.includes(id)
   const stats = { ...current.stats }
   for (const [stat, value] of Object.entries(item.effect) as [Stat, number][]) {
-    stats[stat] = clamp(stats[stat] + (value > 0 && favorite ? value * 1.5 : value))
+    stats[stat] = clamp(stats[stat] + (value > 0 && favorite ? value * 1.5 : value), care.cap[stat])
   }
   const days = current.days.includes(today) ? current.days : [...current.days, today].slice(-60)
   const wearing = { ...current.wearing }
-  if (item.wear) wearing[id] = now + WEAR_MS
-  // La manta y el abanico no se llevan a la vez
-  if (id === "manta") delete wearing.abanico
-  if (id === "abanico") delete wearing.manta
+  if (item.show === "wear") wearing[id] = now + WEAR_MS
   const next: CareState = {
     ...current,
     stats,
     xp: current.xp + (favorite ? 2 : 1),
     days,
     wearing,
-    sleepUntil: id === "siesta" ? now + NAP_MS : current.sleepUntil,
+    sleepUntil: id === "dormir" ? now + NAP_MS : current.sleepUntil,
   }
-  const line = favorite && id !== "siesta" ? `${item.say} ¡Justo lo que me apetecía!` : item.say
+  const line = item.say
   return { state: next, result: { kind: "ok", line, favorite } }
 }
 
@@ -180,7 +190,7 @@ function write(key: string, value: string | null) {
 
 let cache: { raw: string | null; state: CareState | null } = { raw: null, state: null }
 
-function load(now: number): CareState {
+function load(now: number, phase: Phase): CareState {
   const raw = read(KEY)
   if (raw !== cache.raw) {
     try {
@@ -189,7 +199,9 @@ function load(now: number): CareState {
       cache = { raw, state: null }
     }
   }
-  return cache.state ?? newCare(now)
+  const saved = cache.state
+  // Las versiones antiguas del juego no guardaban la estación
+  return saved && saved.phase ? saved : newCare(now, phase)
 }
 
 function subscribe(listener: () => void) {
@@ -204,7 +216,7 @@ function subscribe(listener: () => void) {
 /** El tamagochi, compartido entre pantallas. now se pasa para poder refrescarlo */
 export function useCare(phase: Phase, today: string, now: number) {
   useSyncExternalStore(subscribe, () => read(KEY))
-  const state = decay(load(now), phase, now)
+  const state = decay(load(now, phase), phase, now)
   const mood = moodOf(state, now)
   return {
     state,
@@ -212,7 +224,7 @@ export function useCare(phase: Phase, today: string, now: number) {
     temperament: temperamentOf(phase, mood),
     worn: wornItems(state, now),
     give(id: CareId): CareResult {
-      const { state: next, result } = applyCare(load(Date.now()), phase, id, today, Date.now())
+      const { state: next, result } = applyCare(load(Date.now(), phase), phase, id, today, Date.now())
       write(KEY, JSON.stringify(next))
       return result
     },
