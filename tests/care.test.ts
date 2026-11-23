@@ -1,53 +1,132 @@
 import { describe, expect, it } from "vitest"
-import { CARE_ITEMS, PHASE_CARE } from "../src/content/care"
-import { freshCare, giveItem, isCared, pokeMood, trayFor } from "../src/lib/care"
+import { CARE_ITEMS, CATEGORIES, PHASE_CARE, type CareId } from "../src/content/care"
+import { applyCare, decay, greeting, levelOf, moodOf, newCare, pokeLine, temperamentOf, wornItems } from "../src/lib/care"
 import { PHASES } from "../src/lib/cycle"
 
-describe("Cuida a Mochi", () => {
-  it("en otoño necesita chocolate, manta e infusión", () => {
-    let state = freshCare("2026-11-23", "lutea")
-    let r = giveItem(state, "chocolate")
-    expect(r.result).toBe("gift")
-    state = r.state
-    state = giveItem(state, "manta").state
-    r = giveItem(state, "infusion")
-    expect(r.result).toBe("done")
-    expect(isCared(r.state)).toBe(true)
+const NOW = Date.parse("2026-11-23T10:00:00Z")
+const HOUR = 3_600_000
+const TODAY = "2026-11-23"
+
+describe("necesidades", () => {
+  it("bajan con el tiempo, más rápido el ánimo en otoño que en primavera", () => {
+    const start = newCare(NOW)
+    const otono = decay(start, "lutea", NOW + 5 * HOUR)
+    const primavera = decay(start, "folicular", NOW + 5 * HOUR)
+    expect(otono.stats.animo).toBeLessThan(primavera.stats.animo)
+    expect(otono.stats.animo).toBe(70 - 8 * 5)
   })
 
-  it("lo que hoy no le apetece no se queda", () => {
-    const state = freshCare("2026-11-23", "lutea")
-    const r = giveItem(state, "fiesta")
-    expect(r.result).toBe("nope")
-    expect(r.state.given).toEqual([])
+  it("aunque pasen días, no llegan a cero ni bajan más de lo que pasan dos días", () => {
+    const late = decay(newCare(NOW), "lutea", NOW + 30 * 24 * HOUR)
+    for (const value of Object.values(late.stats)) expect(value).toBeGreaterThanOrEqual(5)
+  })
+})
+
+describe("cuidados", () => {
+  it("lo favorito de la estación hace más efecto y da más cariño", () => {
+    const base = newCare(NOW)
+    const fav = applyCare(base, "lutea", "chocolate", TODAY, NOW)
+    const normal = applyCare(base, "folicular", "chocolate", TODAY, NOW)
+    expect(fav.state.stats.animo).toBeGreaterThan(normal.state.stats.animo)
+    expect(fav.state.xp).toBe(2)
+    expect(normal.state.xp).toBe(1)
+    expect(fav.result).toMatchObject({ kind: "ok", favorite: true })
   })
 
-  it("dar dos veces lo mismo no suma", () => {
-    const state = giveItem(freshCare("2026-11-23", "menstrual"), "manta").state
-    expect(giveItem(state, "manta").result).toBe("repeat")
+  it("en otoño rechaza la fiesta y le baja un poco el ánimo", () => {
+    const r = applyCare(newCare(NOW), "lutea", "fiesta", TODAY, NOW)
+    expect(r.result.kind).toBe("refused")
+    expect(r.state.stats.animo).toBe(65)
   })
 
-  it("en otoño se enfada al tocarlo, y se le pasa si le cuidas", () => {
-    expect(pokeMood("lutea", false)).toBe("grumpy")
-    expect(pokeMood("lutea", true)).toBe("happy")
-    expect(pokeMood("menstrual", false)).toBe("sleepy")
-    expect(pokeMood("ovulatoria", false)).toBe("party")
+  it("en verano no quiere manta, y en invierno no quiere abanico", () => {
+    expect(applyCare(newCare(NOW), "ovulatoria", "manta", TODAY, NOW).result.kind).toBe("refused")
+    expect(applyCare(newCare(NOW), "menstrual", "abanico", TODAY, NOW).result.kind).toBe("refused")
   })
 
-  it("cada estación tiene sus cuatro objetos, todos con nombre y sprite", () => {
+  it("si ya está llena, no hace falta", () => {
+    const full = { ...newCare(NOW), stats: { barriga: 100, energia: 100, animo: 100, confort: 100 } }
+    expect(applyCare(full, "folicular", "fresas", TODAY, NOW).result.kind).toBe("full")
+  })
+
+  it("la siesta la duerme un rato y mientras tanto no come", () => {
+    const asleep = applyCare(newCare(NOW), "menstrual", "siesta", TODAY, NOW).state
+    expect(moodOf(asleep, NOW + 1000)).toBe("dormida")
+    expect(applyCare(asleep, "menstrual", "sopa", TODAY, NOW + 1000).result.kind).toBe("asleep")
+    expect(moodOf(asleep, NOW + 60_000)).not.toBe("dormida")
+  })
+
+  it("la manta se la pone un rato, y quita el abanico", () => {
+    const cold = { ...newCare(NOW), stats: { barriga: 70, energia: 70, animo: 70, confort: 10 } }
+    let state = applyCare(cold, "folicular", "abanico", TODAY, NOW).state
+    state = applyCare(state, "folicular", "manta", TODAY, NOW).state
+    expect(wornItems(state, NOW + HOUR)).toEqual(["manta"])
+    expect(wornItems(state, NOW + 4 * HOUR)).toEqual([])
+  })
+
+  it("cada cuidado tiene categoría, efecto y un sprite de 12 columnas", () => {
+    const categories = new Set(CATEGORIES.map((c) => c.id))
+    for (const [id, item] of Object.entries(CARE_ITEMS) as [CareId, (typeof CARE_ITEMS)[CareId]][]) {
+      expect(categories.has(item.category), id).toBe(true)
+      expect(Object.keys(item.effect).length, id).toBeGreaterThan(0)
+      expect(item.sprite.every((row) => row.length === 12), id).toBe(true)
+      expect(item.sprite.length, id).toBeLessThanOrEqual(12)
+    }
+    for (const c of CATEGORIES) expect(Object.values(CARE_ITEMS).filter((i) => i.category === c.id).length).toBeGreaterThan(0)
+  })
+
+  it("lo favorito y lo que rechaza existen y no se contradicen", () => {
     for (const phase of PHASES) {
-      const tray = trayFor(phase, "2026-11-23")
-      expect(new Set(tray).size).toBe(4)
-      expect(tray).toContain(PHASE_CARE[phase].nope)
-      for (const id of tray) {
-        expect(CARE_ITEMS[id].name).not.toBe("")
-        expect(CARE_ITEMS[id].sprite.every((row) => row.length === 12)).toBe(true)
-        expect(PHASE_CARE[phase].lines.gifts[id] ?? PHASE_CARE[phase].nope).toBeTruthy()
-      }
+      const care = PHASE_CARE[phase]
+      for (const id of care.favorites) expect(CARE_ITEMS[id]).toBeTruthy()
+      for (const id of Object.keys(care.refuses) as CareId[]) expect(care.favorites).not.toContain(id)
     }
   })
+})
 
-  it("el orden de la bandeja no cambia al recargar el mismo día", () => {
-    expect(trayFor("lutea", "2026-11-23")).toEqual(trayFor("lutea", "2026-11-23"))
+describe("humor y reacciones", () => {
+  const withStats = (stats: Partial<Record<"barriga" | "energia" | "animo" | "confort", number>>) => ({
+    ...newCare(NOW),
+    stats: { barriga: 70, energia: 70, animo: 70, confort: 70, ...stats },
+  })
+
+  it("manda la necesidad más baja", () => {
+    expect(moodOf(withStats({ barriga: 10 }), NOW)).toBe("hambrienta")
+    expect(moodOf(withStats({ energia: 10 }), NOW)).toBe("cansada")
+    expect(moodOf(withStats({ animo: 10 }), NOW)).toBe("triste")
+    expect(moodOf(withStats({ confort: 10 }), NOW)).toBe("incomoda")
+    expect(moodOf(withStats({ barriga: 90, energia: 90, animo: 90, confort: 90 }), NOW)).toBe("feliz")
+  })
+
+  it("en otoño avisa una vez, luego se enfada y luego no te habla", () => {
+    const t = temperamentOf("lutea", "bien")
+    expect(t).toBe("grumpy")
+    expect(pokeLine(t, 0, "bien")).toMatch(/no estoy de humor/)
+    expect(pokeLine(t, 1, "bien")).toMatch(/te he dicho que no/)
+    expect(pokeLine(t, 2, "bien")).toMatch(/no te hablo/)
+    expect(pokeLine(t, 5, "bien")).toMatch(/no te hablo/)
+  })
+
+  it("feliz aguanta más, y con hambre o triste se enfada en cualquier estación", () => {
+    expect(temperamentOf("lutea", "feliz")).toBe("soft")
+    expect(temperamentOf("menstrual", "feliz")).toBe("happy")
+    expect(temperamentOf("folicular", "hambrienta")).toBe("grumpy")
+    expect(temperamentOf("ovulatoria", "cansada")).toBe("sleepy")
+  })
+
+  it("la primera vez te cuenta qué le pasa", () => {
+    expect(pokeLine("grumpy", 0, "hambrienta")).toMatch(/hambre/)
+  })
+
+  it("saluda según su estación y cómo está", () => {
+    expect(greeting("menstrual", "incomoda")).toMatch(/frío/)
+    expect(greeting("ovulatoria", "incomoda")).toMatch(/calor/)
+    expect(greeting("lutea", "feliz")).toBe(PHASE_CARE.lutea.happy)
+  })
+
+  it("el cariño sube de nivel", () => {
+    expect(levelOf(0)).toMatchObject({ level: 1, title: "Recién conocidas" })
+    expect(levelOf(12)).toMatchObject({ level: 2, title: "Amigas" })
+    expect(levelOf(999).level).toBe(5)
   })
 })

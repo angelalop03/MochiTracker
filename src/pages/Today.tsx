@@ -1,5 +1,5 @@
 import { ArrowRight, Undo2 } from "lucide-react"
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { useSearchParams } from "react-router-dom"
 import AdviceList, { FeaturedTip } from "../components/AdviceList"
 import AiPanel from "../components/AiPanel"
@@ -32,7 +32,7 @@ import {
 import { daySeed, formatDay, formatInDays, formatLongDate } from "../lib/format"
 import type { AiInput } from "../lib/ai/advice"
 import { personalize, type PersonalTip } from "../lib/personalize"
-import { pokeMood, useCare, useCareGameOn } from "../lib/care"
+import { useCare, useCareGameOn, useNow } from "../lib/care"
 import { isNewSeason, markSeasonSeen } from "../lib/seasonSeen"
 import { markTutorialSeen, shouldShowTutorial } from "../lib/tutorial"
 
@@ -44,6 +44,24 @@ const MOCHI_MOOD: Record<Phase, string> = {
   folicular: "bien",
   ovulatoria: "genial",
   lutea: "normal",
+}
+
+/** La isla de Hoy. Si juega a «Cuida a Mochi», Mochi se comporta según cómo la tenga */
+function TodaySky({ phase, avatar, today, children }: { phase: Phase; avatar?: string | null; today: string; children: ReactNode }) {
+  const game = useCareGameOn()
+  const now = useNow(60_000)
+  const care = useCare(phase, today, now)
+  return (
+    <SkyPanel
+      phase={phase}
+      avatar={avatar}
+      temperament={game ? care.temperament : undefined}
+      expression={game ? care.mood : undefined}
+      items={game ? care.worn : undefined}
+    >
+      {children}
+    </SkyPanel>
+  )
 }
 
 /** La etiqueta sobre la isla: dónde estás hoy */
@@ -141,8 +159,6 @@ export default function Today() {
   const [params, setParams] = useSearchParams()
   const [tutorialClosed, setTutorialClosed] = useState(false)
   const [welcomeClosed, setWelcomeClosed] = useState<string | null>(null)
-  const game = useCareGameOn()
-  const care = useCare(profile ? todayInTimeZone(profile.timezone) : "")
 
   if (!profile) return <Loading />
 
@@ -178,8 +194,6 @@ export default function Today() {
   const aiKey = `nube:${realToday}`
 
   const next = state.nextPhase ? PHASE_CONTENT[state.nextPhase.phase] : null
-  // Lo que le has dado hoy en «Cuida a Mochi» también se ve aquí
-  const careToday = care.state.phase === state.phase ? care : { state: { ...care.state, given: [] }, cared: false }
   // Sale sola a quien acaba de empezar, o desde Ajustes con ?tutorial
   const showTutorial = !tutorialClosed && (params.has("tutorial") || shouldShowTutorial(profile.onboarded_at))
   // Bienvenida a la estación: la primera vez que se abre en una fase nueva, y nunca junto al tutorial
@@ -205,14 +219,9 @@ export default function Today() {
             <span className="wordmark">Isla Mochi</span>
             <ThemeToggle />
           </div>
-          <SkyPanel
-            phase={state.phase}
-            avatar={profile.avatar}
-            mood={game ? pokeMood(state.phase, careToday.cared) : undefined}
-            items={game ? careToday.state.given : undefined}
-          >
+          <TodaySky phase={state.phase} avatar={profile.avatar} today={realToday}>
             <span className="sky-chip">{skyChip(state)}</span>
-          </SkyPanel>
+          </TodaySky>
         </section>
 
         <div className="today-sheet">

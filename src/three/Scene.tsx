@@ -7,8 +7,8 @@ import { useTheme } from "../lib/theme"
 import Burst, { type BurstHandle } from "./Burst"
 import Floaters from "./Floaters"
 import Island from "./Island"
-import Mochi from "./Mochi"
-import type { CareId, PokeMood } from "../content/care"
+import Mochi, { type Reaction } from "./Mochi"
+import type { CareId, Mood, Temperament } from "../content/care"
 import { SEASONS } from "./seasons"
 import { CAMERA_Z, FOV, WORLD_SIZE, visibleHeight } from "./shapes"
 
@@ -111,22 +111,24 @@ function ScrollRig({ children }: { children: ReactNode }) {
 interface WorldProps {
   phase: Phase
   avatar?: string | null
-  mood?: PokeMood
+  temperament?: Temperament
+  expression?: Mood
   items?: readonly CareId[]
-  onMochiPoke?: (mood: PokeMood) => void
+  calm?: number
+  onMochiPoke?: (reaction: Reaction, step: number) => void
 }
 
-function World({ phase, avatar, mood, items, onMochiPoke }: WorldProps) {
+function World({ phase, avatar, temperament, expression, items, calm, onMochiPoke }: WorldProps) {
   const burst = useRef<BurstHandle>(null)
   const holder = useRef<THREE.Group>(null)
 
-  function handlePoke(position: THREE.Vector3, reaction: PokeMood) {
-    // Los píxeles de alegría solo salen si salta
-    if (reaction === "happy" || reaction === "party") {
+  function handlePoke(position: THREE.Vector3, reaction: Reaction, step: number) {
+    // Los píxeles de alegría solo salen si salta o se marea de tanto saltar
+    if (reaction === "jump" || reaction === "spin" || reaction === "dizzy") {
       const scale = holder.current?.getWorldScale(new THREE.Vector3()).x ?? 1
       burst.current?.burst(position, scale)
     }
-    onMochiPoke?.(reaction)
+    onMochiPoke?.(reaction, step)
   }
 
   return (
@@ -134,7 +136,15 @@ function World({ phase, avatar, mood, items, onMochiPoke }: WorldProps) {
       <group ref={holder} rotation={WORLD_TILT}>
         <Island phase={phase} />
         <group position={[-0.2, 2.02, 1.1]} quaternion={FACING_CAMERA} scale={1.6}>
-          <Mochi phase={phase} avatar={avatar} mood={mood} items={items} onPoke={handlePoke} />
+          <Mochi
+            phase={phase}
+            avatar={avatar}
+            temperament={temperament}
+            expression={expression}
+            items={items}
+            calm={calm}
+            onPoke={handlePoke}
+          />
         </group>
       </group>
       <Burst ref={burst} />
@@ -148,14 +158,16 @@ interface SceneProps {
   avatar?: string | null
   /** "embedded" llena su contenedor. "scroll" va de fondo y acompaña a los huecos de la página */
   mode?: "embedded" | "scroll"
-  /** Cómo reacciona Mochi al tocarlo */
-  mood?: PokeMood
-  /** Lo que le han dado en «Cuida a Mochi» */
+  /** Cómo reacciona Mochi al tocarla y cómo se siente */
+  temperament?: Temperament
+  expression?: Mood
+  /** Lo que lleva en «Cuida a Mochi» */
   items?: readonly CareId[]
-  onMochiPoke?: (mood: PokeMood) => void
+  calm?: number
+  onMochiPoke?: (reaction: Reaction, step: number) => void
 }
 
-export default function Scene({ phase, avatar, mode = "embedded", mood, items, onMochiPoke }: SceneProps) {
+export default function Scene({ phase, avatar, mode = "embedded", temperament, expression, items, calm, onMochiPoke }: SceneProps) {
   const wrapper = useRef<HTMLDivElement>(null)
   const visible = useVisible(wrapper)
   const [mobile] = useState(() => window.matchMedia("(max-width: 820px)").matches)
@@ -186,7 +198,15 @@ export default function Scene({ phase, avatar, mode = "embedded", mood, items, o
         <directionalLight position={[5, 9, 7]} intensity={light.sun} color={light.sunColor} />
         <Floaters phase={phase} count={mobile ? 22 : 40} parallax={mode === "scroll"} />
         <Rig>
-          <World phase={phase} avatar={avatar} mood={mood} items={items} onMochiPoke={onMochiPoke} />
+          <World
+            phase={phase}
+            avatar={avatar}
+            temperament={temperament}
+            expression={expression}
+            items={items}
+            calm={calm}
+            onMochiPoke={onMochiPoke}
+          />
         </Rig>
       </Canvas>
     </div>

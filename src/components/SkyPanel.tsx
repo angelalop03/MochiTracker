@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, type ReactNode } from "react"
-import type { CareId, PokeMood } from "../content/care"
+import type { CareId, Mood, Temperament } from "../content/care"
+import type { Reaction } from "../three/Mochi"
 import type { Phase } from "../lib/cycle"
 import { canUse3D } from "../three/support"
 import StaticIsland from "./StaticIsland"
@@ -11,18 +12,22 @@ const Scene = lazy(() => import("../three/Scene"))
 export default function SkyPanel({
   phase,
   avatar,
-  mood,
+  temperament,
+  expression,
   items,
+  calm,
   onMochiPoke,
   children,
 }: {
   phase: Phase
   /** El Mochi del perfil: el de la isla lleva su accesorio */
   avatar?: string | null
-  /** Cómo reacciona Mochi al tocarlo y lo que le han dado en «Cuida a Mochi» */
-  mood?: PokeMood
+  /** Cómo reacciona Mochi al tocarla, cómo se siente y lo que lleva en «Cuida a Mochi» */
+  temperament?: Temperament
+  expression?: Mood
   items?: readonly CareId[]
-  onMochiPoke?: (mood: PokeMood) => void
+  calm?: number
+  onMochiPoke?: (reaction: Reaction, step: number) => void
   children?: ReactNode
 }) {
   const [use3D] = useState(canUse3D)
@@ -30,7 +35,15 @@ export default function SkyPanel({
     <div className="sky-panel">
       {use3D ? (
         <Suspense fallback={<StaticIsland phase={phase} />}>
-          <Scene phase={phase} avatar={avatar} mood={mood} items={items} onMochiPoke={onMochiPoke} />
+          <Scene
+            phase={phase}
+            avatar={avatar}
+            temperament={temperament}
+            expression={expression}
+            items={items}
+            calm={calm}
+            onMochiPoke={onMochiPoke}
+          />
         </Suspense>
       ) : (
         <StaticIsland phase={phase} />

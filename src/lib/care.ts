@@ -1,51 +1,162 @@
-// Estado del minijuego «Cuida a Mochi». Es un juego: vive en el dispositivo y se renueva cada día.
+// «Cuida a Mochi» como un tamagochi: sus necesidades bajan con el tiempo, según su estación,
+// y suben con tus cuidados. Es un juego: vive en el dispositivo.
 
-import { useSyncExternalStore } from "react"
-import { PHASE_CARE, type CareId, type PokeMood } from "../content/care"
+import { useEffect, useState, useSyncExternalStore } from "react"
+import {
+  CARE_ITEMS,
+  LEVELS,
+  MOOD_LINES,
+  PHASE_CARE,
+  POKE_LINES,
+  STATS,
+  type CareId,
+  type Mood,
+  type Stat,
+  type Temperament,
+} from "../content/care"
 import type { Phase } from "./cycle"
 
+export type Stats = Record<Stat, number>
+
 export interface CareState {
-  day: string
-  phase: Phase
-  given: CareId[]
+  stats: Stats
+  /** Momento del último cálculo, en milisegundos */
+  updatedAt: number
+  /** Puntos de cariño */
+  xp: number
+  /** Días en que la has cuidado (los últimos 60) */
+  days: string[]
+  /** Lo que lleva puesto y hasta cuándo */
+  wearing: Partial<Record<CareId, number>>
+  /** Duerme hasta este momento */
+  sleepUntil: number
 }
 
-export type GiveResult = "gift" | "nope" | "repeat" | "done"
+const HOUR = 3_600_000
+/** Como mucho se tienen en cuenta dos días sin abrir la app */
+const MAX_HOURS = 48
+const WEAR_MS = 3 * HOUR
+export const NAP_MS = 20_000
+const MIN_STAT = 5
 
-export function freshCare(day: string, phase: Phase): CareState {
-  return { day, phase, given: [] }
+const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
+
+export function newCare(now: number): CareState {
+  return { stats: { barriga: 70, energia: 70, animo: 70, confort: 70 }, updatedAt: now, xp: 0, days: [], wearing: {}, sleepUntil: 0 }
 }
 
-/** true si ya le has dado todo lo que necesitaba hoy */
-export function isCared(state: CareState) {
-  return PHASE_CARE[state.phase].wants.every((id) => state.given.includes(id))
+/** Las necesidades bajan con el tiempo, a distinto ritmo según la estación. Nunca llegan a 0 */
+export function decay(state: CareState, phase: Phase, now: number): CareState {
+  const hours = Math.min(MAX_HOURS, Math.max(0, (now - state.updatedAt) / HOUR))
+  if (hours === 0) return state
+  const rates = PHASE_CARE[phase].decay
+  const stats = { ...state.stats }
+  for (const { id } of STATS) stats[id] = Math.max(Math.min(stats[id], MIN_STAT), clamp(stats[id] - rates[id] * hours))
+  return { ...state, stats, updatedAt: now }
 }
 
-/** Lo que pasa al darle algo. Lo que no le apetece no se queda */
-export function giveItem(state: CareState, id: CareId): { state: CareState; result: GiveResult } {
-  const care = PHASE_CARE[state.phase]
-  if (id === care.nope) return { state, result: "nope" }
-  if (state.given.includes(id) || !care.wants.includes(id)) return { state, result: "repeat" }
-  const next = { ...state, given: [...state.given, id] }
-  return { state: next, result: isCared(next) ? "done" : "gift" }
-}
+export type CareResult =
+  | { kind: "ok"; line: string; favorite: boolean }
+  | { kind: "refused"; line: string }
+  | { kind: "full"; line: string }
+  | { kind: "asleep"; line: string }
 
-/** Cómo reacciona al tocarlo: si ya le has cuidado, se le pasa el enfado o el sueño */
-export function pokeMood(phase: Phase, cared: boolean): PokeMood {
-  const mood = PHASE_CARE[phase].poke
-  return cared && (mood === "grumpy" || mood === "sleepy") ? "happy" : mood
-}
-
-/** Los cuatro objetos del día, en un orden que cambia cada día pero no al recargar */
-export function trayFor(phase: Phase, day: string): CareId[] {
+/** Le das algo: sube lo que toque (el doble si es su favorito) o lo rechaza */
+export function applyCare(state: CareState, phase: Phase, id: CareId, today: string, now: number): { state: CareState; result: CareResult } {
   const care = PHASE_CARE[phase]
-  const items = [...care.wants, care.nope]
-  const seed = [...day].reduce((n, c) => n + c.charCodeAt(0), 0)
-  return items.map((id, i) => ({ id, k: (seed * (i + 3)) % 7 })).sort((a, b) => a.k - b.k).map((x) => x.id)
+  const item = CARE_ITEMS[id]
+  const current = decay(state, phase, now)
+
+  if (current.sleepUntil > now && id !== "siesta") return { state: current, result: { kind: "asleep", line: "Shh… está durmiendo." } }
+
+  const refusal = care.refuses[id]
+  if (refusal) {
+    const stats = { ...current.stats, animo: clamp(current.stats.animo - 5) }
+    return { state: { ...current, stats }, result: { kind: "refused", line: refusal } }
+  }
+
+  const gains = Object.entries(item.effect).filter(([, v]) => (v ?? 0) > 0) as [Stat, number][]
+  if (gains.length > 0 && gains.every(([stat]) => current.stats[stat] >= 95)) {
+    return { state: current, result: { kind: "full", line: "Ahora mismo no me hace falta, gracias." } }
+  }
+
+  const favorite = care.favorites.includes(id)
+  const stats = { ...current.stats }
+  for (const [stat, value] of Object.entries(item.effect) as [Stat, number][]) {
+    stats[stat] = clamp(stats[stat] + (value > 0 && favorite ? value * 1.5 : value))
+  }
+  const days = current.days.includes(today) ? current.days : [...current.days, today].slice(-60)
+  const wearing = { ...current.wearing }
+  if (item.wear) wearing[id] = now + WEAR_MS
+  // La manta y el abanico no se llevan a la vez
+  if (id === "manta") delete wearing.abanico
+  if (id === "abanico") delete wearing.manta
+  const next: CareState = {
+    ...current,
+    stats,
+    xp: current.xp + (favorite ? 2 : 1),
+    days,
+    wearing,
+    sleepUntil: id === "siesta" ? now + NAP_MS : current.sleepUntil,
+  }
+  const line = favorite && id !== "siesta" ? `${item.say} ¡Justo lo que me apetecía!` : item.say
+  return { state: next, result: { kind: "ok", line, favorite } }
+}
+
+/** Cómo se siente: manda la necesidad más baja; si todas van bien, está feliz */
+export function moodOf(state: CareState, now: number): Mood {
+  if (state.sleepUntil > now) return "dormida"
+  const s = state.stats
+  const lowest = STATS.map(({ id }) => id).sort((a, b) => s[a] - s[b])[0]!
+  if (s[lowest] < 25) {
+    return lowest === "barriga" ? "hambrienta" : lowest === "energia" ? "cansada" : lowest === "animo" ? "triste" : "incomoda"
+  }
+  const average = (s.barriga + s.energia + s.animo + s.confort) / 4
+  return average >= 75 ? "feliz" : average >= 45 ? "bien" : "regular"
+}
+
+/** Cómo reacciona al tocarla, según su estación y cómo se siente */
+export function temperamentOf(phase: Phase, mood: Mood): Temperament {
+  if (mood === "dormida" || mood === "cansada") return "sleepy"
+  if (mood === "hambrienta" || mood === "triste") return "grumpy"
+  const base = PHASE_CARE[phase].temperament
+  if (mood === "feliz") {
+    // Feliz aguanta más: en otoño primero sonríe, y en invierno se anima
+    if (base === "grumpy") return "soft"
+    if (base === "sleepy") return "happy"
+  }
+  return base
+}
+
+/** Lo que dice al tocarla la vez número step (0, 1 o 2) */
+export function pokeLine(temperament: Temperament, step: number, mood: Mood): string {
+  const lines = POKE_LINES[temperament]
+  // La primera vez, si algo le pasa, te lo cuenta
+  if (step === 0 && MOOD_LINES[mood] && mood !== "dormida") return `${lines[0]} ${MOOD_LINES[mood]}`
+  return lines[Math.min(2, step)]!
+}
+
+/** Lo que dice al entrar */
+export function greeting(phase: Phase, mood: Mood): string {
+  const care = PHASE_CARE[phase]
+  if (mood === "feliz") return care.happy
+  if (mood === "incomoda") return care.feels === "frio" ? "Tengo frío… ¿me abrigas?" : "¡Uf, qué calor! ¿Algo fresquito?"
+  return MOOD_LINES[mood] ?? care.hello
+}
+
+export function levelOf(xp: number) {
+  const level = Math.min(LEVELS.length, Math.floor(xp / 12) + 1)
+  const base = (level - 1) * 12
+  return { level, title: LEVELS[level - 1]!, progress: level === LEVELS.length ? 1 : (xp - base) / 12 }
+}
+
+/** Lo que lleva puesto ahora */
+export function wornItems(state: CareState, now: number): CareId[] {
+  return (Object.entries(state.wearing) as [CareId, number][]).filter(([, until]) => until > now).map(([id]) => id)
 }
 
 // ------------------------------------------------------------ almacenamiento
-const KEY = "isla-mochi-cuidados"
+const KEY = "isla-mochi-tamagochi"
 const ENABLED = "isla-mochi-juego"
 const EVENT = "isla-mochi-cuidados"
 
@@ -69,8 +180,7 @@ function write(key: string, value: string | null) {
 
 let cache: { raw: string | null; state: CareState | null } = { raw: null, state: null }
 
-/** Sin fase, devuelve lo de hoy sea cual sea su estación (para Hoy, antes de saberla) */
-function loadCare(day: string, phase?: Phase): CareState {
+function load(now: number): CareState {
   const raw = read(KEY)
   if (raw !== cache.raw) {
     try {
@@ -79,10 +189,7 @@ function loadCare(day: string, phase?: Phase): CareState {
       cache = { raw, state: null }
     }
   }
-  const saved = cache.state
-  // Cada día, o si cambia de estación, se empieza de nuevo
-  if (saved && saved.day === day && (phase === undefined || saved.phase === phase)) return saved
-  return freshCare(day, phase ?? "folicular")
+  return cache.state ?? newCare(now)
 }
 
 function subscribe(listener: () => void) {
@@ -94,17 +201,19 @@ function subscribe(listener: () => void) {
   }
 }
 
-/** Lo que ya le has dado hoy a Mochi, compartido entre pantallas */
-export function useCare(day: string, phase?: Phase) {
-  const raw = useSyncExternalStore(subscribe, () => read(KEY))
-  void raw
-  const state = loadCare(day, phase)
+/** El tamagochi, compartido entre pantallas. now se pasa para poder refrescarlo */
+export function useCare(phase: Phase, today: string, now: number) {
+  useSyncExternalStore(subscribe, () => read(KEY))
+  const state = decay(load(now), phase, now)
+  const mood = moodOf(state, now)
   return {
     state,
-    cared: isCared(state),
-    give(id: CareId): GiveResult {
-      const { state: next, result } = giveItem(state, id)
-      if (next !== state) write(KEY, JSON.stringify(next))
+    mood,
+    temperament: temperamentOf(phase, mood),
+    worn: wornItems(state, now),
+    give(id: CareId): CareResult {
+      const { state: next, result } = applyCare(load(Date.now()), phase, id, today, Date.now())
+      write(KEY, JSON.stringify(next))
       return result
     },
   }
@@ -119,4 +228,14 @@ export function setCareGameOn(on: boolean) {
 
 export function useCareGameOn() {
   return useSyncExternalStore(subscribe, isCareGameOn)
+}
+
+/** La hora actual, refrescada cada cierto tiempo: así las necesidades van bajando en pantalla */
+export function useNow(intervalMs: number) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs)
+    return () => clearInterval(id)
+  }, [intervalMs])
+  return now
 }
