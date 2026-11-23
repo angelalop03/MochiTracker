@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 import { CARE_ITEMS, type CareId } from "../src/content/care"
-import { buy, dailyGift, DAILY_GIFT, earn, missingFor, newWallet, pantryOf, SHOP, spend, START_COINS } from "../src/lib/shop"
+import { buy, canGive, dailyGift, DAILY_GIFT, earn, newWallet, pantryOf, SHOP, spend, START_COINS, type Purchase } from "../src/lib/shop"
+
+const bought = (p: Purchase) => {
+  if (p.kind !== "ok") throw new Error(p.kind)
+  return p.wallet
+}
 
 describe("monedero de Mochi", () => {
   it("empieza con unas monedas y algo en la despensa", () => {
@@ -29,34 +34,36 @@ describe("monedero de Mochi", () => {
     expect(w.coins).toBe(START_COINS)
   })
 
-  it("si no queda, se paga al dárselo", () => {
-    const w = spend(newWallet(), "ensalada")
-    expect(w.coins).toBe(START_COINS - 3)
-    expect(w.stock.ensalada ?? 0).toBe(0)
+  it("si no queda, no se le puede dar ni se cobra nada", () => {
+    const w = newWallet()
+    expect(canGive(w, "ensalada")).toBe(false)
+    expect(spend(w, "ensalada")).toEqual(w)
+    expect(canGive(w, "paseo")).toBe(true)
+  })
+
+  it("en la tienda se compran unidades para la despensa", () => {
+    const w = bought(buy(newWallet(), "chocolate", 3))
+    expect(w.coins).toBe(START_COINS - 6)
+    expect(w.stock.chocolate).toBe(5)
+    const salad = bought(buy(newWallet(), "ensalada"))
+    expect(canGive(salad, "ensalada")).toBe(true)
+    expect(spend(salad, "ensalada").stock.ensalada).toBe(0)
   })
 
   it("la manta se compra una vez y es tuya para siempre", () => {
     const rich = earn(newWallet(), 20)
-    const bought = spend(rich, "manta")
-    expect(bought.coins).toBe(rich.coins - 20)
-    expect(pantryOf(bought, "manta")).toEqual({ kind: "owned" })
-    expect(spend(bought, "manta").coins).toBe(bought.coins)
+    const w = bought(buy(rich, "manta"))
+    expect(w.coins).toBe(rich.coins - 20)
+    expect(pantryOf(w, "manta")).toEqual({ kind: "owned" })
+    expect(buy(w, "manta")).toEqual({ kind: "owned" })
+    expect(spend(w, "manta")).toEqual(w)
   })
 
   it("dice cuántas monedas faltan y no cobra sin dinero", () => {
     const poor = { ...newWallet(), coins: 4 }
-    expect(missingFor(poor, "manta")).toBe(16)
-    expect(missingFor(poor, "agua")).toBe(0)
-    expect(spend(poor, "manta")).toEqual(poor)
-  })
-
-  it("se pueden comprar unidades para guardarlas", () => {
-    const w = buy(newWallet(), "chocolate", 3)
-    expect(w?.coins).toBe(START_COINS - 6)
-    expect(w?.stock.chocolate).toBe(5)
-    expect(buy(newWallet(), "chocolate", 6)).toBeNull()
-    expect(buy(newWallet(), "manta")).toBeNull()
-    expect(buy(newWallet(), "paseo")).toBeNull()
+    expect(buy(poor, "manta")).toEqual({ kind: "poor", missing: 16 })
+    expect(buy(poor, "chocolate", 3)).toEqual({ kind: "poor", missing: 2 })
+    expect(buy(poor, "paseo")).toEqual({ kind: "free" })
   })
 
   it("hay un regalo al día, solo una vez", () => {

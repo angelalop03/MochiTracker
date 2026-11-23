@@ -19,6 +19,7 @@ import Today from "./pages/Today"
 // Los minijuegos se cargan aparte: no pesan a quien no juega
 const StackIsland = lazy(() => import("./games/StackIsland"))
 const CloudJump = lazy(() => import("./games/CloudJump"))
+const Shop = lazy(() => import("./pages/Shop"))
 
 export default function App() {
   return (
@@ -50,6 +51,14 @@ export default function App() {
                 element={
                   <Suspense fallback={<Loading />}>
                     <CloudJump />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/mochi/tienda"
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <Shop />
                   </Suspense>
                 }
               />

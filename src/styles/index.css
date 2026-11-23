@@ -4642,38 +4642,6 @@ a:hover {
   font-size: 0.95rem;
 }
 
-.care-paid {
-  position: absolute;
-  top: -6px;
-  right: -4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--ink);
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-  box-shadow: var(--shadow);
-  animation: care-paid 2.2s ease-out forwards;
-  pointer-events: none;
-}
-
-@keyframes care-paid {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  15%,
-  70% {
-    opacity: 1;
-    transform: translateY(-12px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-22px);
-  }
-}
-
 .care-tag {
   position: absolute;
   top: 8px;
@@ -4702,17 +4670,267 @@ a:hover {
   color: #1f4a2c;
 }
 
-.care-item[data-short] {
-  opacity: 0.6;
-}
-
-.care-item[data-short] .care-tag {
-  background: var(--tint);
+.care-tag.is-out {
   color: var(--ink-soft);
 }
 
+.care-item[data-out] .pixel-sprite {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.care-coins-link {
+  text-decoration: none;
+  box-shadow: 0 2px 0 #c99a2e;
+  transition: transform 0.15s;
+}
+
+.care-coins-link:hover {
+  transform: translateY(-1px);
+}
+
+.care-coins-shop {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(90, 58, 30, 0.3);
+  font-weight: 700;
+}
+
+.care-bubble-link {
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f5c94a;
+  color: #5a3a1e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ---------- La tiendecita ---------- */
+.shop-page {
+  display: grid;
+  gap: 20px;
+  width: min(100%, 640px);
+  margin: 0 auto;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom));
+}
+
+.shop-bar {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.shop-bar h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+}
+
+.shop-front {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: linear-gradient(var(--sky-top, #f6e3d6), var(--sky-bottom, #fbf1e6));
+  box-shadow: var(--shadow);
+}
+
+/* Toldo de rayas con el borde ondulado */
+.shop-awning {
+  height: 44px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 32px, #fff6ea 32px 64px);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% 30px no-repeat,
+    radial-gradient(circle at 16px 0, #000 15.5px, transparent 16px) bottom / 32px 14px repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% 30px no-repeat,
+    radial-gradient(circle at 16px 0, #000 15.5px, transparent 16px) bottom / 32px 14px repeat-x;
+}
+
+.shop-keeper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 8px 16px 18px;
+  padding: 12px 16px 12px 12px;
+  border-radius: 18px;
+  background: var(--glass);
+  box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.35);
+  animation: bubble-in 0.35s ease-out both;
+}
+
+.shop-keeper p {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.shop-shelf {
+  display: grid;
+  gap: 10px;
+}
+
+.shop-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shop-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px 10px 10px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.shop-item-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--tint);
+}
+
+.shop-pop {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #9fd2ad;
+  color: #1f4a2c;
+  font-size: 0.72rem;
+  font-weight: 700;
+  animation: shop-pop 1.2s ease-out forwards;
+}
+
+@keyframes shop-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  20%,
+  70% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+.shop-item-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shop-item-text strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.shop-fav {
+  position: static;
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.shop-item-effect,
+.shop-item-text small {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.shop-buy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 64px;
+  min-height: 40px;
+  justify-content: center;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #f5c94a;
+  color: #5a3a1e;
+  font: inherit;
+  font-weight: 700;
+  box-shadow: 0 3px 0 #c99a2e;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.shop-buy:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 #c99a2e;
+}
+
+.shop-item[data-short] .shop-buy {
+  background: var(--tint);
+  color: var(--ink-soft);
+  box-shadow: none;
+}
+
+.shop-owned {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #9fd2ad;
+  color: #1f4a2c;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.shop-earn {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+
+.shop-earn-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .care-paid {
+  .shop-pop,
+  .shop-keeper {
     animation: none;
   }
 }

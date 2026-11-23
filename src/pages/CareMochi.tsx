@@ -1,4 +1,4 @@
-import { Coins, Star } from "lucide-react"
+import { ChevronRight, Coins, Star, Store } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import BottomNav from "../components/BottomNav"
@@ -22,10 +22,10 @@ import { PHASE_CONTENT } from "../content/phases"
 import { useCycleData } from "../hooks/useCycleData"
 import { greeting, levelOf, NAP_MS, pokeLine, useCare, useNow } from "../lib/care"
 import { getCycleState, todayInTimeZone } from "../lib/cycle"
-import { claimDailyGift, missingFor, pantryOf, spend, updateWallet, useWallet, type Pantry } from "../lib/shop"
+import { canGive, claimDailyGift, SHOP, pantryOf, spend, updateWallet, useWallet, type Pantry } from "../lib/shop"
 import type { Reaction } from "../three/Mochi"
 
-type Say = { text: string; face: string }
+type Say = { text: string; face: string; shop?: boolean }
 
 const FACE: Record<Mood, string> = {
   feliz: "genial",
@@ -54,13 +54,7 @@ function PantryTag({ pantry }: { pantry: Pantry }) {
   if (pantry.kind === "free") return null
   if (pantry.kind === "owned") return <span className="care-tag is-owned">Tuya</span>
   if (pantry.kind === "stock") return <span className="care-tag is-stock">×{pantry.left}</span>
-  return (
-    <span className="care-tag is-buy">
-      <Coins size={11} strokeWidth={2.5} aria-hidden="true" />
-      {pantry.price}
-      <span className="sr-only">{pantry.price === 1 ? " moneda" : " monedas"}</span>
-    </span>
-  )
+  return <span className="care-tag is-out">{pantry.forever ? "En la tienda" : "×0"}</span>
 }
 
 const STAT_SHORT = Object.fromEntries(STATS.map((s) => [s.id, s.label])) as Record<Stat, string>
@@ -102,7 +96,6 @@ export default function CareMochi() {
   const [showing, setShowing] = useState<{ id: CareId; n: number } | null>(null)
   const [, refresh] = useState(0)
   const [calm, setCalm] = useState(0)
-  const [paid, setPaid] = useState<{ text: string; n: number } | null>(null)
   const wallet = useWallet()
 
   // Un regalo de monedas al día, al entrar
@@ -112,11 +105,6 @@ export default function CareMochi() {
     if (gift) setSay({ text: `¡Regalo del día! Toma ${gift} monedas para mis cositas.`, face: "genial" })
   }, [today])
 
-  useEffect(() => {
-    if (!paid) return
-    const id = setTimeout(() => setPaid(null), 2200)
-    return () => clearTimeout(id)
-  }, [paid])
 
   useEffect(() => {
     if (!showing) return
@@ -139,20 +127,21 @@ export default function CareMochi() {
 
   function offer(id: CareId) {
     const item = CARE_ITEMS[id]
-    const pantry = pantryOf(wallet, id)
-    const missing = missingFor(wallet, id)
-    if (pantry.kind === "buy" && missing > 0) {
+    if (!canGive(wallet, id)) {
+      const forever = SHOP[id]?.forever
       setSay({
-        text: `${item.name}: cuesta ${pantry.price} y tienes ${wallet.coins}. Te faltan ${missing} ${missing === 1 ? "moneda" : "monedas"}; gánalas en los minijuegos de abajo.`,
+        text: forever
+          ? `¡Qué gustito sería ${item.name.toLowerCase()}! Está en la tiendecita.`
+          : `No nos queda ${item.name.toLowerCase()}. ¿Vamos a la tiendecita?`,
         face: "triste",
+        shop: true,
       })
       return
     }
     const result = care.give(id)
     if (result.kind === "ok") {
-      // Solo se gasta o se paga si se lo ha tomado
+      // Solo se gasta si se lo ha tomado
       updateWallet((w) => spend(w, id))
-      if (pantry.kind === "buy") setPaid({ text: pantry.forever ? `−${pantry.price} · ¡ya es tuya!` : `−${pantry.price}`, n: Date.now() })
       setCalm((n) => n + 1)
       setSay({ text: result.line, face: result.favorite ? "genial" : "bien" })
       if (CARE_ITEMS[id].show !== "wear") setShowing({ id, n: Date.now() })
@@ -182,15 +171,13 @@ export default function CareMochi() {
                 <span style={{ width: `${Math.round(level.progress * 100)}%` }} />
               </span>
             </span>
-            <span className="care-coins" aria-live="polite">
+            <Link to="/mochi/tienda" className="care-coins care-coins-link">
               <Coins size={14} strokeWidth={2.5} aria-hidden="true" />
               <strong>{wallet.coins}</strong> {wallet.coins === 1 ? "moneda" : "monedas"}
-              {paid && (
-                <span key={paid.n} className="care-paid">
-                  {paid.text}
-                </span>
-              )}
-            </span>
+              <span className="care-coins-shop">
+                <Store size={13} strokeWidth={2.5} aria-hidden="true" /> Tiendecita
+              </span>
+            </Link>
             {days > 0 && (
               <span className="care-days">
                 {days} {days === 1 ? "día juntas" : "días juntas"}
@@ -216,6 +203,11 @@ export default function CareMochi() {
           <figure key={line.text} className="care-bubble" aria-live="polite">
             <MochiFace mood={line.face} size={36} />
             <p>{line.text}</p>
+            {line.shop && (
+              <Link to="/mochi/tienda" className="care-bubble-link">
+                <Store size={14} aria-hidden="true" /> Ir a la tiendecita
+              </Link>
+            )}
           </figure>
         </section>
 
@@ -226,9 +218,14 @@ export default function CareMochi() {
         </section>
 
         <section className="care-block" aria-labelledby="actions-title">
-          <h2 id="actions-title" className="eyebrow">
-            Cuídala
-          </h2>
+          <div className="section-head">
+            <h2 id="actions-title" className="eyebrow">
+              Cuídala
+            </h2>
+            <Link to="/mochi/tienda" className="section-link">
+              Tiendecita <ChevronRight size={14} aria-hidden="true" />
+            </Link>
+          </div>
           <div className="care-tabs" role="group" aria-label="Tipo de cuidado">
             {CATEGORIES.map((c) => (
               <button key={c.id} type="button" className="care-tab" aria-pressed={category === c.id} onClick={() => setCategory(c.id)}>
@@ -243,14 +240,13 @@ export default function CareMochi() {
                 const favorite = phaseCare.favorites.includes(id)
                 const ups = (Object.entries(item.effect) as [Stat, number][]).filter(([, v]) => v > 0)
                 const pantry = pantryOf(wallet, id)
-                const short = pantry.kind === "buy" && pantry.price > wallet.coins
                 return (
                   <button
                     key={id}
                     type="button"
                     className="care-item"
                     data-pantry={pantry.kind}
-                    data-short={short || undefined}
+                    data-out={pantry.kind === "buy" || undefined}
                     onClick={() => offer(id)}
                   >
                     <PantryTag pantry={pantry} />

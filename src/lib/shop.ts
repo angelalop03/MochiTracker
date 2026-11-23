@@ -1,5 +1,5 @@
 // Monedas y despensa de Mochi. Las monedas se ganan en los minijuegos y con un regalo
-// cada día; con ellas se compran la comida y los productos. Moverse, descansar o un
+// cada día; con ellas se compran la comida y los productos en la tiendecita. Moverse, descansar o un
 // masaje no se compran: son gratis, como en la vida real. Se guarda en el dispositivo.
 
 import { useSyncExternalStore } from "react"
@@ -63,29 +63,31 @@ export function pantryOf(wallet: Wallet, id: CareId): Pantry {
   return left > 0 ? { kind: "stock", left } : { kind: "buy", price: item.price, forever: false }
 }
 
-/** Monedas que faltan para darle esto (0 si se puede) */
-export function missingFor(wallet: Wallet, id: CareId) {
+/** Si se le puede dar ahora mismo */
+export function canGive(wallet: Wallet, id: CareId) {
   const p = pantryOf(wallet, id)
-  return p.kind === "buy" ? Math.max(0, p.price - wallet.coins) : 0
+  return p.kind !== "buy"
 }
 
-/** Después de dárselo: se gasta una unidad, o se paga si no quedaban */
+/** Después de dárselo: se gasta una unidad (lo gratis y lo que es tuyo no se gasta) */
 export function spend(wallet: Wallet, id: CareId): Wallet {
   const p = pantryOf(wallet, id)
-  if (p.kind === "free" || p.kind === "owned") return wallet
-  if (p.kind === "stock") return { ...wallet, stock: { ...wallet.stock, [id]: p.left - 1 } }
-  if (wallet.coins < p.price) return wallet
-  const coins = wallet.coins - p.price
-  return p.forever ? { ...wallet, coins, owned: [...wallet.owned, id] } : { ...wallet, coins }
+  return p.kind === "stock" ? { ...wallet, stock: { ...wallet.stock, [id]: p.left - 1 } } : wallet
 }
 
-/** Comprar unidades para tenerlas guardadas */
-export function buy(wallet: Wallet, id: CareId, units = 1): Wallet | null {
+export type Purchase = { kind: "ok"; wallet: Wallet } | { kind: "poor"; missing: number } | { kind: "owned" } | { kind: "free" }
+
+/** Comprar en la tiendecita: unidades para la despensa, o algo para siempre */
+export function buy(wallet: Wallet, id: CareId, units = 1): Purchase {
   const item = SHOP[id]
-  if (!item || item.forever || units < 1) return null
-  const cost = item.price * units
-  if (wallet.coins < cost) return null
-  return { ...wallet, coins: wallet.coins - cost, stock: { ...wallet.stock, [id]: (wallet.stock[id] ?? 0) + units } }
+  if (!item) return { kind: "free" }
+  if (item.forever && wallet.owned.includes(id)) return { kind: "owned" }
+  const cost = item.forever ? item.price : item.price * Math.max(1, Math.floor(units))
+  if (wallet.coins < cost) return { kind: "poor", missing: cost - wallet.coins }
+  const coins = wallet.coins - cost
+  if (item.forever) return { kind: "ok", wallet: { ...wallet, coins, owned: [...wallet.owned, id] } }
+  const n = cost / item.price
+  return { kind: "ok", wallet: { ...wallet, coins, stock: { ...wallet.stock, [id]: (wallet.stock[id] ?? 0) + n } } }
 }
 
 export function earn(wallet: Wallet, coins: number): Wallet {
@@ -173,6 +175,13 @@ export function updateWallet(change: (wallet: Wallet) => Wallet) {
 /** Suma lo ganado en una partida. Siempre guarda, para no perder las estrellas antiguas */
 export function earnCoins(coins: number) {
   updateWallet((w) => earn(w, coins))
+}
+
+/** Compra y guarda. Devuelve el resultado para avisar */
+export function buyItem(id: CareId, units = 1): Purchase {
+  const result = buy(snapshot(), id, units)
+  if (result.kind === "ok") save(result.wallet)
+  return result
 }
 
 /** Recoge el regalo del día. Devuelve cuántas monedas da (0 si ya se recogió) */
